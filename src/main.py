@@ -15,7 +15,7 @@ from enums import Task
 async def lifespan(app: FastAPI):
     redis_client = Redis(db=10)
     try:
-        yield redis_client
+        yield {"redis_client": redis_client}
     finally:
         await redis_client.aclose()
 
@@ -23,8 +23,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-async def get_redis_client(redis_client: Redis = Depends(lifespan)):
-    return redis_client
+def get_redis_client(app_state: dict = Depends(lifespan)):
+    return app_state["redis_client"]
 
 
 @app.post("/add_task/")
