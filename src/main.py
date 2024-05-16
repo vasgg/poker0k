@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 import logging.config
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from redis.asyncio import Redis
 from uvicorn import Config, Server
 
@@ -36,6 +36,16 @@ async def add_task(data):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.post("/debug/")
+async def debug_endpoint(request: Request):
+    try:
+        data = await request.json()
+        print("Received JSON data:", data)
+    except Exception:
+        data = await request.body()
+        print("Received raw data:", data.decode())
+    return {"message": "Data received"}
 
 # @app.post("/add_task/")
 # async def add_task(task: Task, redis_client: Redis = Depends(get_redis_client)):
