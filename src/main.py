@@ -40,8 +40,12 @@ async def add_task(data):
 @app.post("/debug/")
 async def debug_endpoint(request: Request):
     try:
+        headers = request.headers
+        print("Received headers:")
+        print(headers)
         data = await request.json()
-        print("Received JSON data:", data)
+        print("Received JSON data:")
+        print(data)
     except Exception:
         data = await request.body()
         print("Received raw data:", data.decode())
