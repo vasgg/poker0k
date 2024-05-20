@@ -9,10 +9,11 @@ from uvicorn import Config, Server
 
 from config import get_logging_config, settings
 from controllers.crypt import Crypt
+from enums import Task
 
 
 @asynccontextmanager
-async def lifespan(webapp: FastAPI):
+async def lifespan(webapp):
     redis_client = Redis(db=10)
     try:
         yield {"redis_client": redis_client}
