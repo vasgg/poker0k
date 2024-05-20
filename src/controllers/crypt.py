@@ -1,6 +1,10 @@
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
 import base64
+import random
+
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+from config import settings
 
 
 def decrypt_aes_256_cbc(key, iv, ciphertext):
@@ -20,12 +24,17 @@ def encrypt_aes_256_cbc(key, iv, cleartext):
     return ciphertext
 
 
-key = "QtRGfLst9ABGMnMMUoB+zzTB9vI8Zwc06/VzsjW+YFM="[:32].encode()
+class Crypt:
+    def __init__(self, encrypt_key: bytes, decrypt_key: bytes):
+        self.encrypt_key = encrypt_key
+        self.decrypt_key = decrypt_key
 
-decoded_bytes = base64.b64decode("3lqQCYxs7SvP93CuQX9sGjllVlA0cGxjWXdIS1NlWXUvOEZNMzRUTWxmWVkyY0VDcG1EUTdUaXZnSjNOb0RwWW9KTjNUUlJnOXMwR29rb1ByTThMVTNKTUJUUDA0UDJjY1dsMlFnPT0=")
+    def decrypt(self, message: str):
+        decoded_bytes = base64.b64decode(message)
+        iv = decoded_bytes[:16]
+        ciphertext = base64.b64decode(decoded_bytes[16:])
+        return decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext).decode()
 
-iv = decoded_bytes[:16]
-ciphertext = base64.b64decode(decoded_bytes[16:])
-
-print(decrypt_aes_256_cbc(key, iv, ciphertext).decode())
-print(base64.b64encode(iv + base64.b64encode(encrypt_aes_256_cbc(key, iv, "Ответ: 4"))))
+    def encrypt(self, message: str) -> str:
+        iv = random.randbytes(16)
+        return base64.b64encode(iv + base64.b64encode(encrypt_aes_256_cbc(self.encrypt_key, iv, message))).decode()
