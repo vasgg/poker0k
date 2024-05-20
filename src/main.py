@@ -9,7 +9,6 @@ from uvicorn import Config, Server
 
 from config import get_logging_config, settings
 from controllers.crypt import Crypt
-from enums import Task
 
 
 @asynccontextmanager
@@ -49,7 +48,7 @@ async def add_task(request: Request, redis_client: Redis = Depends(get_redis_cli
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/queue_lenght/")
+@app.get("/queue_length/")
 async def queue_status(redis_client: Redis = Depends(get_redis_client)):
     queue_length = await redis_client.llen('tasks')
     return {"queue_count": queue_length}

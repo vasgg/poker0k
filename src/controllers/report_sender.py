@@ -38,8 +38,19 @@ async def send_report(task: Task, status: int = 1) -> None:
     print(data)
 
 
+async def send_queue_request() -> None:
+    async with aiohttp.ClientSession() as session:
+        url = 'http://localhost:8800/queue_length/'
+        async with session.get(url) as response:
+            if response.status == 200:
+                print(await response.json())
+            else:
+                print(await response.json())
+
+
 def run_main():
-    asyncio.run(send_report(task=Task(order_id=1, user_id=1, requisite='Mein Herz Brent', amount=1.00, status=1)))
+    # asyncio.run(send_report(task=Task(order_id=1, user_id=1, requisite='Mein Herz Brent', amount=1.00, status=1)))
+    asyncio.run(send_queue_request())
 
 
 if __name__ == '__main__':
