@@ -7,12 +7,12 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from redis.asyncio import Redis
 from uvicorn import Config, Server
 
-from config import get_logging_config
-from enums import Task
+from config import get_logging_config, settings
+from controllers.crypt import Crypt
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(webapp: FastAPI):
     redis_client = Redis(db=10)
     try:
         yield {"redis_client": redis_client}
@@ -28,38 +28,30 @@ def get_redis_client(app_state: dict = Depends(lifespan)):
 
 
 @app.post("/add_task/")
-async def add_task(data):
+async def add_task(request: Request, redis_client: Redis = Depends(get_redis_client)):
+    headers_dict = request.headers
+    data = await request.json()
+    cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+    check = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+    task = data.model_dump_json()
+    logging.info(f"Received new task: {task}, signature: {check}")
+    if check != task:
+        return {"message": "Invalid signature"}
+    if task.status != 0:
+        return {"message": "Invalid status"}
     try:
-        task_data = data.json()
-        logging.info(f"Incoming data: {task_data}")
-        return {"message": "Data received"}
+        task_data = task.json()
+        await redis_client.publish('tasks', task_data)
+        logging.info(f"Task added to queue: {task_data}")
+        return {"message": "Task added to queue"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/debug/")
-async def debug_endpoint(request: Request):
-    try:
-        headers = request.headers
-        print("Received headers:")
-        print(headers)
-        data = await request.json()
-        print("Received JSON data:")
-        print(data)
-    except Exception:
-        data = await request.body()
-        print("Received raw data:", data.decode())
-    return {"message": "Data received"}
-
-# @app.post("/add_task/")
-# async def add_task(task: Task, redis_client: Redis = Depends(get_redis_client)):
-#     try:
-#         task_data = task.json()
-#         await redis_client.publish('tasks', task_data)
-#         logging.info(f"Task added to queue: {task_data}")
-#         return {"message": "Task added to queue"}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+@app.get("/queue_lenght/")
+async def queue_status(redis_client: Redis = Depends(get_redis_client)):
+    queue_length = await redis_client.llen('tasks')
+    return {"queue_count": queue_length}
 
 
 async def main():
