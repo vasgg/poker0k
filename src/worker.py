@@ -5,12 +5,13 @@ import logging.config
 
 from config import get_logging_config
 from controllers.actions import Actions
+from controllers.report_sender import send_report
 from controllers.window_checker import WindowChecker
 from enums import Status, Task
 
 
 async def execute_task(task: Task):
-    logging.info(f"Executing task for {task.nickname} with amount {task.amount}")
+    logging.info(f"Executing task id {task.order_id} for {task.nickname} with amount {task.amount}")
     if await WindowChecker.check_transfer_section():
         await Actions.click_nickname_section()
         await Actions.enter_nickname(nick=task.nickname)
@@ -21,11 +22,11 @@ async def execute_task(task: Task):
         if await WindowChecker.check_transfer_confirm_button():
             await Actions.click_transfer_confirm_button()
         if await WindowChecker.check_confirm_transfer_section():
-            await Actions.take_screenshot(Status.SUCCESS, nick=task.nickname, amount=str(task.amount))
-            logging.info(f"Completed task for {task.nickname} with amount {task.amount}")
+            await Actions.take_screenshot(task=task, status=Status.SUCCESS)
+            await send_report(task.copy(update={"status": Status.SUCCESS}))
         else:
-            await Actions.take_screenshot(Status.FAIL, nick=task.nickname, amount=str(task.amount))
-            logging.info(f"Something went wrong with task for {task.nickname} with amount {task.amount}")
+            await Actions.take_screenshot(task=task, status=Status.FAIL)
+            await send_report(task, status=Status.FAIL.value)
 
     else:
         await WindowChecker.check_login()
@@ -44,11 +45,11 @@ async def execute_task(task: Task):
         if await WindowChecker.check_transfer_confirm_button():
             await Actions.click_transfer_confirm_button()
         if await WindowChecker.check_confirm_transfer_section():
-            await Actions.take_screenshot(Status.SUCCESS, nick=task.nickname, amount=str(task.amount))
-            logging.info(f"Completed task for {task.nickname} with amount {task.amount}")
+            await Actions.take_screenshot(task=task, status=Status.SUCCESS)
+            await send_report(task.copy(update={"status": Status.SUCCESS}))
         else:
-            await Actions.take_screenshot(Status.FAIL, nick=task.nickname, amount=str(task.amount))
-            logging.info(f"Something went wrong with task for {task.nickname} with amount {task.amount}")
+            await Actions.take_screenshot(task=task, status=Status.FAIL)
+            await send_report(task, status=Status.FAIL.value)
 
 
 async def main():
