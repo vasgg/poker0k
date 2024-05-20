@@ -1,18 +1,16 @@
-from enum import StrEnum, auto
+from enum import Enum
 
 from pydantic import BaseModel
 
 
-class Stage(StrEnum):
-    DEV = auto()
-    PROD = auto()
-
-
-class Status(StrEnum):
-    SUCCESS = auto()
-    FAIL = auto()
+class Status(Enum):
+    SUCCESS = 1
+    FAIL = 0
 
 
 class Task(BaseModel):
-    nickname: str
-    amount: int
+    order_id: int
+    user_id: int
+    requisite: str
+    amount: float
+    status: int
