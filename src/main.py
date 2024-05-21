@@ -34,6 +34,7 @@ async def add_task(request: Request):
     logging.info(f"Received new data: {data}")
     logging.info(f"Headers: {headers_dict}")
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+    print('PREFIX', headers_dict['x-simpleex-sign'])
     signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
     task_dict = json.loads(signature.strip('\x07'))
     logging.info(f"Received new task: {task}, signature: {task_dict}")

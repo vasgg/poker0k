@@ -34,7 +34,6 @@ class Crypt:
         self.decrypt_key = decrypt_key
 
     def decrypt(self, message: str):
-        print(message)
         decoded_bytes = base64.b64decode(message)
         iv = decoded_bytes[:16]
         ciphertext = base64.b64decode(decoded_bytes[16:])
