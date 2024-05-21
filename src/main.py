@@ -36,13 +36,13 @@ async def add_task(request: Request):
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
     signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
     logging.info(f"Received new task: {task}, signature: {signature}")
-    redis_client = request.app.state.redis_client
+    # redis_client = request.app.state.redis_client
     if signature != data:
         return {'status': 'invalid signature'}
     if task.status != 0:
         return {'status': 'invalid task status'}
     try:
-        await redis_client.hset("tasks", task.order_id, task.json())
+        # await redis_client.hset("tasks", task.order_id, task.json())
         logging.info(f"Task added to queue: {task.json()}")
         return {'status': 'true'}
     except Exception as e:
