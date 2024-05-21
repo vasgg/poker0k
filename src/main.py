@@ -4,7 +4,7 @@ import json
 import logging.config
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from redis.asyncio import Redis
 from uvicorn import Config, Server
 
