@@ -29,6 +29,8 @@ app = FastAPI(lifespan=lifespan)
 async def add_task(request: Request):
     headers_dict = request.headers
     data = await request.json()
+    logging.info(f"Received new data: {data}")
+    logging.info(f"Headers: {headers_dict}")
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
     check = cryptor.decrypt(headers_dict['x-simpleex-sign'])
     task = data.model_dump_json()
@@ -54,6 +56,7 @@ async def get_task(order_id: int, request: Request):
     if not task_data:
         raise HTTPException(status_code=404, detail="Task not found")
     task = json.loads(task_data.decode('utf-8'))
+    logging.info(f"Requested task: {task}")
     return task
 
 
@@ -61,6 +64,7 @@ async def get_task(order_id: int, request: Request):
 async def queue_status(request: Request):
     redis_client = request.app.state.redis_client
     queue_length = await redis_client.llen('tasks')
+    logging.info(f"Requested queue length: {queue_length}")
     return {"queue_count": queue_length}
 
 
