@@ -4,7 +4,7 @@ import json
 import logging.config
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from redis.asyncio import Redis
 from uvicorn import Config, Server
 
@@ -35,8 +35,7 @@ async def add_task(request: Request):
     logging.info(f"Headers: {headers_dict}")
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
     signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    json_string = signature.rstrip('\x07')
-    task_dict = json.loads(json_string)
+    task_dict = json.loads(signature.strip('\x07'))
     logging.info(f"Received new task: {task}, signature: {task_dict}")
     # redis_client = request.app.state.redis_client
     if signature != data:
