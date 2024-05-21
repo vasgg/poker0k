@@ -1,3 +1,4 @@
+import json
 
 import redis.asyncio as redis
 import asyncio
@@ -10,48 +11,50 @@ from controllers.window_checker import WindowChecker
 from enums import Status, Task
 
 
-async def execute_task(task: Task):
+async def execute_task(task: Task, redis_client: redis):
     logging.info(f"Executing task id {task.order_id} for {task.nickname} with amount {task.amount}")
-    if await WindowChecker.check_transfer_section():
-        await Actions.click_nickname_section()
-        await Actions.enter_nickname(nick=task.nickname)
-        await Actions.click_amount_section()
-        await Actions.enter_amount(amount=str(task.amount))
-        if await WindowChecker.check_transfer_button():
-            await Actions.click_transfer_button()
-        if await WindowChecker.check_transfer_confirm_button():
-            await Actions.click_transfer_confirm_button()
-        if await WindowChecker.check_confirm_transfer_section():
-            await Actions.take_screenshot(task=task, status=Status.SUCCESS)
-            await send_report(task.copy(update={"status": Status.SUCCESS}))
-            # await redis_client.sadd(f"task_set:{task.order_id}", task_data)
+    # if await WindowChecker.check_transfer_section():
+    #     await Actions.click_nickname_section()
+    #     await Actions.enter_nickname(nick=task.nickname)
+    #     await Actions.click_amount_section()
+    #     await Actions.enter_amount(amount=str(task.amount))
+    #     if await WindowChecker.check_transfer_button():
+    #         await Actions.click_transfer_button()
+    #     if await WindowChecker.check_transfer_confirm_button():
+    #         await Actions.click_transfer_confirm_button()
+    #
+    #     status = Status.SUCCESS if await WindowChecker.check_confirm_transfer_section() else Status.FAIL
 
-        else:
-            await Actions.take_screenshot(task=task, status=Status.FAIL)
-            await send_report(task, status=Status.FAIL.value)
+    task.status = 1
+    await Actions.take_screenshot(task=task)
+    await send_report(task=task)
+    serialized_task = json.dumps(task.dict())
+    await redis_client.hset("tasks", task.order_id, serialized_task)
 
-    else:
-        await WindowChecker.check_login()
-        await WindowChecker.check_confirm_login()
-        await WindowChecker.check_ad()
-        await WindowChecker.check_cashier()
-
-        await Actions.click_transfer_section()
-        await Actions.click_nickname_section()
-        await Actions.enter_nickname(nick=task.nickname)
-        await Actions.click_amount_section()
-        await Actions.enter_amount(amount=str(task.amount))
-
-        if await WindowChecker.check_transfer_button():
-            await Actions.click_transfer_button()
-        if await WindowChecker.check_transfer_confirm_button():
-            await Actions.click_transfer_confirm_button()
-        if await WindowChecker.check_confirm_transfer_section():
-            await Actions.take_screenshot(task=task, status=Status.SUCCESS)
-            await send_report(task.copy(update={"status": Status.SUCCESS}))
-        else:
-            await Actions.take_screenshot(task=task, status=Status.FAIL)
-            await send_report(task, status=Status.FAIL.value)
+    # else:
+    #     await WindowChecker.check_login()
+    #     await WindowChecker.check_confirm_login()
+    #     await WindowChecker.check_ad()
+    #     await WindowChecker.check_cashier()
+    #
+    #     await Actions.click_transfer_section()
+    #     await Actions.click_nickname_section()
+    #     await Actions.enter_nickname(nick=task.nickname)
+    #     await Actions.click_amount_section()
+    #     await Actions.enter_amount(amount=str(task.amount))
+    #
+    #     if await WindowChecker.check_transfer_button():
+    #         await Actions.click_transfer_button()
+    #     if await WindowChecker.check_transfer_confirm_button():
+    #         await Actions.click_transfer_confirm_button()
+    #
+    #     status = Status.SUCCESS if await WindowChecker.check_confirm_transfer_section() else Status.FAIL
+    #
+    #     task.status = status.value
+    #     await Actions.take_screenshot(task=task)
+    #     await send_report(task=task)
+    #     serialized_task = json.dumps(task.dict())
+    #     await redis_client.hset("tasks", task.order_id, serialized_task)
 
 
 async def main():
@@ -66,7 +69,7 @@ async def main():
         if message['type'] == 'message':
             task_data = message['data'].decode('utf-8')
             task = Task.parse_raw(task_data)
-            await execute_task(task)
+            await execute_task(task, redis_client)
 
 
 if __name__ == "__main__":
