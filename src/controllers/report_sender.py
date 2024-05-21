@@ -40,7 +40,7 @@ async def send_report(task: Task, status: int = 1) -> None:
 
 async def send_queue_request() -> None:
     async with aiohttp.ClientSession() as session:
-        url = 'http://localhost:8800/queue_length/'
+        url = 'http://188.127.243.64:8800/queue_length/'
         async with session.get(url) as response:
             if response.status == 200:
                 print(await response.json())
