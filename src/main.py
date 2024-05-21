@@ -37,14 +37,14 @@ async def add_task(request: Request):
     logging.info(f"Received new task: {task}, signature: {check}")
     redis_client = request.app.state.redis_client
     if check != task:
-        return {"message": "Invalid signature"}
+        return {"status": "invalid signature"}
     if task.status != 0:
-        return {"message": "Invalid status"}
+        return {"status": "invalid task status"}
     try:
         task_data = task.json()
         await redis_client.publish('tasks', task_data)
         logging.info(f"Task added to queue: {task_data}")
-        return {"message": "Task added to queue"}
+        return {'status': 'true'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
