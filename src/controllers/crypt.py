@@ -45,9 +45,9 @@ class Crypt:
         return base64.b64encode(iv + base64.b64encode(encrypt_aes_256_cbc(self.encrypt_key, iv, message))).decode()
 
 
-a = Crypt(settings.key_encrypt, settings.key_decrypt)
-b = a.decrypt('/bYaZzmzN6hqynFmKvP2Vmw1Y3lkVTlyWXlEbUJlL1V5OUJseEFKalRWeGV2ZjRJMHBKakEzUjJ3dkFFWWc2VVBSb3pQY2lFM1FRMVNVaStMaDBYZ2JXemY3OUtOSXIwY1ErWDhuOTNYNkVlbmd5SHJianVjTEZFMEpTU1AxT2g2SmpJVjhtY1F0K1dyUlJW')
-c = {'order_id': 2968, 'user_id': 2702, 'requisite': 'Senior Pomidoro', 'amount': '9.55', 'status': 0}
+# a = Crypt(settings.key_encrypt, settings.key_decrypt)
+# b = a.decrypt('/bYaZzmzN6hqynFmKvP2Vmw1Y3lkVTlyWXlEbUJlL1V5OUJseEFKalRWeGV2ZjRJMHBKakEzUjJ3dkFFWWc2VVBSb3pQY2lFM1FRMVNVaStMaDBYZ2JXemY3OUtOSXIwY1ErWDhuOTNYNkVlbmd5SHJianVjTEZFMEpTU1AxT2g2SmpJVjhtY1F0K1dyUlJW')
+# c = {'order_id': 2968, 'user_id': 2702, 'requisite': 'Senior Pomidoro', 'amount': '9.55', 'status': 0}
 # print(b)
 
 
