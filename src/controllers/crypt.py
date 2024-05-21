@@ -13,7 +13,9 @@ def decrypt_aes_256_cbc(key, iv, ciphertext):
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
     decryptor = cipher.decryptor()
     decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
-    return decrypted_data
+    unpadder = padding.PKCS7(128).unpadder()
+    data = unpadder.update(decrypted_data)
+    return data + unpadder.finalize()
 
 
 def encrypt_aes_256_cbc(key, iv, cleartext):
@@ -42,9 +44,9 @@ class Crypt:
         iv = random.randbytes(16)
         return base64.b64encode(iv + base64.b64encode(encrypt_aes_256_cbc(self.encrypt_key, iv, message))).decode()
 
-#
+
 # a = Crypt(settings.key_encrypt, settings.key_decrypt)
-# b = a.decrypt('f3t49Gaggyj7yd1SmmHiSGwzOVdvL3BacUtBY2xMeUY4Q1F6RFlnajUwZUxrSnk1VHNRdUJ5Y2hMNDhxV256ZUpMcGF6OHlSeW5DTjV2dUdMNHVqRVdONW5MZnpKSC93RUhieWdic2RRcng2ZngxSFR2TlVJTUE2QWtxYW1tNHVUYUlpc213S3hXT3JzUVhL')
+# b = a.decrypt('3EcIMd8Xcg0wdZKP1NjkBVlDQmg5OTdlbTN5T21wUFNhM3RlaVRWbXJ3S1l2ZXpyc0dTQ01pRzArU0puMXF1QzFyNDRyL0tLL09CRkZ5Zkw4MlJOV2NvZzRmZlQ5TndwRkFPZWdjQlgzOWRXQlQrWUFvZDUvRmI5eWFBOXRGdEtNbWZjR1cvazE3RzU5YXFY')
 # c = {'order_id': 2968, 'user_id': 2702, 'requisite': 'Senior Pomidoro', 'amount': '9.55', 'status': 0}
 # print(b)
 

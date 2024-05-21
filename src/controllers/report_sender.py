@@ -50,6 +50,8 @@ async def send_queue_request() -> None:
 async def send_task_request() -> None:
     async with aiohttp.ClientSession() as session:
         url = 'http://188.127.243.64:8800/add_task/'
+        # cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+        # data_json = task.model_dump_json()
         data = {'order_id': 2968, 'user_id': 2702, 'requisite': 'Senior Pomidoro', 'amount': '9.55', 'status': 0}
         headers = {'x-simpleex-sign': '3EcIMd8Xcg0wdZKP1NjkBVlDQmg5OTdlbTN5T21wUFNhM3RlaVRWbXJ3S1l2ZXpyc0dTQ01pRzArU0puMXF1QzFyNDRyL0tLL09CRkZ5Zkw4MlJOV2NvZzRmZlQ5TndwRkFPZWdjQlgzOWRXQlQrWUFvZDUvRmI5eWFBOXRGdEtNbWZjR1cvazE3RzU5YXFY'}
 
