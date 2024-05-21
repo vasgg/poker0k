@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import random
 
@@ -31,18 +32,18 @@ class Crypt:
         self.decrypt_key = decrypt_key
 
     # def decrypt(self, message: str):
-        # try:
-        #     decoded_bytes = base64.b64decode(message)
-        #     iv = decoded_bytes[:16]
-        #     ciphertext = decoded_bytes[16:]
-        #     plaintext = decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext)
-        #     try:
-        #         return plaintext.decode()
-        #     except UnicodeDecodeError:
-        #         return base64.b64encode(plaintext).decode()
-        # except Exception as e:
-        #     logging.error(f"Ошибка: {e}")
-        #     raise
+    #     try:
+    #         decoded_bytes = base64.b64decode(message)
+    #         iv = decoded_bytes[:16]
+    #         ciphertext = decoded_bytes[16:]
+    #         plaintext = decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext)
+    #         try:
+    #             return plaintext.decode()
+    #         except UnicodeDecodeError:
+    #             return base64.b64encode(plaintext).decode()
+    #     except Exception as e:
+    #         logging.error(f"Ошибка: {e}")
+    #         raise
     def decrypt(self, message: str):
         decoded_bytes = base64.b64decode(message)
         iv = decoded_bytes[:16]

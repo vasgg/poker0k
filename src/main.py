@@ -35,7 +35,9 @@ async def add_task(request: Request):
     logging.info(f"Headers: {headers_dict}")
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
     signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    logging.info(f"Received new task: {task}, signature: {signature}")
+    json_string = signature.rstrip('\x07')
+    task_dict = json.loads(json_string)
+    logging.info(f"Received new task: {task}, signature: {task_dict}")
     # redis_client = request.app.state.redis_client
     if signature != data:
         return {'status': 'invalid signature'}
