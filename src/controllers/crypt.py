@@ -10,11 +10,9 @@ from config import settings
 
 
 def decrypt_aes_256_cbc(key, iv, ciphertext):
-    print('KEY', key)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
     decryptor = cipher.decryptor()
     decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
-    print('DATA', decrypted_data)
     unpadder = padding.PKCS7(128).unpadder()
     data = unpadder.update(decrypted_data)
     return data + unpadder.finalize()

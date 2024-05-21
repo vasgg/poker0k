@@ -5,19 +5,19 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    ENCRYPT_KEY: str
-    DECRYPT_KEY: str
+    ENCRYPT_KEY: SecretStr
+    DECRYPT_KEY: SecretStr
     REPORT_ENDPOINT: str
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
     @property
     def key_decrypt(self) -> bytes:
-        return self.DECRYPT_KEY[:32].encode()
+        return self.DECRYPT_KEY.get_secret_value()[:32].encode()
 
     @property
     def key_encrypt(self) -> bytes:
-        return self.ENCRYPT_KEY[:32].encode()
+        return self.ENCRYPT_KEY.get_secret_value()[:32].encode()
 
 
 settings = Settings()
