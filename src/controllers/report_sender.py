@@ -53,7 +53,7 @@ async def send_task_request() -> None:
         url = 'http://188.127.243.64:8800/add_task/'
         data = {'order_id': 2968, 'user_id': 2702, 'requisite': 'Senior Pomidoro', 'amount': '9.55', 'status': 0}
         headers = {
-            'x-simpleex-sign': '3EcIMd8Xcg0wdZKP1NjkBVlDQmg5OTdlbTN5T21wUFNhM3RlaVRWbXJ3S1l2ZXpyc0dTQ01pRzArU0puMXF1QzFyNDRyL0tLL09CRkZ5Zkw4MlJOV2NvZzRmZlQ5TndwRkFPZWdjQlgzOWRXQlQrWUFvZDUvRmI5eWFBOXRGdEtNbWZjR1cvazE3RzU5YXFY',
+            'x-simpleex-sign': '/bYaZzmzN6hqynFmKvP2Vmw1Y3lkVTlyWXlEbUJlL1V5OUJseEFKalRWeGV2ZjRJMHBKakEzUjJ3dkFFWWc2VVBSb3pQY2lFM1FRMVNVaStMaDBYZ2JXemY3OUtOSXIwY1ErWDhuOTNYNkVlbmd5SHJianVjTEZFMEpTU1AxT2g2SmpJVjhtY1F0K1dyUlJW',
             'Content-Type': 'application/json'
         }
 
