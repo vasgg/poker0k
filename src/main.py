@@ -29,7 +29,8 @@ app = FastAPI(lifespan=lifespan)
 @app.post("/add_task/")
 async def add_task(request: Request):
     headers_dict = request.headers
-    data = await request.json()
+    data = request
+    print(request)
     task = Task(**data)
     logging.info(f"Received new data: {data}")
     logging.info(f"Headers: {headers_dict}")
