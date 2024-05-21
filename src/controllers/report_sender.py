@@ -47,9 +47,24 @@ async def send_queue_request() -> None:
                 print(await response.json())
 
 
+async def send_task_request() -> None:
+    async with aiohttp.ClientSession() as session:
+        url = 'http://188.127.243.64:8800/add_task/'
+        data = {'order_id': 2968, 'user_id': 2702, 'requisite': 'Senior Pomidoro', 'amount': '9.55', 'status': 0}
+        headers = {'x-simpleex-sign': '3EcIMd8Xcg0wdZKP1NjkBVlDQmg5OTdlbTN5T21wUFNhM3RlaVRWbXJ3S1l2ZXpyc0dTQ01pRzArU0puMXF1QzFyNDRyL0tLL09CRkZ5Zkw4MlJOV2NvZzRmZlQ5TndwRkFPZWdjQlgzOWRXQlQrWUFvZDUvRmI5eWFBOXRGdEtNbWZjR1cvazE3RzU5YXFY'}
+
+        async with session.post(url, data=data, headers=headers) as response:
+            if response.status == 200:
+                print(await response.json())
+            else:
+                print(await response.json())
+    print(data)
+
+
 def run_main():
     # asyncio.run(send_report(task=Task(order_id=1, user_id=1, requisite='Mein Herz Brent', amount=1.00, status=1)))
-    asyncio.run(send_queue_request())
+    # asyncio.run(send_queue_request())
+    asyncio.run(send_task_request())
 
 
 if __name__ == '__main__':

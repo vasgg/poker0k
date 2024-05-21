@@ -35,7 +35,7 @@ class Crypt:
         decoded_bytes = base64.b64decode(message)
         iv = decoded_bytes[:16]
         ciphertext = base64.b64decode(decoded_bytes[16:])
-        return decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext)
+        return decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext).decode()
         # return decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext).decode()
 
     def encrypt(self, message: str) -> str:
