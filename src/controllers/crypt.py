@@ -31,25 +31,22 @@ class Crypt:
         self.encrypt_key = encrypt_key
         self.decrypt_key = decrypt_key
 
-    # def decrypt(self, message: str):
-    #     try:
-    #         decoded_bytes = base64.b64decode(message)
-    #         iv = decoded_bytes[:16]
-    #         ciphertext = decoded_bytes[16:]
-    #         plaintext = decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext)
-    #         try:
-    #             return plaintext.decode()
-    #         except UnicodeDecodeError:
-    #             return base64.b64encode(plaintext).decode()
-    #     except Exception as e:
-    #         logging.error(f"Ошибка: {e}")
-    #         raise
     def decrypt(self, message: str):
         decoded_bytes = base64.b64decode(message)
         iv = decoded_bytes[:16]
         ciphertext = base64.b64decode(decoded_bytes[16:])
-        return decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext).decode()
+        return decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext)
+        # return decrypt_aes_256_cbc(self.decrypt_key, iv, ciphertext).decode()
 
     def encrypt(self, message: str) -> str:
         iv = random.randbytes(16)
         return base64.b64encode(iv + base64.b64encode(encrypt_aes_256_cbc(self.encrypt_key, iv, message))).decode()
+
+
+a = Crypt(settings.key_encrypt, settings.key_decrypt)
+b = a.decrypt('f3t49Gaggyj7yd1SmmHiSGwzOVdvL3BacUtBY2xMeUY4Q1F6RFlnajUwZUxrSnk1VHNRdUJ5Y2hMNDhxV256ZUpMcGF6OHlSeW5DTjV2dUdMNHVqRVdONW5MZnpKSC93RUhieWdic2RRcng2ZngxSFR2TlVJTUE2QWtxYW1tNHVUYUlpc213S3hXT3JzUVhL')
+c = {'order_id': 2968, 'user_id': 2702, 'requisite': 'Senior Pomidoro', 'amount': '9.55', 'status': 0}
+print(b)
+
+
+
