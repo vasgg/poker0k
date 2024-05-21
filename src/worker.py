@@ -24,6 +24,8 @@ async def execute_task(task: Task):
         if await WindowChecker.check_confirm_transfer_section():
             await Actions.take_screenshot(task=task, status=Status.SUCCESS)
             await send_report(task.copy(update={"status": Status.SUCCESS}))
+            # await redis_client.sadd(f"task_set:{task.order_id}", task_data)
+
         else:
             await Actions.take_screenshot(task=task, status=Status.FAIL)
             await send_report(task, status=Status.FAIL.value)

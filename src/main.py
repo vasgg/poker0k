@@ -12,10 +12,11 @@ from controllers.crypt import Crypt
 
 
 @asynccontextmanager
-async def lifespan(webapp):
+async def lifespan(webapp: FastAPI):
     redis_client = Redis(db=10)
     try:
-        yield {"redis_client": redis_client}
+        webapp.state.redis_client = redis_client
+        yield
     finally:
         await redis_client.aclose()
 
@@ -23,18 +24,15 @@ async def lifespan(webapp):
 app = FastAPI(lifespan=lifespan)
 
 
-def get_redis_client(app_state: dict = Depends(lifespan)):
-    return app_state["redis_client"]
-
-
 @app.post("/add_task/")
-async def add_task(request: Request, redis_client: Redis = Depends(get_redis_client)):
+async def add_task(request: Request):
     headers_dict = request.headers
     data = await request.json()
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
     check = cryptor.decrypt(headers_dict['x-simpleex-sign'])
     task = data.model_dump_json()
     logging.info(f"Received new task: {task}, signature: {check}")
+    redis_client = request.app.state.redis_client
     if check != task:
         return {"message": "Invalid signature"}
     if task.status != 0:
@@ -49,7 +47,8 @@ async def add_task(request: Request, redis_client: Redis = Depends(get_redis_cli
 
 
 @app.get("/queue_length/")
-async def queue_status(redis_client: Redis = Depends(get_redis_client)):
+async def queue_status(request: Request):
+    redis_client = request.app.state.redis_client
     queue_length = await redis_client.llen('tasks')
     return {"queue_count": queue_length}
 
