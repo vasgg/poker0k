@@ -43,6 +43,7 @@ async def add_task(request: Request):
     if task.status != 0:
         return {'status': 'invalid task status'}
     try:
+
         # await redis_client.hset("tasks", task.order_id, task.json())
         logging.info(f"Task added to queue: {task.json()}")
         return {'status': 'true'}
