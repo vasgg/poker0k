@@ -38,7 +38,7 @@ async def add_task(request: Request):
     task_dict = json.loads(signature.strip('\x07'))
     logging.info(f"Received new task: {task}, signature: {task_dict}")
     # redis_client = request.app.state.redis_client
-    if signature != data:
+    if task_dict != data:
         return {'status': 'invalid signature'}
     if task.status != 0:
         return {'status': 'invalid task status'}
