@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager
+import json
 import logging.config
 from pathlib import Path
 
@@ -44,6 +45,16 @@ async def add_task(request: Request):
         return {"message": "Task added to queue"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/get_task/{order_id}")
+async def get_task(order_id: int, request: Request):
+    redis_client = request.app.state.redis_client
+    task_data = await redis_client.hget("tasks", order_id)
+    if not task_data:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task = json.loads(task_data.decode('utf-8'))
+    return task
 
 
 @app.get("/queue_length/")
