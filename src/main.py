@@ -10,6 +10,7 @@ from uvicorn import Config, Server
 
 from config import get_logging_config, settings
 from controllers.crypt import Crypt
+from enums import Task
 
 
 @asynccontextmanager
@@ -29,21 +30,20 @@ app = FastAPI(lifespan=lifespan)
 async def add_task(request: Request):
     headers_dict = request.headers
     data = await request.json()
+    task = Task(**data)
     logging.info(f"Received new data: {data}")
     logging.info(f"Headers: {headers_dict}")
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-    check = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    task = data.model_dump_json()
-    logging.info(f"Received new task: {task}, signature: {check}")
+    signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+    logging.info(f"Received new task: {task}, signature: {signature}")
     redis_client = request.app.state.redis_client
-    if check != task:
-        return {"status": "invalid signature"}
+    if signature != data:
+        return {'status': 'invalid signature'}
     if task.status != 0:
-        return {"status": "invalid task status"}
+        return {'status': 'invalid task status'}
     try:
-        task_data = task.json()
-        await redis_client.publish('tasks', task_data)
-        logging.info(f"Task added to queue: {task_data}")
+        await redis_client.hset("tasks", task.order_id, task.json())
+        logging.info(f"Task added to queue: {task.json()}")
         return {'status': 'true'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
