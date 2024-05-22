@@ -14,6 +14,8 @@ class WindowChecker:
         check_logout = pyautogui.pixelMatchesColor(*Coords.RESTART_BUTTON, Colors.GREEN, tolerance=10)
         if check_logout:
             pyautogui.click(Coords.RESTART_BUTTON)
+            await asyncio.sleep(1)
+            pyautogui.click(Coords.RESTART_BUTTON)
             logger.info("Disconnected. Restart button clicked...")
             await asyncio.sleep(3)
         else:
