@@ -38,7 +38,7 @@ class WindowChecker:
         if check_login:
             pyautogui.click(Coords.LOGIN_BUTTON)
             logger.info("Disconnected. Login button clicked...")
-            await asyncio.sleep(3)
+            await asyncio.sleep(10)
         else:
             logger.info("Connected, continue...")
 
