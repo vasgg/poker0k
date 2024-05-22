@@ -32,6 +32,7 @@ async def execute_task(task: Task, redis_client: redis):
         await redis_client.hset("tasks", task.order_id, serialized_task)
 
     else:
+        await WindowChecker.check_logout()
         await WindowChecker.check_login()
         await WindowChecker.check_confirm_login()
         await WindowChecker.check_ad()
