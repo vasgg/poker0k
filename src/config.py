@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ENCRYPT_KEY: SecretStr
     DECRYPT_KEY: SecretStr
     REPORT_ENDPOINT: str
+    TEST_ENDPOINT: str
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 

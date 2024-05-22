@@ -52,7 +52,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_cashier():
-        check_cashier = pyautogui.pixelMatchesColor(*Coords.CASHIER_BUTTON, Colors.WHITE, tolerance=20)
+        check_cashier = pyautogui.pixelMatchesColor(*Coords.CASHIER_BUTTON, Colors.WHITE, tolerance=25)
         if check_cashier:
             pyautogui.click(Coords.CASHIER_BUTTON)
             logger.info("Cashier button clicked...")
