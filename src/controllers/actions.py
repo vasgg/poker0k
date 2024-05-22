@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
 import logging
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pyautogui
@@ -69,7 +70,8 @@ class Actions:
         file_name = f'{moscow_time}|{task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}.png'
         screenshot = pyautogui.screenshot()
         gray_screenshot = screenshot.convert('L')
-        gray_screenshot.save(f'screenshots/{file_name}')
+        path = Path('screenshots')
+        gray_screenshot.save(path / file_name)
         logger.info(f"Screenshot {file_name} saved...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
