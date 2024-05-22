@@ -58,6 +58,7 @@ class Actions:
         pyautogui.keyDown('tab')
         await asyncio.sleep(0.1)
         pyautogui.keyDown('tab')
+        await asyncio.sleep(0.1)
         pyautogui.keyDown('enter')
 
         # pyautogui.click(Coords.TRANSFER_BUTTON)
@@ -69,7 +70,7 @@ class Actions:
 
     @staticmethod
     async def click_transfer_confirm_button():
-        pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON, button='left', clicks=2, interval=0.2)
+        pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
         await asyncio.sleep(0.1)
         logger.info("Transfer confirm button clicked...")
         logger.info("Awaiting 3 seconds...")

@@ -48,6 +48,7 @@ async def execute_task(task: Task, redis_client: redis):
             await Actions.click_transfer_button()
         if await WindowChecker.check_transfer_confirm_button():
             await Actions.click_transfer_confirm_button()
+            await Actions.click_transfer_confirm_button()
 
         task.status = 1 if await WindowChecker.check_confirm_transfer_section() else 0
 
