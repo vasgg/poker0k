@@ -31,40 +31,50 @@ async def add_task(request: Request):
     headers_dict = request.headers
     data = await request.json()
     task = Task(**data)
-    logging.info(f"Received new data: {data}")
-    logging.info(f"Headers: {headers_dict}")
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-    print('PREFIX', headers_dict['x-simpleex-sign'])
     signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    task_dict = json.loads(signature.strip('\x07'))
+    task_dict = json.loads(signature)
     logging.info(f"Received new task: {task}, signature: {task_dict}")
-    # redis_client = request.app.state.redis_client
+    redis_client = request.app.state.redis_client
     if task_dict != data:
-        return {'status': 'invalid signature'}
+        return {'status': False}
     if task.status != 0:
-        return {'status': 'invalid task status'}
+        return {'status': False}
     try:
-
-        # await redis_client.hset("tasks", task.order_id, task.json())
+        await redis_client.hset("tasks", task.order_id, task.json())
         logging.info(f"Task added to queue: {task.json()}")
         return {'status': 'true'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/get_task/{order_id}")
-async def get_task(order_id: int, request: Request):
+@app.get("/get_task/")
+async def get_task(request: Request):
+    headers_dict = request.headers
+    data = await request.json()
+    cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+    signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+    task_dict = json.loads(signature)
+    if task_dict != data:
+        return {'status': False}
     redis_client = request.app.state.redis_client
-    task_data = await redis_client.hget("tasks", order_id)
+    task_data = await redis_client.hget("tasks", data['order_id'])
     if not task_data:
-        raise HTTPException(status_code=404, detail="Task not found")
+        return {'status': False}
     task = json.loads(task_data.decode('utf-8'))
     logging.info(f"Requested task: {task}")
     return task
 
 
-@app.get("/queue_length/")
+@app.post("/queue_length/")
 async def queue_status(request: Request):
+    headers_dict = request.headers
+    data = await request.json()
+    cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+    signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+    task_dict = json.loads(signature)
+    if task_dict != data:
+        return {'status': 'invalid signature'}
     redis_client = request.app.state.redis_client
     queue_length = await redis_client.llen('tasks')
     logging.info(f"Requested queue length: {queue_length}")
