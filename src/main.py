@@ -48,7 +48,7 @@ async def add_task(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/get_task/")
+@app.post("/get_task/")
 async def get_task(request: Request):
     headers_dict = request.headers
     data = await request.json()
@@ -74,7 +74,7 @@ async def queue_status(request: Request):
     signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
     task_dict = json.loads(signature)
     if task_dict != data:
-        return {'status': 'invalid signature'}
+        return {'status': False}
     redis_client = request.app.state.redis_client
     queue_length = await redis_client.llen('tasks')
     logging.info(f"Requested queue length: {queue_length}")
