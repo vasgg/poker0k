@@ -2,21 +2,13 @@ import asyncio
 import json
 import logging.config
 
-from pydantic import BaseModel
 import redis.asyncio as redis
 
 from config import get_logging_config
 from controllers.actions import Actions
 from controllers.requests import send_report
 from controllers.window_checker import WindowChecker
-
-
-class Task(BaseModel):
-    order_id: int
-    user_id: int
-    requisite: str
-    amount: float
-    status: int
+from task_model import Task
 
 
 async def execute_task(task: Task, redis_client: redis):

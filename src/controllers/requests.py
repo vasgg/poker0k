@@ -5,7 +5,7 @@ import aiohttp
 
 from config import settings
 from controllers.crypt import Crypt
-from worker import Task
+from task_model import Task
 
 logger = logging.getLogger(__name__)
 

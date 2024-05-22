@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 import pyautogui
 
 from consts import Coords
-from worker import Task
+from task_model import Task
 
 logger = logging.getLogger(__name__)
 
