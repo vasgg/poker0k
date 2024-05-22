@@ -4,7 +4,6 @@ import logging
 import pyautogui
 
 from consts import Coords, Colors
-from enums import Task
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@ import aiohttp
 
 from config import settings
 from controllers.crypt import Crypt
-from enums import Task
+from worker import Task
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,6 @@ async def send_queue_request() -> None:
             'Content-Type': 'application/json'
         }
         async with session.post(url, json=data, headers=headers) as response:
-        # async with session.post(url) as response:
             if response.status == 200:
                 print(await response.json())
             else:

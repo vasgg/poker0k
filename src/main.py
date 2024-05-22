@@ -10,7 +10,7 @@ from uvicorn import Config, Server
 
 from config import get_logging_config, settings
 from controllers.crypt import Crypt
-from enums import Task
+from worker import Task
 
 
 @asynccontextmanager

@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 import pyautogui
 
 from consts import Coords
-from enums import Status, Task
+from worker import Task
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class Actions:
     async def click_transfer_section():
         pyautogui.click(Coords.TRANSFER_SECTION)
         logger.info("Transfer section clicked...")
-        logger.info("Awaiting 10 seconds...")
+        logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
 
     @staticmethod
@@ -28,11 +28,11 @@ class Actions:
         await asyncio.sleep(3)
 
     @staticmethod
-    async def enter_nickname(nick: str):
-        pyautogui.typewrite(nick)
-        logger.info(f'Enter nickname: {nick}...')
-        logger.info("Awaiting 5 seconds...")
-        await asyncio.sleep(5)
+    async def enter_nickname(requisite: str):
+        pyautogui.typewrite(requisite)
+        logger.info(f'Enter nickname: {requisite}...')
+        logger.info("Awaiting 3 seconds...")
+        await asyncio.sleep(3)
 
     @staticmethod
     async def click_amount_section():
@@ -51,6 +51,7 @@ class Actions:
     @staticmethod
     async def click_transfer_button():
         pyautogui.click(Coords.TRANSFER_BUTTON)
+        await asyncio.sleep(0.1)
         pyautogui.click(Coords.TRANSFER_BUTTON)
         logger.info("Transfer button clicked...")
         logger.info("Awaiting 3 seconds...")
@@ -60,8 +61,8 @@ class Actions:
     async def click_transfer_confirm_button():
         pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
         logger.info("Transfer confirm button clicked...")
-        logger.info("Awaiting 2 seconds...")
-        await asyncio.sleep(2)
+        logger.info("Awaiting 3 seconds...")
+        await asyncio.sleep(3)
 
     @staticmethod
     async def take_screenshot(task: Task):
