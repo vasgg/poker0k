@@ -66,7 +66,7 @@ class Actions:
     @staticmethod
     async def take_screenshot(task: Task):
         moscow_tz = ZoneInfo("Europe/Moscow")
-        moscow_time = datetime.now(moscow_tz).strftime('%d.%m.%Y_%H:%M:%S')
+        moscow_time = datetime.now(moscow_tz).strftime('%d.%m.%Y_%H.%M.%S')
         file = f'{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png'
         screenshot = pyautogui.screenshot()
         gray_screenshot = screenshot.convert('L')
