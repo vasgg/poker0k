@@ -70,7 +70,9 @@ class Actions:
 
     @staticmethod
     async def click_transfer_confirm_button():
-        pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
+        pyautogui.moveTo(Coords.TRANSFER_CONFIRM_BUTTON)
+        pyautogui.click()
+        # pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
         await asyncio.sleep(0.1)
         logger.info("Transfer confirm button clicked...")
         logger.info("Awaiting 3 seconds...")
