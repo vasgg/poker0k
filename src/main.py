@@ -39,8 +39,10 @@ async def add_task(request: Request):
     # if task_dict != data or task.status != 0:
     #     return {'status': False}
     try:
-        await redis_client.publish('queue', task.json())
+        await redis_client.lpush('queue', task.json())
         logging.info(f"Task added to queue: {task.json()}")
+        queue_length = await redis_client.llen('queue')
+        logging.info(f"Current queue length: {queue_length}")
         return {'status': 'true'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
