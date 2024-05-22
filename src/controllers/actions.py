@@ -56,10 +56,13 @@ class Actions:
     @staticmethod
     async def click_transfer_button():
         pyautogui.keyDown('tab')
+        pyautogui.keyUp('tab')
         await asyncio.sleep(0.1)
         pyautogui.keyDown('tab')
+        pyautogui.keyUp('tab')
         await asyncio.sleep(0.1)
         pyautogui.keyDown('enter')
+        pyautogui.keyUp('enter')
 
         # pyautogui.click(Coords.TRANSFER_BUTTON)
         # await asyncio.sleep(0.1)
