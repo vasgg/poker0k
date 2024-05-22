@@ -59,6 +59,7 @@ async def execute_task(task: Task, redis_client: redis):
 
 async def main():
     redis_client = redis.Redis(db=10)
+    await asyncio.sleep(3)
 
     logging_config = get_logging_config('worker')
     logging.config.dictConfig(logging_config)
