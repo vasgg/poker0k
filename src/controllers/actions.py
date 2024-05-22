@@ -36,9 +36,12 @@ class Actions:
 
     @staticmethod
     async def click_amount_section():
-        pyautogui.click(Coords.AMOUNT_SECTION)
+        pyautogui.keyDown('tab')
         await asyncio.sleep(0.1)
-        pyautogui.click(Coords.AMOUNT_SECTION)
+        pyautogui.keyDown('tab')
+        # pyautogui.click(Coords.AMOUNT_SECTION)
+        # await asyncio.sleep(0.1)
+        # pyautogui.click(Coords.AMOUNT_SECTION)
         logger.info("Amount section clicked...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
