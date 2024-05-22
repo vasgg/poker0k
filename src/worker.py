@@ -12,7 +12,7 @@ from enums import Status, Task
 
 
 async def execute_task(task: Task, redis_client: redis):
-    logging.info(f"Executing task id {task.order_id} for {task.nickname} with amount {task.amount}")
+    logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     # if await WindowChecker.check_transfer_section():
     #     await Actions.click_nickname_section()
     #     await Actions.enter_nickname(nick=task.nickname)
