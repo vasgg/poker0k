@@ -66,12 +66,12 @@ class Actions:
     @staticmethod
     async def take_screenshot(task: Task):
         moscow_tz = ZoneInfo("Europe/Moscow")
-        moscow_time = datetime.now(moscow_tz).strftime('%d.%m.%Y|%H:%M:%S')
-        file_name = f'{moscow_time}|{task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}.png'
+        moscow_time = datetime.now(moscow_tz).strftime('%d.%m.%Y_%H:%M:%S')
+        file = f'{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png'
         screenshot = pyautogui.screenshot()
         gray_screenshot = screenshot.convert('L')
         path = Path('screenshots')
-        gray_screenshot.save(path / file_name)
-        logger.info(f"Screenshot {file_name} saved...")
+        gray_screenshot.save(path / file)
+        logger.info(f"Screenshot {file} saved...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
