@@ -28,17 +28,17 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post("/add_task/")
 async def add_task(request: Request):
-    headers_dict = request.headers
     data = await request.json()
     task = Task(**data)
-    cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-    signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    task_dict = json.loads(signature)
-    logging.info(f"Received new task: {task}, signature: {task_dict}")
-    redis_client = request.app.state.redis_client
-    if task_dict != data or task.status != 0:
-        return {'status': False}
+    # headers_dict = request.headers
+    # cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+    # signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+    # task_dict = json.loads(signature)
+    # logging.info(f"Received new task: {task}, signature: {task_dict}")
+    # if task_dict != data or task.status != 0:
+    #     return {'status': False}
     try:
+        redis_client = request.app.state.redis_client
         await redis_client.lpush('queue', task.json())
         logging.info(f"Task added to queue: {task.json()}")
         queue_length = await redis_client.llen('queue')
