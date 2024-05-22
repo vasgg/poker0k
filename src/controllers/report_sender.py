@@ -39,9 +39,15 @@ async def send_report(task: Task) -> None:
 
 async def send_queue_request() -> None:
     async with aiohttp.ClientSession() as session:
-        url = 'http://localhost:8800/queue_length/'
-        # url = 'http://188.127.243.64:8800/queue_length/'
-        async with session.post(url) as response:
+        # url = 'http://localhost:8800/queue_length/'
+        url = 'http://188.127.243.64:8800/queue_length/'
+        data = {'order_id': 2968, 'user_id': 2702, 'requisite': 'Senior Pomidoro', 'amount': '9.55', 'status': 0}
+        headers = {
+            'x-simpleex-sign': '/bYaZzmzN6hqynFmKvP2Vmw1Y3lkVTlyWXlEbUJlL1V5OUJseEFKalRWeGV2ZjRJMHBKakEzUjJ3dkFFWWc2VVBSb3pQY2lFM1FRMVNVaStMaDBYZ2JXemY3OUtOSXIwY1ErWDhuOTNYNkVlbmd5SHJianVjTEZFMEpTU1AxT2g2SmpJVjhtY1F0K1dyUlJW',
+            'Content-Type': 'application/json'
+        }
+        async with session.post(url, json=data, headers=headers) as response:
+        # async with session.post(url) as response:
             if response.status == 200:
                 print(await response.json())
             else:

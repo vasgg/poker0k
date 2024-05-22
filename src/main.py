@@ -36,13 +36,10 @@ async def add_task(request: Request):
     task_dict = json.loads(signature)
     logging.info(f"Received new task: {task}, signature: {task_dict}")
     redis_client = request.app.state.redis_client
-    if task_dict != data:
-        return {'status': False}
-    if task.status != 0:
+    if task_dict != data or task.status != 0:
         return {'status': False}
     try:
-        # await redis_client.hset("tasks", task.order_id, task.json())
-        await redis_client.publish('tasks', task.json())
+        await redis_client.publish('queue', task.json())
         logging.info(f"Task added to queue: {task.json()}")
         return {'status': 'true'}
     except Exception as e:
@@ -77,7 +74,7 @@ async def queue_status(request: Request):
     if task_dict != data:
         return {'status': False}
     redis_client = request.app.state.redis_client
-    queue_length = await redis_client.llen('tasks')
+    queue_length = await redis_client.llen('queue')
     logging.info(f"Requested queue length: {queue_length}")
     return {"queue_count": queue_length}
 

@@ -62,11 +62,11 @@ async def execute_task(task: Task, redis_client: redis):
 async def main():
     redis_client = redis.Redis(db=10)
     pubsub = redis_client.pubsub()
-    await pubsub.subscribe('tasks')
+    await pubsub.subscribe('queue')
 
     logging_config = get_logging_config('worker')
     logging.config.dictConfig(logging_config)
-    logging.info("Subscribed to 'tasks' channel. Waiting for tasks...")
+    logging.info("Subscribed to 'queue' channel. Waiting for tasks...")
     async for message in pubsub.listen():
         if message['type'] == 'message':
             task_data = message['data'].decode('utf-8')
