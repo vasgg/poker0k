@@ -24,8 +24,8 @@ async def execute_task(task: Task, redis_client: redis):
     #         await Actions.click_transfer_confirm_button()
     #
     #     status = Status.SUCCESS if await WindowChecker.check_confirm_transfer_section() else Status.FAIL
-    logging.info(f"awaiting 10 seconds...")
-    await asyncio.sleep(10)
+    logging.info(f"awaiting 30 seconds...")
+    await asyncio.sleep(30)
 
     task.status = 1
     # await Actions.take_screenshot(task=task)
