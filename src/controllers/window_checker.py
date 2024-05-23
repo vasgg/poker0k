@@ -23,7 +23,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_ad():
-        check_ad = pyautogui.pixelMatchesColor(*Coords.CLOSE_AD_BUTTON, Colors.GRAY, tolerance=20)
+        check_ad = pyautogui.pixelMatchesColor(*Coords.CLOSE_AD_BUTTON, Colors.GRAY, tolerance=35)
         if check_ad:
             pyautogui.click(Coords.CLOSE_AD_BUTTON)
             await asyncio.sleep(1)
@@ -48,8 +48,8 @@ class WindowChecker:
         if check_confirm_login:
             pyautogui.click(Coords.CONFIRM_LOGIN_BUTTON)
             logger.info("Disconnected. Confirm login button clicked...")
-            logger.info("Connection in progress. Awaiting 10 seconds...")
-            await asyncio.sleep(10)
+            logger.info("Connection in progress. Awaiting 15 seconds...")
+            await asyncio.sleep(15)
         else:
             logger.info("Connected, continue...")
 
