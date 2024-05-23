@@ -15,9 +15,10 @@ async def execute_task(task: Task, redis_client: redis):
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     if await WindowChecker.check_transfer_section():
         await Actions.click_nickname_section()
-        await Actions.enter_nickname(requisite=task.requisite)
+        await Actions.enter_nickname(requisite='dnk-jarod')
+        # await Actions.enter_nickname(requisite=task.requisite)
         await Actions.click_amount_section()
-        await Actions.enter_amount(amount=str(task.amount))
+        await Actions.enter_amount(amount=str(1.00))
         if await WindowChecker.check_transfer_button():
             await Actions.click_transfer_button()
         if await WindowChecker.check_transfer_confirm_button():
