@@ -27,7 +27,7 @@ class WindowChecker:
         if check_ad:
             pyautogui.click(Coords.CLOSE_AD_BUTTON)
             await asyncio.sleep(1)
-            pyautogui.click(Coords.CLOSE_AD_BUTTON)
+            # pyautogui.click(Coords.CLOSE_AD_BUTTON)
             logger.info("Ad closed...")
         else:
             logger.info("No ad, continue...")
@@ -38,7 +38,8 @@ class WindowChecker:
         if check_login:
             pyautogui.click(Coords.LOGIN_BUTTON)
             logger.info("Disconnected. Login button clicked...")
-            await asyncio.sleep(10)
+            logger.info("Connection in progress. Awaiting 15 seconds...")
+            await asyncio.sleep(15)
         else:
             logger.info("Connected, continue...")
 
