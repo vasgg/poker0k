@@ -36,11 +36,11 @@ class Actions:
 
     @staticmethod
     async def click_amount_section():
-        pyautogui.keyDown('tab')
-        await asyncio.sleep(0.1)
-        pyautogui.keyDown('tab')
-        # pyautogui.click(Coords.AMOUNT_SECTION)
+        # pyautogui.keyDown('tab')
         # await asyncio.sleep(0.1)
+        # pyautogui.keyDown('tab')
+        pyautogui.click(Coords.AMOUNT_SECTION)
+        await asyncio.sleep(0.1)
         # pyautogui.click(Coords.AMOUNT_SECTION)
         logger.info("Amount section clicked...")
         logger.info("Awaiting 3 seconds...")
@@ -55,17 +55,17 @@ class Actions:
 
     @staticmethod
     async def click_transfer_button():
-        pyautogui.keyDown('tab')
-        pyautogui.keyUp('tab')
-        await asyncio.sleep(0.1)
-        pyautogui.keyDown('tab')
-        pyautogui.keyUp('tab')
-        await asyncio.sleep(0.1)
-        pyautogui.keyDown('enter')
-        pyautogui.keyUp('enter')
-
-        # pyautogui.click(Coords.TRANSFER_BUTTON)
+        # pyautogui.keyDown('tab')
+        # pyautogui.keyUp('tab')
         # await asyncio.sleep(0.1)
+        # pyautogui.keyDown('tab')
+        # pyautogui.keyUp('tab')
+        # await asyncio.sleep(0.1)
+        # pyautogui.keyDown('enter')
+        # pyautogui.keyUp('enter')
+
+        pyautogui.click(Coords.TRANSFER_BUTTON)
+        await asyncio.sleep(0.1)
         # pyautogui.click(Coords.TRANSFER_BUTTON)
         logger.info("Transfer button clicked...")
         logger.info("Awaiting 3 seconds...")
