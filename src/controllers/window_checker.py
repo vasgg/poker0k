@@ -75,7 +75,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_transfer_button():
-        check_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.GREEN, tolerance=20)
+        check_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.GREEN, tolerance=35)
         if check_transfer_button:
             logger.info("Transfer button detected...")
             return True
