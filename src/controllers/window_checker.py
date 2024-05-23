@@ -50,6 +50,8 @@ class WindowChecker:
         check_confirm_login = pyautogui.pixelMatchesColor(*Coords.CONFIRM_LOGIN_BUTTON, Colors.RUST, tolerance=20)
         if check_confirm_login:
             pyautogui.click(Coords.CONFIRM_LOGIN_BUTTON)
+            await asyncio.sleep(1)
+            pyautogui.click(Coords.CONFIRM_LOGIN_BUTTON)
             logger.info("Disconnected. Confirm login button clicked...")
             logger.info("Connection in progress. Awaiting 15 seconds...")
             await asyncio.sleep(15)
