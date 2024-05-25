@@ -10,6 +10,7 @@ from consts import Coords
 from task_model import Task
 
 logger = logging.getLogger(__name__)
+pyautogui.FAILSAFE = False
 
 
 class Actions:
