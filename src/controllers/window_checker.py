@@ -64,8 +64,8 @@ class WindowChecker:
         if check_cashier:
             pyautogui.click(Coords.CASHIER_BUTTON)
             logger.info("Cashier button clicked...")
-            logger.info("Loading in progress. Awaiting 10 seconds...")
-            await asyncio.sleep(10)
+            logger.info("Loading in progress. Awaiting 15 seconds...")
+            await asyncio.sleep(15)
         logger.info("Connected, continue...")
 
     @staticmethod
