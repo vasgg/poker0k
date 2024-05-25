@@ -40,8 +40,8 @@ class WindowChecker:
             await asyncio.sleep(0.1)
             pyautogui.click(Coords.LOGIN_BUTTON)
             logger.info("Disconnected. Login button clicked...")
-            logger.info("Connection in progress. Awaiting 15 seconds...")
-            await asyncio.sleep(15)
+            logger.info("Connection in progress. Awaiting 20 seconds...")
+            await asyncio.sleep(20)
         else:
             logger.info("Connected, continue...")
 
