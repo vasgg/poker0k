@@ -22,6 +22,13 @@ class Actions:
         await asyncio.sleep(4)
 
     @staticmethod
+    async def click_transfer_history_section():
+        pyautogui.click(Coords.TRANSFER_HISTORY_SECTION)
+        logger.info("Transfer section clicked...")
+        logger.info("Awaiting 4 seconds...")
+        await asyncio.sleep(4)
+
+    @staticmethod
     async def click_nickname_section():
         pyautogui.click(Coords.NICKNAME_SECTION)
         logger.info("Nickname section clicked...")

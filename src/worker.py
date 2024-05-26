@@ -10,6 +10,12 @@ from controllers.window_checker import WindowChecker
 from task_model import Task
 
 
+async def handle_timeout():
+    logging.info("No tasks for 20 minutes. Performing scheduled actions...")
+    await Actions.click_transfer_history_section()
+    await Actions.click_transfer_section()
+
+
 async def execute_task(task: Task, redis_client: redis):
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     if await WindowChecker.check_transfer_section():
@@ -63,10 +69,13 @@ async def main():
     logging.config.dictConfig(logging_config)
     logging.info("Waiting for tasks...")
 
-    while True:
-        _, task_data = await redis_client.brpop('queue')
+    try:
+        task_data = await asyncio.wait_for(redis_client.brpop('queue'), timeout=1200)
+        _, task_data = task_data
         task = Task.parse_raw(task_data.decode('utf-8'))
         await execute_task(task, redis_client)
+    except asyncio.TimeoutError:
+        await handle_timeout()
 
 
 if __name__ == "__main__":
