@@ -69,13 +69,14 @@ async def main():
     logging.config.dictConfig(logging_config)
     logging.info("Waiting for tasks...")
 
-    try:
-        task_data = await asyncio.wait_for(redis_client.brpop('queue'), timeout=1200)
-        _, task_data = task_data
-        task = Task.parse_raw(task_data.decode('utf-8'))
-        await execute_task(task, redis_client)
-    except asyncio.TimeoutError:
-        await handle_timeout()
+    while True:
+        try:
+            task_data = await asyncio.wait_for(redis_client.brpop('queue'), timeout=1200)
+            _, task_data = task_data
+            task = Task.parse_raw(task_data.decode('utf-8'))
+            await execute_task(task, redis_client)
+        except asyncio.TimeoutError:
+            await handle_timeout()
 
 
 if __name__ == "__main__":
