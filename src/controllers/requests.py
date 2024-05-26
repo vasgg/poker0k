@@ -39,19 +39,13 @@ async def send_report(task: Task) -> None:
 async def send_queue_request() -> None:
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f'{settings.TEST_ENDPOINT}/queue_length/') as response:
-            if response.status == 200:
-                print(await response.json())
-            else:
-                print(await response.json())
+            logger.info(await response.json())
 
 
 async def send_task_request() -> None:
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f'{settings.TEST_ENDPOINT}/add_task/') as response:
-            if response.status == 200:
-                print(await response.json())
-            else:
-                print(await response.json())
+            logger.info(await response.json())
 
 
 def run_main():

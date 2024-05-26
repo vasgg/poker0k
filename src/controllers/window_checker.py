@@ -11,13 +11,14 @@ logger = logging.getLogger(__name__)
 class WindowChecker:
     @staticmethod
     async def check_logout():
-        check_logout = pyautogui.pixelMatchesColor(*Coords.RESTART_BUTTON, Colors.GREEN, tolerance=10)
+        check_logout = pyautogui.pixelMatchesColor(*Coords.RESTART_BUTTON, Colors.GREEN, tolerance=25)
         if check_logout:
             pyautogui.click(Coords.RESTART_BUTTON)
             await asyncio.sleep(1)
             pyautogui.click(Coords.RESTART_BUTTON)
             logger.info("Disconnected. Restart button clicked...")
-            await asyncio.sleep(3)
+            logger.info("Connection in progress. Awaiting 10 seconds...")
+            await asyncio.sleep(10)
         else:
             logger.info("Connected, continue...")
 
@@ -26,7 +27,7 @@ class WindowChecker:
         check_ad = pyautogui.pixelMatchesColor(*Coords.CLOSE_AD_BUTTON, Colors.GRAY, tolerance=35)
         if check_ad:
             pyautogui.click(Coords.CLOSE_AD_BUTTON)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.1)
             # pyautogui.click(Coords.CLOSE_AD_BUTTON)
             logger.info("Ad closed...")
         else:

@@ -6,7 +6,6 @@ import redis.asyncio as redis
 
 from config import get_logging_config
 from controllers.actions import Actions
-from controllers.requests import send_report
 from controllers.window_checker import WindowChecker
 from task_model import Task
 
@@ -25,8 +24,6 @@ async def execute_task(task: Task, redis_client: redis):
             await Actions.click_transfer_confirm_button()
 
         task.status = 1 if await WindowChecker.check_confirm_transfer_section() else 0
-    # logging.info(f"awaiting 30 seconds...")
-    # await asyncio.sleep(30)
         await Actions.take_screenshot(task=task)
         # await send_report(task=task)
         serialized_task = json.dumps(task.dict())
