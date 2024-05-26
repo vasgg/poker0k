@@ -59,6 +59,7 @@ async def execute_task(task: Task, redis_client: redis):
         # await send_report(task=task)
         serialized_task = json.dumps(task.dict())
         await redis_client.hset("tasks", task.order_id, serialized_task)
+    logging.info(f"Waiting for new tasks...")
 
 
 async def main():
