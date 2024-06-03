@@ -21,6 +21,8 @@ dependencies = [
     'pydantic-settings>=2.2.1',
     'cryptography>=42.0.7',
     'pyautogui>=0.9.54',
+    'pillow>=10.3.0',
+    'tzdata>=2024.1',
 ]
 requires-python = ">=3.11"
 
