@@ -30,7 +30,7 @@ class Actions:
 
     @staticmethod
     async def click_nickname_section():
-        pyautogui.click(Coords.NICKNAME_SECTION)
+        pyautogui.click(Coords.NICKNAME_SECTION, duration=0.4)
         logger.info("Nickname section clicked...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
@@ -44,7 +44,7 @@ class Actions:
 
     @staticmethod
     async def click_amount_section():
-        pyautogui.click(Coords.AMOUNT_SECTION)
+        pyautogui.click(Coords.AMOUNT_SECTION, duration=0.4)
         await asyncio.sleep(0.1)
         # pyautogui.click(Coords.AMOUNT_SECTION)
         logger.info("Amount section clicked...")
