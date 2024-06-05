@@ -5,6 +5,7 @@ import logging.config
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
+import pyautogui
 from redis.asyncio import Redis
 from uvicorn import Config, Server
 
@@ -73,12 +74,17 @@ async def queue_status(request: Request):
     cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
     signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
     task_dict = json.loads(signature)
+    screen_width, screen_height = pyautogui.size()
     if task_dict != data:
         return {'status': False}
     redis_client = request.app.state.redis_client
     queue_length = await redis_client.llen('queue')
     logging.info(f"Requested queue length: {queue_length}")
-    return {"queue_count": queue_length}
+    return {
+        "queue_count": queue_length,
+        'screen_width': screen_width,
+        'screen_height': screen_height
+    }
 
 
 async def main():
