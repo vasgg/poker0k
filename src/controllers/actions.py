@@ -46,23 +46,20 @@ class Actions:
     @staticmethod
     async def click_amount_section():
         # pyautogui.click(Coords.AMOUNT_SECTION)
-        import time
 
         # Создаем объект контроллера мыши
         mouse = Controller()
 
         # Задержка для наблюдения за действием (необязательно)
-        time.sleep(2)
 
         # Установка координат, куда будет кликать мышь
-        x, y = Coords.AMOUNT_SECTION
-        mouse.position = (x, y)
+        mouse.position = Coords.AMOUNT_SECTION
 
         # Выполнение клика левой кнопкой мыши
         mouse.click(Button.left)
-
-        # Выполнение клика правой кнопкой мыши
         await asyncio.sleep(0.1)
+        mouse.click(Button.left)
+
         # pyautogui.click(Coords.AMOUNT_SECTION)
         logger.info("Amount section clicked...")
         logger.info("Awaiting 3 seconds...")
