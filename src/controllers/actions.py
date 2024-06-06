@@ -1,3 +1,4 @@
+from pynput.mouse import Button, Controller
 import asyncio
 from datetime import datetime
 import logging
@@ -44,7 +45,23 @@ class Actions:
 
     @staticmethod
     async def click_amount_section():
-        pyautogui.click(Coords.AMOUNT_SECTION, duration=0.4, clicks=2, interval=0.1)
+        # pyautogui.click(Coords.AMOUNT_SECTION)
+        import time
+
+        # Создаем объект контроллера мыши
+        mouse = Controller()
+
+        # Задержка для наблюдения за действием (необязательно)
+        time.sleep(2)
+
+        # Установка координат, куда будет кликать мышь
+        x, y = Coords.AMOUNT_SECTION
+        mouse.position = (x, y)
+
+        # Выполнение клика левой кнопкой мыши
+        mouse.click(Button.left)
+
+        # Выполнение клика правой кнопкой мыши
         await asyncio.sleep(0.1)
         # pyautogui.click(Coords.AMOUNT_SECTION)
         logger.info("Amount section clicked...")
