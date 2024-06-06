@@ -82,8 +82,7 @@ async def queue_status(request: Request):
     logging.info(f"Requested queue length: {queue_length}")
     return {
         "queue_count": queue_length,
-        'screen_width': screen_width,
-        'screen_height': screen_height
+        'resolution': f'{screen_width} x {screen_height}',
     }
 
 
