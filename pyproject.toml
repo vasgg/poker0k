@@ -23,7 +23,7 @@ dependencies = [
     'pyautogui>=0.9.54',
     'pillow>=10.3.0',
     'tzdata>=2024.1',
-    'pynput>=1.7.7',
+    'pywin32>=306',
 ]
 requires-python = ">=3.11"
 
