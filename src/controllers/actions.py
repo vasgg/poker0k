@@ -3,8 +3,8 @@ from datetime import datetime
 import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
-import win32api
-import win32con
+# import win32api
+# import win32con
 import pyautogui
 
 from consts import Coords
@@ -45,15 +45,15 @@ class Actions:
 
     @staticmethod
     async def click_amount_section():
-        # pyautogui.click(Coords.AMOUNT_SECTION)
+        pyautogui.click(Coords.AMOUNT_SECTION)
 
         # Установка координат для перемещения мыши
-        x, y = Coords.AMOUNT_SECTION
-        win32api.SetCursorPos((x, y))
-
-        # Выполнение клика левой кнопкой мыши
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
+        # x, y = Coords.AMOUNT_SECTION
+        # win32api.SetCursorPos((x, y))
+        #
+        # # Выполнение клика левой кнопкой мыши
+        # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
+        # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
 
         # pyautogui.click(Coords.AMOUNT_SECTION)
         logger.info("Amount section clicked...")
