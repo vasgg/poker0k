@@ -6,6 +6,7 @@ import redis.asyncio as redis
 
 from config import get_logging_config
 from controllers.actions import Actions
+from controllers.requests import send_report
 from controllers.window_checker import WindowChecker
 from task_model import Task
 
@@ -31,7 +32,7 @@ async def execute_task(task: Task, redis_client: redis):
 
         task.status = 1 if await WindowChecker.check_confirm_transfer_section() else 0
         await Actions.take_screenshot(task=task)
-        # await send_report(task=task)
+        await send_report(task=task)
         serialized_task = json.dumps(task.dict())
         await redis_client.hset("tasks", task.order_id, serialized_task)
 
@@ -56,7 +57,7 @@ async def execute_task(task: Task, redis_client: redis):
         task.status = 1 if await WindowChecker.check_confirm_transfer_section() else 0
 
         await Actions.take_screenshot(task=task)
-        # await send_report(task=task)
+        await send_report(task=task)
         serialized_task = json.dumps(task.dict())
         await redis_client.hset("tasks", task.order_id, serialized_task)
     logging.info(f"Waiting for new tasks...")
