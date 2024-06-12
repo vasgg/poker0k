@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     DECRYPT_KEY: SecretStr
     REPORT_ENDPOINT: str
     TEST_ENDPOINT: str
+    MAX_ATTEMPTS: int
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 

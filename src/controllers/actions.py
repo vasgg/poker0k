@@ -3,8 +3,8 @@ from datetime import datetime
 import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
-import win32api
-import win32con
+# import win32api
+# import win32con
 import pyautogui
 
 from consts import Coords
@@ -23,11 +23,18 @@ class Actions:
         await asyncio.sleep(4)
 
     @staticmethod
-    async def click_transfer_history_section():
-        pyautogui.click(Coords.TRANSFER_HISTORY_SECTION)
+    async def click_close_cashier_button():
+        pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
         logger.info("Transfer section clicked...")
         logger.info("Awaiting 4 seconds...")
         await asyncio.sleep(4)
+
+    # @staticmethod
+    # async def click_cashier_fullscreen_button():
+    #     pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
+    #     logger.info("Transfer section clicked...")
+    #     logger.info("Awaiting 4 seconds...")
+    #     await asyncio.sleep(4)
 
     @staticmethod
     async def click_nickname_section():
@@ -47,11 +54,11 @@ class Actions:
     async def click_amount_section():
         pyautogui.click(Coords.AMOUNT_SECTION)
 
-        x, y = Coords.AMOUNT_SECTION
-        win32api.SetCursorPos((x, y))
-
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
+        # x, y = Coords.AMOUNT_SECTION
+        # win32api.SetCursorPos((x, y))
+        #
+        # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
+        # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
 
         pyautogui.click(Coords.AMOUNT_SECTION)
         logger.info("Amount section clicked...")

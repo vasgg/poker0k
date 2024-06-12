@@ -104,3 +104,25 @@ class WindowChecker:
             return True
         logger.info("Confirm transfer section not detected...")
         return False
+
+    @staticmethod
+    async def check_close_cashier_button():
+        check_close_cashier_button = pyautogui.pixelMatchesColor(*Coords.CLOSE_CASHIER_BUTTON, Colors.GRAY, tolerance=35)
+        if check_close_cashier_button:
+            pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
+            await asyncio.sleep(0.1)
+            logger.info("Cashier closed...")
+            return True
+        logger.info("Cashier not closed after timeout...")
+        return False
+
+    @staticmethod
+    async def check_cashier_fullscreen_button():
+        check_cashier_fullscreen_button = pyautogui.pixelMatchesColor(*Coords.CASHIER_FULLSCREEN_BUTTON, Colors.WHITE, tolerance=35)
+        if check_cashier_fullscreen_button:
+            pyautogui.click(Coords.CASHIER_FULLSCREEN_BUTTON)
+            await asyncio.sleep(5)
+            logger.info("Cashier fullscreen toggled...")
+            return True
+        logger.info("Cashier not closed...")
+        return False
