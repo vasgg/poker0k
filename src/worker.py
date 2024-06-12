@@ -86,7 +86,7 @@ async def main():
 
     while True:
         try:
-            task_data = await asyncio.wait_for(redis_client.brpop('queue'), timeout=120)
+            task_data = await asyncio.wait_for(redis_client.brpop('queue'), timeout=1200)
             _, task_data = task_data
             task = Task.parse_raw(task_data.decode('utf-8'))
             await execute_task(task, redis_client)
