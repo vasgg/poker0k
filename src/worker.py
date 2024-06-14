@@ -22,6 +22,9 @@ async def handle_timeout():
 
 
 async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
+    if task.status == 100:
+        logging.info(f"Executing initial task. Cashier window timeout: 20 min.")
+        return
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     if await WindowChecker.check_transfer_section():
         await Actions.click_nickname_section()
@@ -78,6 +81,14 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
 
 async def main():
     redis_client = redis.Redis(db=10)
+    initial_task = Task(
+        order_id=0,
+        user_id=0,
+        requisite="",
+        amount=0.0,
+        status=100
+    )
+    await redis_client.lpush('queue', initial_task.json())
     await asyncio.sleep(3)
 
     logging_config = get_logging_config('worker')
