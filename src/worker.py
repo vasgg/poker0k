@@ -13,12 +13,12 @@ from task_model import Task
 
 async def handle_timeout():
     logging.info("No tasks for 20 minutes. Performing scheduled actions...")
-    if await WindowChecker.check_close_cashier_button():
-        await WindowChecker.check_cashier()
-        if await WindowChecker.check_cashier_fullscreen_button():
-            await Actions.click_transfer_section()
-            return
-    logging.info("Error occurred while performing scheduled actions...")
+    # if await WindowChecker.check_close_cashier_button():
+    #     await WindowChecker.check_cashier()
+    #     if await WindowChecker.check_cashier_fullscreen_button():
+    #         await Actions.click_transfer_section()
+    #         return
+    # logging.info("Error occurred while performing scheduled actions...")
 
 
 async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
