@@ -36,7 +36,7 @@ async def handle_timeout():
     global start_cycle_time
     start_cycle_time = datetime.now()
 
-    logging.info((start_cycle_time.strftime("%H:%M:%S")), "Refreshing global timer on 50 minutes, returning to tasks...")
+    logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Refreshing global timer on 50 minutes, returning to tasks...')
 
 
 async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
@@ -83,7 +83,7 @@ async def main():
     global start_cycle_time
     start_cycle_time = datetime.now()
     last_activity_time = start_cycle_time
-    logging.info((start_cycle_time.strftime("%H:%M:%S")), "Worker started, setting up global timer on 50 minutes...")
+    logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Worker started, setting up global timer on 50 minutes...')
 
     while True:
         # noinspection PyTypeChecker
