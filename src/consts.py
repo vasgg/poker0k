@@ -26,3 +26,4 @@ class Colors:
     WHITE = 245, 255, 235
     LIGHT_GREEN = 206, 234, 214
     RED = 189, 63, 60
+    MENU_RED = 89, 0, 0

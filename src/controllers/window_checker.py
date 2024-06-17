@@ -117,10 +117,10 @@ class WindowChecker:
 
     @staticmethod
     async def check_cashier_fullscreen_button():
-        check_cashier_fullscreen_button = pyautogui.pixelMatchesColor(*Coords.CASHIER_FULLSCREEN_BUTTON, Colors.RED, tolerance=35)
+        check_cashier_fullscreen_button = pyautogui.pixelMatchesColor(*Coords.CASHIER_FULLSCREEN_BUTTON, Colors.MENU_RED, tolerance=25)
         if check_cashier_fullscreen_button:
             await asyncio.sleep(5)
-            pyautogui.click(Coords.CASHIER_FULLSCREEN_BUTTON)
+            # pyautogui.click(Coords.CASHIER_FULLSCREEN_BUTTON)
             pyautogui.click(Coords.CASHIER_FULLSCREEN_BUTTON)
             logger.info("Cashier fullscreen toggled...")
             return True
