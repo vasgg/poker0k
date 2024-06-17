@@ -28,7 +28,6 @@ class WindowChecker:
         if check_ad:
             pyautogui.click(Coords.CLOSE_AD_BUTTON)
             await asyncio.sleep(0.1)
-            # pyautogui.click(Coords.CLOSE_AD_BUTTON)
             logger.info("Ad closed...")
         else:
             logger.info("No ad, continue...")
@@ -67,7 +66,7 @@ class WindowChecker:
             logger.info("Cashier button clicked...")
             logger.info("Loading in progress. Awaiting 15 seconds...")
             await asyncio.sleep(15)
-        logger.info("Connected, continue...")
+        logger.info("Cashier button not found...")
 
     @staticmethod
     async def check_transfer_section():
@@ -118,7 +117,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_cashier_fullscreen_button():
-        check_cashier_fullscreen_button = pyautogui.pixelMatchesColor(*Coords.CASHIER_FULLSCREEN_BUTTON, Colors.GRAY, tolerance=35)
+        check_cashier_fullscreen_button = pyautogui.pixelMatchesColor(*Coords.CASHIER_FULLSCREEN_BUTTON, Colors.RED, tolerance=35)
         if check_cashier_fullscreen_button:
             await asyncio.sleep(5)
             pyautogui.click(Coords.CASHIER_FULLSCREEN_BUTTON)

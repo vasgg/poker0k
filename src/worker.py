@@ -1,108 +1,52 @@
 import asyncio
-import json
+from datetime import datetime
 import logging.config
 
 import redis.asyncio as redis
 
-from config import get_logging_config, settings
+from config import get_logging_config
 from controllers.actions import Actions
-from controllers.requests import send_report
+from controllers.processing import check_timer, execute_task
 from controllers.window_checker import WindowChecker
 from task_model import Task
 
+start_cycle_time = None
+
 
 async def handle_timeout():
-    logging.info("No tasks for 20 minutes. Performing scheduled actions...")
-    # if await WindowChecker.check_close_cashier_button():
-    #     await WindowChecker.check_cashier()
-    #     if await WindowChecker.check_cashier_fullscreen_button():
-    #         await Actions.click_transfer_section()
-    #         return
-    # logging.info("Error occurred while performing scheduled actions...")
+    logging.info("Global timeout reached 50 minutes. Performing scheduled actions...")
+    if await WindowChecker.check_close_cashier_button():
+        await Actions.tab_clicking()
+        await WindowChecker.check_cashier()
+        if await WindowChecker.check_cashier_fullscreen_button():
+            await Actions.click_transfer_section()
 
+    global start_cycle_time
+    start_cycle_time = datetime.now()
 
-async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
-    if task.status == 100:
-        logging.info(f"Executing initial task. Cashier window timeout: 20 min.")
-        return
-    logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
-    if await WindowChecker.check_transfer_section():
-        await Actions.click_nickname_section()
-        await Actions.enter_nickname(requisite=task.requisite)
-        await Actions.click_amount_section()
-        await Actions.enter_amount(amount=str(task.amount))
-        if await WindowChecker.check_transfer_button():
-            await Actions.click_transfer_button()
-        if await WindowChecker.check_transfer_confirm_button():
-            await Actions.click_transfer_confirm_button()
-
-        task.status = 1 if await WindowChecker.check_confirm_transfer_section() else 0
-
-        if task.status == 1:
-            await Actions.take_screenshot(task=task)
-            await send_report(task=task)
-            serialized_task = json.dumps(task.dict())
-            await redis_client.hset("tasks", task.order_id, serialized_task)
-        else:
-            await Actions.take_screenshot(task=task)
-            attempts += 1
-            if attempts < settings.MAX_ATTEMPTS:
-                await execute_task(task=task, redis_client=redis_client, attempts=attempts)
-            else:
-                logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
-                await send_report(task=task)
-
-    # else:
-    #     await WindowChecker.check_logout()
-    #     await WindowChecker.check_login()
-    #     await WindowChecker.check_confirm_login()
-    #     await WindowChecker.check_ad()
-    #     await WindowChecker.check_cashier()
-    #
-    #     await Actions.click_transfer_section()
-    #     await Actions.click_nickname_section()
-    #     await Actions.enter_nickname(requisite=task.requisite)
-    #     await Actions.click_amount_section()
-    #     await Actions.enter_amount(amount=str(task.amount))
-    #
-    #     if await WindowChecker.check_transfer_button():
-    #         await Actions.click_transfer_button()
-    #     if await WindowChecker.check_transfer_confirm_button():
-    #         await Actions.click_transfer_confirm_button()
-    #
-    #     task.status = 1 if await WindowChecker.check_confirm_transfer_section() else 0
-    #
-    #     await Actions.take_screenshot(task=task)
-    #     await send_report(task=task)
-    #     serialized_task = json.dumps(task.dict())
-    #     await redis_client.hset("tasks", task.order_id, serialized_task)
-    logging.info(f"Waiting for new tasks...")
+    logging.info((start_cycle_time.strftime("%H:%M:%S")), "Refreshing global timer on 50 minutes, returning to tasks...")
 
 
 async def main():
     redis_client = redis.Redis(db=10)
-    initial_task = Task(
-        order_id=0,
-        user_id=0,
-        requisite="",
-        amount=0.0,
-        status=100
-    )
-    await redis_client.lpush('queue', initial_task.json())
-    await asyncio.sleep(3)
-
     logging_config = get_logging_config('worker')
     logging.config.dictConfig(logging_config)
-    logging.info("Waiting for tasks...")
+
+    await asyncio.sleep(4)
+    global start_cycle_time
+    start_cycle_time = datetime.now()
+    last_activity_time = start_cycle_time
+    logging.info((start_cycle_time.strftime("%H:%M:%S")), "Worker started, setting up global timer on 50 minutes...")
 
     while True:
-        try:
-            task_data = await asyncio.wait_for(redis_client.brpop('queue'), timeout=1200)
+        # noinspection PyTypeChecker
+        task_data = await redis_client.brpop('queue', timeout=5)
+        if task_data:
             _, task_data = task_data
             task = Task.parse_raw(task_data.decode('utf-8'))
             await execute_task(task, redis_client)
-        except asyncio.TimeoutError:
-            await handle_timeout()
+            last_activity_time = datetime.now()
+        last_activity_time = await check_timer(last_activity_time, start_cycle_time)
 
 
 if __name__ == "__main__":

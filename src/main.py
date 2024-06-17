@@ -31,13 +31,13 @@ app = FastAPI(lifespan=lifespan)
 async def add_task(request: Request):
     data = await request.json()
     task = Task(**data)
-    headers_dict = request.headers
-    cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-    signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    task_dict = json.loads(signature)
-    logging.info(f"Received new task: {task}, signature: {task_dict}")
-    if task_dict != data or task.status != 0:
-        return {'status': False}
+    # headers_dict = request.headers
+    # cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+    # signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+    # task_dict = json.loads(signature)
+    # logging.info(f"Received new task: {task}, signature: {task_dict}")
+    # if task_dict != data or task.status != 0:
+    #     return {'status': False}
     try:
         redis_client = request.app.state.redis_client
         await redis_client.lpush('queue', task.json())
@@ -93,7 +93,7 @@ async def main():
     screenshots_directory.mkdir(parents=True, exist_ok=True)
     logging_config = get_logging_config('pokerok')
     logging.config.dictConfig(logging_config)
-    logging.info("app started...")
+    logging.info("server started...")
 
     config = Config(app=app, host="0.0.0.0", port=8800)
     server = Server(config)
