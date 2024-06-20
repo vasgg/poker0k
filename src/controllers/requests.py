@@ -1,4 +1,5 @@
 import asyncio
+from http import HTTPStatus
 import logging
 
 import aiohttp
@@ -27,13 +28,13 @@ async def send_report(task: Task) -> None:
         text_not_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response: ' + '{}. {}'
 
         async with session.post(url, data=data, headers=headers) as response:
-            if response.status == 200:
+            if response.status == HTTPStatus.OK:
                 logger.info(text_ok)
-                print(await response.json())
+                # print(await response.json())
             else:
                 error_text = await response.text()
                 logger.info(text_not_ok.format(response.status, error_text))
-                print(await response.json())
+                # print(await response.json())
 
 
 async def send_queue_request() -> None:
