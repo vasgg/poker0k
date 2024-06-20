@@ -29,11 +29,11 @@ async def send_report(task: Task) -> None:
         async with session.post(url, data=data, headers=headers) as response:
             if response.status == 200:
                 logger.info(text_ok)
-                # print(await response.json())
+                print(await response.json())
             else:
                 error_text = await response.text()
                 logger.info(text_not_ok.format(response.status, error_text))
-                # print(await response.json())
+                print(await response.json())
 
 
 async def send_queue_request() -> None:
