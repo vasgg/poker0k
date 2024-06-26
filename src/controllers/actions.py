@@ -1,12 +1,12 @@
 import asyncio
-from datetime import datetime
 import logging
+from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
-import pyautogui
 
+import pyautogui
 from consts import Coords
-from task_model import Task
+from internal import Task
 
 logger = logging.getLogger(__name__)
 pyautogui.FAILSAFE = False

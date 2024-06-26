@@ -1,12 +1,11 @@
 import asyncio
-from http import HTTPStatus
 import logging
+from http import HTTPStatus
 
 import aiohttp
-
 from config import settings
 from controllers.crypt import Crypt
-from task_model import Task
+from internal import Stage, Task
 
 logger = logging.getLogger(__name__)
 
@@ -14,18 +13,19 @@ logger = logging.getLogger(__name__)
 async def send_report(task: Task) -> None:
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-        url = settings.REPORT_ENDPOINT
+        url = settings.REPORT_PROD_ENDPOINT if settings.STAGE == Stage.PROD else settings.REPORT_DEV_ENDPOINT
         data_json = task.model_dump_json()
         data = {
             'order_id': task.order_id,
             'user_id': task.user_id,
             'requisite': task.requisite,
             'amount': task.amount,
-            'status': task.status
+            'status': task.status,
         }
         headers = {'x-simpleex-sign': cryptor.encrypt(data_json)}
         text_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}'
-        text_not_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response: ' + '{}. {}'
+        text_not_ok = (f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} '
+                       f'with response: ') + '{}. {}'
 
         async with session.post(url, data=data, headers=headers) as response:
             if response.status == HTTPStatus.OK:

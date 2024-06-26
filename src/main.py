@@ -1,17 +1,16 @@
 import asyncio
-from contextlib import asynccontextmanager
 import json
 import logging.config
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
 import pyautogui
-from redis.asyncio import Redis
-from uvicorn import Config, Server
-
 from config import get_logging_config, settings
 from controllers.crypt import Crypt
-from task_model import Task
+from fastapi import FastAPI, HTTPException, Request
+from internal import Stage, Task
+from redis.asyncio import Redis
+from uvicorn import Config, Server
 
 
 @asynccontextmanager
@@ -31,13 +30,14 @@ app = FastAPI(lifespan=lifespan)
 async def add_task(request: Request):
     data = await request.json()
     task = Task(**data)
-    # headers_dict = request.headers
-    # cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-    # signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    # task_dict = json.loads(signature)
-    # logging.info(f"Received new task: {task}, signature: {task_dict}")
-    # if task_dict != data or task.status != 0:
-    #     return {'status': False}
+    if settings.STAGE != Stage.DEV:
+        headers_dict = request.headers
+        cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+        signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+        task_dict = json.loads(signature)
+        logging.info(f"Received new task: {task}, signature: {task_dict}")
+        if task_dict != data or task.status != 0:
+            return {'status': False}
     try:
         redis_client = request.app.state.redis_client
         await redis_client.lpush('queue', task.json())
@@ -52,12 +52,13 @@ async def add_task(request: Request):
 @app.post("/get_task/")
 async def get_task(request: Request):
     data = await request.json()
-    headers_dict = request.headers
-    cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-    signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    task_dict = json.loads(signature)
-    if task_dict != data:
-        return {'status': False}
+    if settings.STAGE != Stage.DEV:
+        headers_dict = request.headers
+        cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+        signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+        task_dict = json.loads(signature)
+        if task_dict != data:
+            return {'status': False}
     redis_client = request.app.state.redis_client
     task_data = await redis_client.hget("tasks", data['order_id'])
     if not task_data:
@@ -70,13 +71,14 @@ async def get_task(request: Request):
 @app.post("/queue_length/")
 async def queue_status(request: Request):
     data = await request.json()
-    headers_dict = request.headers
-    cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-    signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
-    task_dict = json.loads(signature)
     screen_width, screen_height = pyautogui.size()
-    if task_dict != data:
-        return {'status': False}
+    if settings.STAGE != Stage.DEV:
+        headers_dict = request.headers
+        cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+        signature = cryptor.decrypt(headers_dict['x-simpleex-sign'])
+        task_dict = json.loads(signature)
+        if task_dict != data:
+            return {'status': False}
     redis_client = request.app.state.redis_client
     queue_length = await redis_client.llen('queue')
     logging.info(f"Requested queue length: {queue_length}")

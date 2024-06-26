@@ -1,21 +1,20 @@
 import asyncio
-from datetime import datetime, timedelta
 import json
 import logging.config
+from datetime import datetime, timedelta, timezone
 
 import redis.asyncio as redis
-
 from config import get_logging_config, settings
 from controllers.actions import Actions
 from controllers.requests import send_report
 from controllers.window_checker import WindowChecker
-from task_model import Task
+from internal import Task
 
 start_cycle_time = None
 
 
 async def check_timer(last_activity_time, start_time):
-    current_time = datetime.now()
+    current_time = datetime.now(timezone.utc)
     if current_time - last_activity_time >= timedelta(minutes=50):
         await handle_timeout()
         return current_time
@@ -27,6 +26,7 @@ async def check_timer(last_activity_time, start_time):
 
 async def handle_timeout():
     logging.info("Global timeout reached 50 minutes. Performing scheduled actions...")
+    await WindowChecker.check_logout()
     if await WindowChecker.check_close_cashier_button():
         await Actions.tab_clicking()
         await WindowChecker.check_cashier()
@@ -34,9 +34,9 @@ async def handle_timeout():
             await Actions.click_transfer_section()
 
     global start_cycle_time
-    start_cycle_time = datetime.now()
+    start_cycle_time = datetime.now(timezone.utc)
 
-    logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Refreshing global timer on 50 minutes, returning to tasks...')
+    logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Reset global timer on 50 minutes, returning to tasks...')
 
 
 async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
@@ -81,7 +81,7 @@ async def main():
 
     await asyncio.sleep(4)
     global start_cycle_time
-    start_cycle_time = datetime.now()
+    start_cycle_time = datetime.now(timezone.utc)
     last_activity_time = start_cycle_time
     logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Worker started, setting up global timer on 50 minutes...')
 
@@ -92,7 +92,7 @@ async def main():
             _, task_data = task_data
             task = Task.parse_raw(task_data.decode('utf-8'))
             await execute_task(task, redis_client)
-            last_activity_time = datetime.now()
+            last_activity_time = datetime.now(timezone.utc)
         last_activity_time = await check_timer(last_activity_time, start_cycle_time)
 
 
