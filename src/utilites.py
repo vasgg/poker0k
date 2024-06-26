@@ -7,6 +7,7 @@ def check_ggnet_app():
     for proc in psutil.process_iter(['pid', 'name', 'username']):
         try:
             if proc.info['name'] in ['GGnet.exe']:
+                print(f'GGnet is running with PID: {proc.info["pid"]}')
                 print('GGnet is running')
                 return
             else:
