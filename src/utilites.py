@@ -1,14 +1,20 @@
+import os
+
 import psutil
 
 
-def print_non_system_processes():
+def check_ggnet_app():
     for proc in psutil.process_iter(['pid', 'name', 'username']):
         try:
-            if proc.info['name'] in ['GGnet.exe', 'pokerok.exe']:
-                print(f"PID: {proc.info['pid']}, User: {proc.info['username']}, Name: {proc.info['name']}")
+            if proc.info['name'] in ['GGnet.exe']:
+                return
+            else:
+                application_path = r"C:\Users\Administrator\Desktop\poker0k\GGnet.exe"
+                os.startfile(application_path)
+                return
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
 
 
 if __name__ == "__main__":
-    print_non_system_processes()
+    check_ggnet_app()
