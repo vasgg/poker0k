@@ -9,7 +9,7 @@ def check_ggnet_app():
             if proc.info['name'] in ['GGnet.exe']:
                 return
             else:
-                application_path = r"C:\Users\Administrator\Desktop\poker0k\GGnet.exe"
+                application_path = "C:\\Users\\Administrator\\Desktop\\poker0k\\GGnet.exe"
                 os.startfile(application_path)
                 return
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
