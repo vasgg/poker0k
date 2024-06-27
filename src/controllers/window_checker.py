@@ -78,7 +78,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_transfer_button():
-        check_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.GREEN, tolerance=35)
+        check_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.GREEN, tolerance=45)
         if check_transfer_button:
             logger.info("Transfer button detected...")
             return True
@@ -111,7 +111,7 @@ class WindowChecker:
     async def check_close_cashier_button():
         check_close_cashier_button = pyautogui.pixelMatchesColor(*Coords.CLOSE_CASHIER_BUTTON,
                                                                  Colors.GRAY,
-                                                                 tolerance=35)
+                                                                 tolerance=50)
         if check_close_cashier_button:
             pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
             await asyncio.sleep(0.1)
