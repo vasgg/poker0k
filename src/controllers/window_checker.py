@@ -115,6 +115,7 @@ class WindowChecker:
         if check_close_cashier_button:
             pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
             await asyncio.sleep(0.1)
+            pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
             logger.info("Cashier closed...")
             return True
         logger.info("Cashier not closed after timeout...")
