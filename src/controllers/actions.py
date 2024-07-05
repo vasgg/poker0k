@@ -31,7 +31,10 @@ class Actions:
 
     @staticmethod
     async def click_nickname_section():
-        pyautogui.click(Coords.NICKNAME_SECTION)
+        # pyautogui.click(Coords.NICKNAME_SECTION)
+        mouse = Controller()
+        mouse.position = Coords.NICKNAME_SECTION
+        mouse.click(Button.left)
         logger.info("Nickname section clicked...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
