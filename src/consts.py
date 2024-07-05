@@ -20,10 +20,11 @@ class Coords:
 
 
 class Colors:
-    GREEN = 60, 131, 96
+    LIGHT_GREEN = 57, 132, 95
+    DARK_GREEN = 44, 98, 71
     GRAY = 181, 181, 181
     RUST = 152, 61, 61
     WHITE = 245, 255, 235
-    LIGHT_GREEN = 206, 234, 214
+    FINAL_GREEN = 206, 234, 214
     RED = 189, 63, 60
     MENU_RED = 89, 0, 0

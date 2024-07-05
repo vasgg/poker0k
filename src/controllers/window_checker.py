@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 import pyautogui
+
 from consts import Colors, Coords
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 class WindowChecker:
     @staticmethod
     async def check_logout() -> None:
-        check_logout = pyautogui.pixelMatchesColor(*Coords.RESTART_BUTTON, Colors.GREEN, tolerance=25)
+        check_logout = pyautogui.pixelMatchesColor(*Coords.RESTART_BUTTON, Colors.LIGHT_GREEN, tolerance=25)
         if check_logout:
             pyautogui.click(Coords.RESTART_BUTTON)
             await asyncio.sleep(1)
@@ -78,8 +79,9 @@ class WindowChecker:
 
     @staticmethod
     async def check_transfer_button():
-        check_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.GREEN, tolerance=65)
-        if check_transfer_button:
+        check_light_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.LIGHT_GREEN, tolerance=65)
+        check_dark_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.DARK_GREEN, tolerance=65)
+        if check_light_transfer_button or check_dark_transfer_button:
             logger.info("Transfer button detected...")
             return True
         logger.info("Transfer button not detected...")
@@ -87,10 +89,13 @@ class WindowChecker:
 
     @staticmethod
     async def check_transfer_confirm_button():
-        check_transfer_confirm_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_CONFIRM_BUTTON,
-                                                                    Colors.GREEN,
-                                                                    tolerance=45)
-        if check_transfer_confirm_button:
+        check_light_transfer_confirm_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_CONFIRM_BUTTON,
+                                                                          Colors.LIGHT_GREEN,
+                                                                          tolerance=45)
+        check_dark_transfer_confirm_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_CONFIRM_BUTTON,
+                                                                         Colors.DARK_GREEN,
+                                                                         tolerance=45)
+        if check_light_transfer_confirm_button or check_dark_transfer_confirm_button:
             logger.info("Transfer confirm button detected...")
             return True
         logger.info("Transfer confirm button not detected...")
@@ -99,7 +104,7 @@ class WindowChecker:
     @staticmethod
     async def check_confirm_transfer_section():
         check_transfer_section = pyautogui.pixelMatchesColor(*Coords.CONFIRM_TRANSFER_SECTION,
-                                                             Colors.LIGHT_GREEN,
+                                                             Colors.FINAL_GREEN,
                                                              tolerance=20)
         if check_transfer_section:
             logger.info("Confirm transfer section detected...")
