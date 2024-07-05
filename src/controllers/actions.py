@@ -1,10 +1,11 @@
 import asyncio
-import logging
 from datetime import datetime
+import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pyautogui
+
 from consts import Coords
 from internal import Task
 
@@ -84,10 +85,11 @@ class Actions:
         await asyncio.sleep(3)
 
     @staticmethod
-    async def take_screenshot(task: Task):
+    async def take_screenshot(task: Task, debug: bool = False):
         moscow_tz = ZoneInfo("Europe/Moscow")
         moscow_time = datetime.now(moscow_tz).strftime('%d.%m.%Y_%H.%M.%S')
-        file = f'{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png'
+        file = f'{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png' if not debug else \
+            f'debug_{task.requisite}_${task.amount}_{task.status}.png'
         screenshot = pyautogui.screenshot()
         gray_screenshot = screenshot.convert('L')
         path = Path('screenshots')

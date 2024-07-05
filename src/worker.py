@@ -60,6 +60,7 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
             await redis_client.hset("tasks", task.order_id, serialized_task)
         else:
             attempts += 1
+            await Actions.take_screenshot(task=task, debug=True)
             if await WindowChecker.check_close_cashier_button():
                 await asyncio.sleep(2)
                 await WindowChecker.check_cashier()
