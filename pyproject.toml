@@ -25,6 +25,7 @@ dependencies = [
     'tzdata>=2024.1',
     'aiohttp>=3.9.5',
     'psutil>=6.0.0',
+    'pynput>=1.7.7',
 ]
 requires-python = ">=3.11"
 

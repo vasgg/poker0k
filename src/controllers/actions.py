@@ -5,6 +5,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pyautogui
+from pynput.mouse import Button, Controller
 
 from consts import Coords
 from internal import Task
@@ -83,12 +84,12 @@ class Actions:
 
     @staticmethod
     async def click_transfer_confirm_button():
-        # pyautogui.moveTo(Coords.TRANSFER_CONFIRM_BUTTON, duration=1)
-        pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
-        await asyncio.sleep(0.1)
-        pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
-        await asyncio.sleep(1)
-        pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
+        # pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
+        # await asyncio.sleep(0.1)
+        mouse = Controller()
+        mouse.position = Coords.TRANSFER_CONFIRM_BUTTON
+        mouse.click(Button.left)
+
         logger.info("Transfer confirm button clicked...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
