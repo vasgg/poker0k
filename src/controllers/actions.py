@@ -17,14 +17,20 @@ pyautogui.FAILSAFE = False
 class Actions:
     @staticmethod
     async def click_transfer_section():
-        pyautogui.click(Coords.TRANSFER_SECTION)
+        # pyautogui.click(Coords.TRANSFER_SECTION)
+        mouse = Controller()
+        mouse.position = Coords.TRANSFER_SECTION
+        mouse.click(Button.left)
         logger.info("Transfer section clicked...")
         logger.info("Awaiting 4 seconds...")
         await asyncio.sleep(4)
 
     @staticmethod
     async def click_close_cashier_button():
-        pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
+        # pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
+        mouse = Controller()
+        mouse.position = Coords.CLOSE_CASHIER_BUTTON
+        mouse.click(Button.left)
         logger.info("Transfer section clicked...")
         logger.info("Awaiting 4 seconds...")
         await asyncio.sleep(4)
@@ -66,9 +72,14 @@ class Actions:
 
     @staticmethod
     async def tab_clicking():
-        pyautogui.click(Coords.NEXT_SECTION_BUTTON)
+        mouse = Controller()
+        mouse.position = Coords.NEXT_SECTION_BUTTON
+        mouse.click(Button.left)
+        # pyautogui.click(Coords.NEXT_SECTION_BUTTON)
         await asyncio.sleep(3)
-        pyautogui.click(Coords.HOME_SECTION_BUTTON)
+        # pyautogui.click(Coords.HOME_SECTION_BUTTON)
+        mouse.position = Coords.HOME_SECTION_BUTTON
+        mouse.click(Button.left)
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
 
