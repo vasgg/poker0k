@@ -56,7 +56,7 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
         if task.status == 1:
             await Actions.take_screenshot(task=task)
             await send_report(task=task)
-            serialized_task = json.dumps(task.dict())
+            serialized_task = json.dumps(task.model_dump())
             await redis_client.hset("tasks", task.order_id, serialized_task)
         else:
             attempts += 1
@@ -66,6 +66,9 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
                 await WindowChecker.check_cashier()
                 if await WindowChecker.check_cashier_fullscreen_button():
                     await Actions.click_transfer_section()
+            else:
+                await send_report(task=task, problem=f'Cashier dont closed after timeout. Check Cashier window.')
+                return
 
             if attempts < settings.MAX_ATTEMPTS:
                 await execute_task(task=task, redis_client=redis_client, attempts=attempts)
@@ -73,6 +76,10 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
                 await Actions.take_screenshot(task=task)
                 logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
                 await send_report(task=task)
+
+    else:
+        await send_report(task=task,
+                          problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Check Cashier window or transfer section.')
 
 
 async def main():
@@ -91,7 +98,8 @@ async def main():
         task_data = await redis_client.brpop('queue', timeout=5)
         if task_data:
             _, task_data = task_data
-            task = Task.parse_raw(task_data.decode('utf-8'))
+            task = Task.model_validate_json(task_data.decode('utf-8'))
+            # task = Task.parse_raw(task_data.decode('utf-8'))
             await execute_task(task, redis_client)
             last_activity_time = datetime.now(timezone.utc)
         last_activity_time = await check_timer(last_activity_time, start_cycle_time)

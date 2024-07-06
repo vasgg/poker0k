@@ -31,7 +31,7 @@ class Actions:
         mouse = Controller()
         mouse.position = Coords.CLOSE_CASHIER_BUTTON
         mouse.click(Button.left)
-        logger.info("Transfer section clicked...")
+        logger.info("Close cashier button clicked...")
         logger.info("Awaiting 4 seconds...")
         await asyncio.sleep(4)
 
@@ -54,12 +54,16 @@ class Actions:
 
     @staticmethod
     async def click_amount_section():
-        pyautogui.keyDown('tab')
-        pyautogui.keyUp('tab')
-        pyautogui.keyDown('tab')
-        pyautogui.keyUp('tab')
+        mouse = Controller()
+        mouse.position = Coords.AMOUNT_SECTION
+        mouse.click(Button.left)
+        # pyautogui.keyDown('tab')
+        # pyautogui.keyUp('tab')
+        # pyautogui.keyDown('tab')
+        # pyautogui.keyUp('tab')
         # pyautogui.click(Coords.AMOUNT_SECTION)
-        logger.info("Amount section clicked...")
+        # logger.info("Go to amount section with TAB...")
+        logger.info("Click to amount section...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
 
@@ -80,6 +84,7 @@ class Actions:
         # pyautogui.click(Coords.HOME_SECTION_BUTTON)
         mouse.position = Coords.HOME_SECTION_BUTTON
         mouse.click(Button.left)
+        logger.info("Tab clicking performed...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
 
@@ -92,17 +97,17 @@ class Actions:
         pyautogui.keyDown('enter')
         pyautogui.keyUp('enter')
         # pyautogui.click(Coords.TRANSFER_BUTTON)
-        logger.info("Transfer button clicked...")
+        logger.info("Go to transfer button with TAB...")
         logger.info("Awaiting 4 seconds...")
         await asyncio.sleep(4)
 
     @staticmethod
     async def click_transfer_confirm_button():
         # pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
-        # await asyncio.sleep(0.1)
         mouse = Controller()
         mouse.position = Coords.TRANSFER_CONFIRM_BUTTON
         mouse.click(Button.left)
+        await asyncio.sleep(0.1)
 
         logger.info("Transfer confirm button clicked...")
         logger.info("Awaiting 3 seconds...")

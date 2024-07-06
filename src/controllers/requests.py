@@ -10,7 +10,7 @@ from internal import Stage, Task
 logger = logging.getLogger(__name__)
 
 
-async def send_report(task: Task) -> None:
+async def send_report(task: Task, problem: str | None = None) -> None:
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
         url = settings.REPORT_PROD_ENDPOINT if settings.STAGE == Stage.PROD else settings.REPORT_DEV_ENDPOINT
@@ -20,7 +20,8 @@ async def send_report(task: Task) -> None:
             'user_id': task.user_id,
             'requisite': task.requisite,
             'amount': task.amount,
-            'status': task.status,
+            'status': task.status if not problem else 3,
+            'message': '' if not problem else problem,
         }
         headers = {'x-simpleex-sign': cryptor.encrypt(data_json)}
         text_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}'
