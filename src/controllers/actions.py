@@ -90,14 +90,17 @@ class Actions:
 
     @staticmethod
     async def click_transfer_button():
-        pyautogui.keyDown('tab')
-        pyautogui.keyUp('tab')
-        pyautogui.keyDown('tab')
-        pyautogui.keyUp('tab')
-        pyautogui.keyDown('enter')
-        pyautogui.keyUp('enter')
+        mouse = Controller()
+        mouse.position = Coords.TRANSFER_BUTTON
+        # mouse.click(Button.left)
+        # pyautogui.keyDown('tab')
+        # pyautogui.keyUp('tab')
+        # pyautogui.keyDown('tab')
+        # pyautogui.keyUp('tab')
+        # pyautogui.keyDown('enter')
+        # pyautogui.keyUp('enter')
         # pyautogui.click(Coords.TRANSFER_BUTTON)
-        logger.info("Go to transfer button with TAB...")
+        logger.info("Click to transfer button...")
         logger.info("Awaiting 4 seconds...")
         await asyncio.sleep(4)
 
