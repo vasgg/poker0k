@@ -46,8 +46,8 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
         await Actions.enter_nickname(requisite=task.requisite)
         await Actions.click_amount_section()
         await Actions.enter_amount(amount=str(task.amount))
-        if await WindowChecker.check_transfer_button():
-            await Actions.click_transfer_button()
+        # if await WindowChecker.check_transfer_button():
+        await Actions.click_transfer_button()
         if await WindowChecker.check_transfer_confirm_button():
             await Actions.click_transfer_confirm_button()
 
