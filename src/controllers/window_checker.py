@@ -104,10 +104,10 @@ class WindowChecker:
     async def check_transfer_confirm_button():
         check_light_transfer_confirm_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_CONFIRM_BUTTON,
                                                                           Colors.LIGHT_GREEN,
-                                                                          tolerance=45)
+                                                                          tolerance=65)
         check_dark_transfer_confirm_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_CONFIRM_BUTTON,
                                                                          Colors.DARK_GREEN,
-                                                                         tolerance=45)
+                                                                         tolerance=65)
         if check_light_transfer_confirm_button or check_dark_transfer_confirm_button:
             logger.info("Transfer confirm button detected...")
             return True
