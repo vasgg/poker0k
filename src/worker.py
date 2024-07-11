@@ -65,6 +65,9 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
                 await WindowChecker.check_cashier()
                 if await WindowChecker.check_cashier_fullscreen_button():
                     await Actions.click_transfer_section()
+            else:
+                await send_report(task=task, problem=f'Cashier did not closed after timeout. Check Cashier window.')
+                return
 
             if attempts < settings.MAX_ATTEMPTS:
                 await execute_task(task=task, redis_client=redis_client, attempts=attempts)
@@ -72,6 +75,12 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
                 await Actions.take_screenshot(task=task)
                 logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
                 await send_report(task=task)
+
+    else:
+        await send_report(
+            task=task,
+            problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Check Cashier window or transfer section.',
+        )
 
 
 async def main():
