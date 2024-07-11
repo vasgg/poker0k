@@ -74,7 +74,7 @@ class Actions:
         await asyncio.sleep(3)
 
     @staticmethod
-    async def tab_clicking():
+    async def sections_reclicking():
         mouse = Controller()
         mouse.position = Coords.NEXT_SECTION_BUTTON
         mouse.click(Button.left)
