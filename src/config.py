@@ -3,13 +3,17 @@ from logging.handlers import RotatingFileHandler
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from internal import Stage
+
 
 class Settings(BaseSettings):
     ENCRYPT_KEY: SecretStr
     DECRYPT_KEY: SecretStr
-    REPORT_ENDPOINT: str
+    REPORT_PROD_ENDPOINT: str
+    REPORT_DEV_ENDPOINT: str
     TEST_ENDPOINT: str
     MAX_ATTEMPTS: int
+    STAGE: Stage
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
