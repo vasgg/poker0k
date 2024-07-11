@@ -9,7 +9,7 @@ from config import get_logging_config, settings
 from controllers.actions import Actions
 from controllers.requests import send_report
 from controllers.window_checker import WindowChecker
-from task_model import Task
+from internal import Task
 
 start_cycle_time = None
 
@@ -27,8 +27,9 @@ async def check_timer(last_activity_time, start_time):
 
 async def handle_timeout():
     logging.info("Global timeout reached 50 minutes. Performing scheduled actions...")
+    await WindowChecker.check_logout()
     if await WindowChecker.check_close_cashier_button():
-        await Actions.tab_clicking()
+        await Actions.sections_reclicking()
         await WindowChecker.check_cashier()
         if await WindowChecker.check_cashier_fullscreen_button():
             await Actions.click_transfer_section()
@@ -46,8 +47,8 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
         await Actions.enter_nickname(requisite=task.requisite)
         await Actions.click_amount_section()
         await Actions.enter_amount(amount=str(task.amount))
-        if await WindowChecker.check_transfer_button():
-            await Actions.click_transfer_button()
+        # if await WindowChecker.check_transfer_button():
+        await Actions.click_transfer_button()
         if await WindowChecker.check_transfer_confirm_button():
             await Actions.click_transfer_confirm_button()
 
@@ -56,10 +57,11 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
         if task.status == 1:
             await Actions.take_screenshot(task=task)
             await send_report(task=task)
-            serialized_task = json.dumps(task.dict())
+            serialized_task = json.dumps(task.model_dump())
             await redis_client.hset("tasks", task.order_id, serialized_task)
         else:
             attempts += 1
+            await Actions.take_screenshot(task=task, debug=True)
             if await WindowChecker.check_close_cashier_button():
                 await asyncio.sleep(2)
                 await WindowChecker.check_cashier()
@@ -99,7 +101,8 @@ async def main():
         task_data = await redis_client.brpop('queue', timeout=5)
         if task_data:
             _, task_data = task_data
-            task = Task.parse_raw(task_data.decode('utf-8'))
+            task = Task.model_validate_json(task_data.decode('utf-8'))
+            # task = Task.parse_raw(task_data.decode('utf-8'))
             await execute_task(task, redis_client)
             last_activity_time = datetime.now(timezone(timedelta(hours=3)))
         last_activity_time = await check_timer(last_activity_time, start_cycle_time)
