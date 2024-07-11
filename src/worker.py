@@ -19,7 +19,7 @@ async def check_timer(last_activity_time, start_time):
     if current_time - last_activity_time >= timedelta(minutes=50):
         await handle_timeout()
         return current_time
-    if current_time - start_time >= timedelta(minutes=5):
+    if current_time - start_time >= timedelta(minutes=2):
         await handle_timeout()
         return current_time
     return last_activity_time
