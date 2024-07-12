@@ -20,8 +20,8 @@ class WindowChecker:
             mouse.click(Button.left)
             await asyncio.sleep(1)
             logger.info("Disconnected. Restart button clicked...")
-            logger.info("Connection in progress. Awaiting 15 seconds...")
-            await asyncio.sleep(15)
+            logger.info("Connection in progress. Awaiting 10 seconds...")
+            await asyncio.sleep(10)
         else:
             logger.info("Connected, continue...")
 
@@ -77,15 +77,16 @@ class WindowChecker:
             mouse.position = Coords.CASHIER_BUTTON
             mouse.click(Button.left)
             logger.info("Cashier button clicked...")
-            logger.info("Loading in progress. Awaiting 15 seconds...")
-            await asyncio.sleep(15)
+            logger.info("Loading in progress. Awaiting 8 seconds...")
+            await asyncio.sleep(8)
+            return
         logger.info("Cashier button not found...")
 
     @staticmethod
     async def check_transfer_section():
         check_transfer_section = pyautogui.pixelMatchesColor(*Coords.TRANSFER_SECTION, Colors.RED, tolerance=25)
         if check_transfer_section:
-            logger.info("We are in the transfer section. Going short path...")
+            logger.info("We are in the transfer section...")
             return True
         logger.info("We are not in the transfer section. Check cashier window and transfer section...")
         return False
@@ -158,5 +159,5 @@ class WindowChecker:
             # pyautogui.click(Coords.CASHIER_FULLSCREEN_BUTTON)
             logger.info("Cashier fullscreen toggled...")
             return True
-        logger.info("Cashier not closed...")
+        logger.info("Something went wrong...")
         return False

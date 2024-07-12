@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     REPORT_DEV_ENDPOINT: str
     TEST_ENDPOINT: str
     MAX_ATTEMPTS: int
+    # RESTART_HOUR: int
     STAGE: Stage
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')

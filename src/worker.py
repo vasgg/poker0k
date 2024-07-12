@@ -12,17 +12,34 @@ from controllers.window_checker import WindowChecker
 from internal import Task
 
 start_cycle_time = None
+last_daily_action = None
 
 
 async def check_timer(last_activity_time, start_time):
     current_time = datetime.now(timezone(timedelta(hours=3)))
+    # if current_time.hour == settings.RESTART_HOUR and current_time.minute == 0:
+    #     global last_daily_action
+    #     if last_daily_action is None or last_daily_action.date() < current_time.date():
+    #         await handle_daily_action()
+    #         last_daily_action = current_time
     if current_time - last_activity_time >= timedelta(minutes=50):
         await handle_timeout()
         return current_time
-    if current_time - start_time >= timedelta(minutes=2):
+    if current_time - start_time >= timedelta(minutes=50):
         await handle_timeout()
         return current_time
+
     return last_activity_time
+
+
+async def handle_daily_action():
+    logging.info("Performing daily actions...")
+    await WindowChecker.check_logout()
+    if await WindowChecker.check_close_cashier_button():
+        await Actions.sections_reclicking()
+        await WindowChecker.check_cashier()
+        if await WindowChecker.check_cashier_fullscreen_button():
+            await Actions.click_transfer_section()
 
 
 async def handle_timeout():

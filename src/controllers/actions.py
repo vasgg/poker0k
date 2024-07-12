@@ -54,10 +54,10 @@ class Actions:
 
     @staticmethod
     async def click_amount_section():
-        # mouse = Controller()
-        # mouse.position = Coords.AMOUNT_SECTION
-        # mouse.click(Button.left)
-        pyautogui.click(Coords.AMOUNT_SECTION)
+        mouse = Controller()
+        mouse.position = Coords.AMOUNT_SECTION
+        mouse.click(Button.left)
+        # pyautogui.click(Coords.AMOUNT_SECTION)
 
         # pyautogui.keyDown('tab')
         # pyautogui.keyUp('tab')
