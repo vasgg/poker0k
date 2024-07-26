@@ -48,8 +48,8 @@ class WindowChecker:
             mouse.click(Button.left)
             await asyncio.sleep(0.1)
             logger.info("Disconnected. Login button clicked...")
-            logger.info("Connection in progress. Awaiting 20 seconds...")
-            await asyncio.sleep(20)
+            logger.info("Connection in progress. Awaiting 5 seconds...")
+            await asyncio.sleep(5)
         else:
             logger.info("Connected, continue...")
 
@@ -152,10 +152,10 @@ class WindowChecker:
             *Coords.CASHIER_FULLSCREEN_BUTTON, Colors.MENU_RED, tolerance=25
         )
         if check_cashier_fullscreen_button:
-            await asyncio.sleep(5)
             mouse = Controller()
             mouse.position = Coords.CASHIER_FULLSCREEN_BUTTON
             mouse.click(Button.left)
+            await asyncio.sleep(1)
             # pyautogui.click(Coords.CASHIER_FULLSCREEN_BUTTON)
             logger.info("Cashier fullscreen toggled...")
             return True
