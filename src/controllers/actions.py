@@ -4,14 +4,13 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-import pyautogui
+from pyautogui import typewrite, screenshot
 from pynput.mouse import Button, Controller
 
 from consts import Coords
 from internal import Task
 
 logger = logging.getLogger(__name__)
-pyautogui.FAILSAFE = False
 
 
 class Actions:
@@ -44,7 +43,7 @@ class Actions:
 
     @staticmethod
     async def enter_nickname(requisite: str):
-        pyautogui.typewrite(requisite)
+        typewrite(requisite)
         logger.info(f'Enter nickname: {requisite}...')
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
@@ -60,7 +59,7 @@ class Actions:
 
     @staticmethod
     async def enter_amount(amount: str):
-        pyautogui.typewrite(amount)
+        typewrite(amount)
         logger.info(f'Enter amount: {amount}...')
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
@@ -105,8 +104,8 @@ class Actions:
             if not debug
             else f'debug_{task.requisite}_${task.amount}_{task.status}.png'
         )
-        screenshot = pyautogui.screenshot()
-        gray_screenshot = screenshot.convert('L')
+        scrnsht = screenshot()
+        gray_screenshot = scrnsht.convert('L')
         path = Path('screenshots')
         gray_screenshot.save(path / file)
         logger.info(f"Screenshot {file} saved...")
