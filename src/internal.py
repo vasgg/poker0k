@@ -9,6 +9,7 @@ class Task(BaseModel):
     requisite: str
     amount: float
     status: int
+    callback_url: str
 
 
 class Stage(StrEnum):
