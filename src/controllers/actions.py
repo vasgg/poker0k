@@ -17,7 +17,6 @@ pyautogui.FAILSAFE = False
 class Actions:
     @staticmethod
     async def click_transfer_section():
-        # pyautogui.click(Coords.TRANSFER_SECTION)
         mouse = Controller()
         mouse.position = Coords.TRANSFER_SECTION
         mouse.click(Button.left)
@@ -27,7 +26,6 @@ class Actions:
 
     @staticmethod
     async def click_close_cashier_button():
-        # pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
         mouse = Controller()
         mouse.position = Coords.CLOSE_CASHIER_BUTTON
         mouse.click(Button.left)
@@ -37,7 +35,6 @@ class Actions:
 
     @staticmethod
     async def click_nickname_section():
-        # pyautogui.click(Coords.NICKNAME_SECTION)
         mouse = Controller()
         mouse.position = Coords.NICKNAME_SECTION
         mouse.click(Button.left)
@@ -57,12 +54,6 @@ class Actions:
         mouse = Controller()
         mouse.position = Coords.AMOUNT_SECTION
         mouse.click(Button.left)
-        # pyautogui.keyDown('tab')
-        # pyautogui.keyUp('tab')
-        # pyautogui.keyDown('tab')
-        # pyautogui.keyUp('tab')
-        # pyautogui.click(Coords.AMOUNT_SECTION)
-        # logger.info("Go to amount section with TAB...")
         logger.info("Click to amount section...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
@@ -79,9 +70,7 @@ class Actions:
         mouse = Controller()
         mouse.position = Coords.NEXT_SECTION_BUTTON
         mouse.click(Button.left)
-        # pyautogui.click(Coords.NEXT_SECTION_BUTTON)
         await asyncio.sleep(3)
-        # pyautogui.click(Coords.HOME_SECTION_BUTTON)
         mouse.position = Coords.HOME_SECTION_BUTTON
         mouse.click(Button.left)
         logger.info("Tab clicking performed...")
@@ -90,28 +79,19 @@ class Actions:
 
     @staticmethod
     async def click_transfer_button():
-        # mouse = Controller()
-        # mouse.position = Coords.TRANSFER_BUTTON
-        # mouse.click(Button.left)
-        pyautogui.keyDown('tab')
-        pyautogui.keyUp('tab')
-        pyautogui.keyDown('tab')
-        pyautogui.keyUp('tab')
-        pyautogui.keyDown('enter')
-        pyautogui.keyUp('enter')
-        # pyautogui.click(Coords.TRANSFER_BUTTON)
-        logger.info("Go to transfer button with TAB...")
+        mouse = Controller()
+        mouse.position = Coords.TRANSFER_BUTTON
+        mouse.click(Button.left)
+        logger.info("Click transfer button...")
         logger.info("Awaiting 4 seconds...")
         await asyncio.sleep(4)
 
     @staticmethod
     async def click_transfer_confirm_button():
-        # pyautogui.click(Coords.TRANSFER_CONFIRM_BUTTON)
         mouse = Controller()
         mouse.position = Coords.TRANSFER_CONFIRM_BUTTON
         mouse.click(Button.left)
         await asyncio.sleep(0.1)
-
         logger.info("Transfer confirm button clicked...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
@@ -120,8 +100,11 @@ class Actions:
     async def take_screenshot(task: Task, debug: bool = False):
         moscow_tz = ZoneInfo("Europe/Moscow")
         moscow_time = datetime.now(moscow_tz).strftime('%d.%m.%Y_%H.%M.%S')
-        file = f'{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png' if not debug else \
-            f'debug_{task.requisite}_${task.amount}_{task.status}.png'
+        file = (
+            f'{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png'
+            if not debug
+            else f'debug_{task.requisite}_${task.amount}_{task.status}.png'
+        )
         screenshot = pyautogui.screenshot()
         gray_screenshot = screenshot.convert('L')
         path = Path('screenshots')
