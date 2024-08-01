@@ -1,16 +1,17 @@
 import asyncio
+from contextlib import asynccontextmanager
 import json
 import logging.config
-from contextlib import asynccontextmanager
 from pathlib import Path
 
-import pyautogui
-from config import get_logging_config, settings
-from controllers.crypt import Crypt
 from fastapi import FastAPI, HTTPException, Request
-from internal import Stage, Task
+import pyautogui
 from redis.asyncio import Redis
 from uvicorn import Config, Server
+
+from config import get_logging_config, settings
+from controllers.crypt import Crypt
+from internal import Stage, Task
 
 
 @asynccontextmanager
