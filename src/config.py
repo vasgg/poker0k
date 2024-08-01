@@ -1,18 +1,18 @@
 from logging.handlers import RotatingFileHandler
-
-from internal import Stage
+import sys
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from internal import Stage
 
 
 class Settings(BaseSettings):
     ENCRYPT_KEY: SecretStr
     DECRYPT_KEY: SecretStr
-    REPORT_PROD_ENDPOINT: str
-    REPORT_DEV_ENDPOINT: str
     TEST_ENDPOINT: str
     MAX_ATTEMPTS: int
     STAGE: Stage
+    # RESTART_HOUR: int
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
@@ -34,12 +34,12 @@ def get_logging_config(app_name: str):
         "disable_existing_loggers": False,
         "formatters": {
             "main": {
-                "format": "%(asctime)s.%(msecs)03d|%(levelname)s|%(module)s|%(funcName)s: %(message)s",
-                "datefmt": "%d.%m.%Y|%H:%M:%S|%z",
+                "format": "%(asctime)s.%(msecs)03d [%(levelname)8s] [%(module)s:%(funcName)s:%(lineno)d] %(message)s",
+                "datefmt": "%d.%m.%Y %H:%M:%S%z",
             },
             "errors": {
-                "format": "%(asctime)s.%(msecs)03d|%(levelname)s|%(module)s|%(funcName)s: %(message)s",
-                "datefmt": "%d.%m.%Y|%H:%M:%S|%z",
+                "format": "%(asctime)s.%(msecs)03d [%(levelname)8s] [%(module)s:%(funcName)s:%(lineno)d] %(message)s",
+                "datefmt": "%d.%m.%Y %H:%M:%S%z",
             },
         },
         "handlers": {
@@ -47,21 +47,22 @@ def get_logging_config(app_name: str):
                 "class": "logging.StreamHandler",
                 "level": "INFO",
                 "formatter": "main",
-                "stream": "ext://sys.stdout",
+                "stream": sys.stdout,
             },
             "stderr": {
                 "class": "logging.StreamHandler",
                 "level": "WARNING",
                 "formatter": "errors",
-                "stream": "ext://sys.stderr",
+                "stream": sys.stderr,
             },
             "file": {
                 "()": RotatingFileHandler,
                 "level": "INFO",
                 "formatter": "main",
-                "filename": f"logs/{app_name}.log",
+                "filename": f"logs/{app_name}_log.log",
                 "maxBytes": 500000,
                 "backupCount": 3,
+                "encoding": "utf-8",
             },
         },
         "loggers": {
