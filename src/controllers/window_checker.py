@@ -1,8 +1,7 @@
 import asyncio
 import logging
+from pyautogui import pixelMatchesColor
 from pynput.mouse import Button, Controller
-
-import pyautogui
 
 from consts import Colors, Coords
 
@@ -12,24 +11,22 @@ logger = logging.getLogger(__name__)
 class WindowChecker:
     @staticmethod
     async def check_logout() -> None:
-        check_logout = pyautogui.pixelMatchesColor(*Coords.RESTART_BUTTON, Colors.LIGHT_GREEN, tolerance=25)
+        check_logout = pixelMatchesColor(*Coords.RESTART_BUTTON, Colors.LIGHT_GREEN, tolerance=25)
         if check_logout:
-            # pyautogui.click(Coords.RESTART_BUTTON)
             mouse = Controller()
             mouse.position = Coords.RESTART_BUTTON
             mouse.click(Button.left)
             await asyncio.sleep(1)
             logger.info("Disconnected. Restart button clicked...")
-            logger.info("Connection in progress. Awaiting 15 seconds...")
-            await asyncio.sleep(15)
+            logger.info("Connection in progress. Awaiting 10 seconds...")
+            await asyncio.sleep(10)
         else:
             logger.info("Connected, continue...")
 
     @staticmethod
     async def check_ad() -> None:
-        check_ad = pyautogui.pixelMatchesColor(*Coords.CLOSE_AD_BUTTON, Colors.GRAY, tolerance=35)
+        check_ad = pixelMatchesColor(*Coords.CLOSE_AD_BUTTON, Colors.GRAY, tolerance=35)
         if check_ad:
-            # pyautogui.click(Coords.CLOSE_AD_BUTTON)
             mouse = Controller()
             mouse.position = Coords.CLOSE_AD_BUTTON
             mouse.click(Button.left)
@@ -40,24 +37,22 @@ class WindowChecker:
 
     @staticmethod
     async def check_login() -> None:
-        check_login = pyautogui.pixelMatchesColor(*Coords.LOGIN_BUTTON, Colors.RUST, tolerance=35)
+        check_login = pixelMatchesColor(*Coords.LOGIN_BUTTON, Colors.RUST, tolerance=35)
         if check_login:
-            # pyautogui.click(Coords.LOGIN_BUTTON)
             mouse = Controller()
             mouse.position = Coords.LOGIN_BUTTON
             mouse.click(Button.left)
             await asyncio.sleep(0.1)
             logger.info("Disconnected. Login button clicked...")
-            logger.info("Connection in progress. Awaiting 20 seconds...")
-            await asyncio.sleep(20)
+            logger.info("Connection in progress. Awaiting 5 seconds...")
+            await asyncio.sleep(5)
         else:
             logger.info("Connected, continue...")
 
     @staticmethod
     async def check_confirm_login():
-        check_confirm_login = pyautogui.pixelMatchesColor(*Coords.CONFIRM_LOGIN_BUTTON, Colors.RUST, tolerance=20)
+        check_confirm_login = pixelMatchesColor(*Coords.CONFIRM_LOGIN_BUTTON, Colors.RUST, tolerance=20)
         if check_confirm_login:
-            # pyautogui.click(Coords.CONFIRM_LOGIN_BUTTON)
             mouse = Controller()
             mouse.position = Coords.CONFIRM_LOGIN_BUTTON
             mouse.click(Button.left)
@@ -70,30 +65,30 @@ class WindowChecker:
 
     @staticmethod
     async def check_cashier() -> None:
-        check_cashier = pyautogui.pixelMatchesColor(*Coords.CASHIER_BUTTON, Colors.WHITE, tolerance=25)
+        check_cashier = pixelMatchesColor(*Coords.CASHIER_BUTTON, Colors.WHITE, tolerance=25)
         if check_cashier:
-            # pyautogui.click(Coords.CASHIER_BUTTON)
             mouse = Controller()
             mouse.position = Coords.CASHIER_BUTTON
             mouse.click(Button.left)
             logger.info("Cashier button clicked...")
-            logger.info("Loading in progress. Awaiting 15 seconds...")
-            await asyncio.sleep(15)
+            logger.info("Loading in progress. Awaiting 8 seconds...")
+            await asyncio.sleep(8)
+            return
         logger.info("Cashier button not found...")
 
     @staticmethod
     async def check_transfer_section():
-        check_transfer_section = pyautogui.pixelMatchesColor(*Coords.TRANSFER_SECTION, Colors.RED, tolerance=25)
+        check_transfer_section = pixelMatchesColor(*Coords.TRANSFER_SECTION, Colors.RED, tolerance=25)
         if check_transfer_section:
-            logger.info("We are in the transfer section. Going short path...")
+            logger.info("We are in the transfer section...")
             return True
         logger.info("We are not in the transfer section. Check cashier window and transfer section...")
         return False
 
     @staticmethod
     async def check_transfer_button():
-        check_light_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.LIGHT_GREEN, tolerance=65)
-        check_dark_transfer_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.DARK_GREEN, tolerance=65)
+        check_light_transfer_button = pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.LIGHT_GREEN, tolerance=65)
+        check_dark_transfer_button = pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.DARK_GREEN, tolerance=65)
         if check_light_transfer_button or check_dark_transfer_button:
             logger.info("Transfer button detected...")
             return True
@@ -102,12 +97,12 @@ class WindowChecker:
 
     @staticmethod
     async def check_transfer_confirm_button():
-        check_light_transfer_confirm_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_CONFIRM_BUTTON,
-                                                                          Colors.LIGHT_GREEN,
-                                                                          tolerance=65)
-        check_dark_transfer_confirm_button = pyautogui.pixelMatchesColor(*Coords.TRANSFER_CONFIRM_BUTTON,
-                                                                         Colors.DARK_GREEN,
-                                                                         tolerance=65)
+        check_light_transfer_confirm_button = pixelMatchesColor(
+            *Coords.TRANSFER_CONFIRM_BUTTON, Colors.LIGHT_GREEN, tolerance=65
+        )
+        check_dark_transfer_confirm_button = pixelMatchesColor(
+            *Coords.TRANSFER_CONFIRM_BUTTON, Colors.DARK_GREEN, tolerance=65
+        )
         if check_light_transfer_confirm_button or check_dark_transfer_confirm_button:
             logger.info("Transfer confirm button detected...")
             return True
@@ -116,9 +111,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_confirm_transfer_section():
-        check_transfer_section = pyautogui.pixelMatchesColor(*Coords.CONFIRM_TRANSFER_SECTION,
-                                                             Colors.FINAL_GREEN,
-                                                             tolerance=20)
+        check_transfer_section = pixelMatchesColor(*Coords.CONFIRM_TRANSFER_SECTION, Colors.FINAL_GREEN, tolerance=20)
         if check_transfer_section:
             logger.info("Confirm transfer section detected...")
             return True
@@ -127,27 +120,28 @@ class WindowChecker:
 
     @staticmethod
     async def check_close_cashier_button():
-        check_close_cashier_button = pyautogui.pixelMatchesColor(*Coords.CLOSE_CASHIER_BUTTON,
-                                                                 Colors.GRAY,
-                                                                 tolerance=50)
+        check_close_cashier_button = pixelMatchesColor(*Coords.CLOSE_CASHIER_BUTTON, Colors.GRAY, tolerance=50)
         if check_close_cashier_button:
-            pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
+            mouse = Controller()
+            mouse.position = Coords.CLOSE_CASHIER_BUTTON
+            mouse.click(Button.left)
             await asyncio.sleep(0.1)
-            # pyautogui.click(Coords.CLOSE_CASHIER_BUTTON)
-            logger.info("Cashier closed...")
+            logger.info("Close Cashier button clicked...")
             return True
         logger.info("Cashier not closed after timeout...")
         return False
 
     @staticmethod
     async def check_cashier_fullscreen_button():
-        check_cashier_fullscreen_button = pyautogui.pixelMatchesColor(*Coords.CASHIER_FULLSCREEN_BUTTON,
-                                                                      Colors.MENU_RED,
-                                                                      tolerance=25)
+        check_cashier_fullscreen_button = pixelMatchesColor(
+            *Coords.CASHIER_FULLSCREEN_BUTTON, Colors.MENU_RED, tolerance=25
+        )
         if check_cashier_fullscreen_button:
-            await asyncio.sleep(5)
-            pyautogui.click(Coords.CASHIER_FULLSCREEN_BUTTON)
+            mouse = Controller()
+            mouse.position = Coords.CASHIER_FULLSCREEN_BUTTON
+            mouse.click(Button.left)
+            await asyncio.sleep(1)
             logger.info("Cashier fullscreen toggled...")
             return True
-        logger.info("Cashier not closed...")
+        logger.info("Something went wrong...")
         return False
