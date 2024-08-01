@@ -1,9 +1,10 @@
 import asyncio
+from datetime import datetime, timedelta, timezone
 import json
 import logging.config
-from datetime import datetime, timedelta, timezone
 
 import redis.asyncio as redis
+
 from config import get_logging_config, settings
 from controllers.actions import Actions
 from controllers.requests import send_report
@@ -11,10 +12,16 @@ from controllers.window_checker import WindowChecker
 from internal import Task
 
 start_cycle_time = None
+last_daily_action = None
 
 
 async def check_timer(last_activity_time, start_time):
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(timezone(timedelta(hours=3)))
+    # if current_time.hour == settings.RESTART_HOUR and current_time.minute == 0:
+    #     global last_daily_action
+    #     if last_daily_action is None or last_daily_action.date() < current_time.date():
+    #         await handle_daily_action()
+    #         last_daily_action = current_time
     if current_time - last_activity_time >= timedelta(minutes=50):
         await handle_timeout()
         return current_time
@@ -22,6 +29,16 @@ async def check_timer(last_activity_time, start_time):
         await handle_timeout()
         return current_time
     return last_activity_time
+
+
+async def handle_daily_action():
+    logging.info("Performing daily actions...")
+    await WindowChecker.check_logout()
+    if await WindowChecker.check_close_cashier_button():
+        await Actions.tab_clicking()
+        await WindowChecker.check_cashier()
+        if await WindowChecker.check_cashier_fullscreen_button():
+            await Actions.click_transfer_section()
 
 
 async def handle_timeout():
@@ -34,7 +51,7 @@ async def handle_timeout():
             await Actions.click_transfer_section()
 
     global start_cycle_time
-    start_cycle_time = datetime.now(timezone.utc)
+    start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
 
     logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Reset global timer on 50 minutes, returning to tasks...')
 
@@ -46,7 +63,6 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
         await Actions.enter_nickname(requisite=task.requisite)
         await Actions.click_amount_section()
         await Actions.enter_amount(amount=str(task.amount))
-        # if await WindowChecker.check_transfer_button():
         await Actions.click_transfer_button()
         if await WindowChecker.check_transfer_confirm_button():
             await Actions.click_transfer_confirm_button()
@@ -67,7 +83,7 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
                 if await WindowChecker.check_cashier_fullscreen_button():
                     await Actions.click_transfer_section()
             else:
-                await send_report(task=task, problem=f'Cashier dont closed after timeout. Check Cashier window.')
+                await send_report(task=task, problem=f'Cashier did not closed after timeout. Check Cashier window.')
                 return
 
             if attempts < settings.MAX_ATTEMPTS:
@@ -78,8 +94,10 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
                 await send_report(task=task)
 
     else:
-        await send_report(task=task,
-                          problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Check Cashier window or transfer section.')
+        await send_report(
+            task=task,
+            problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Check Cashier window or transfer section.',
+        )
 
 
 async def main():
@@ -89,7 +107,7 @@ async def main():
 
     await asyncio.sleep(4)
     global start_cycle_time
-    start_cycle_time = datetime.now(timezone.utc)
+    start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
     last_activity_time = start_cycle_time
     logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Worker started, setting up global timer on 50 minutes...')
 
@@ -99,9 +117,8 @@ async def main():
         if task_data:
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode('utf-8'))
-            # task = Task.parse_raw(task_data.decode('utf-8'))
             await execute_task(task, redis_client)
-            last_activity_time = datetime.now(timezone.utc)
+            last_activity_time = datetime.now(timezone(timedelta(hours=3)))
         last_activity_time = await check_timer(last_activity_time, start_cycle_time)
 
 
