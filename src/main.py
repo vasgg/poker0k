@@ -18,6 +18,7 @@ from internal import Stage, Task
 async def lifespan(webapp: FastAPI):
     redis_client = Redis(db=10)
     try:
+        # noinspection PyUnresolvedReferences
         webapp.state.redis_client = redis_client
         yield
     finally:
@@ -41,8 +42,8 @@ async def add_task(request: Request):
             return {'status': False}
     try:
         redis_client = request.app.state.redis_client
-        await redis_client.lpush('queue', task.json())
-        logging.info(f"Task added to queue: {task.json()}")
+        await redis_client.lpush('queue', task.model_dump_json())
+        logging.info(f"Task added to queue: {task.model_dump_json()}")
         queue_length = await redis_client.llen('queue')
         logging.info(f"Current queue length: {queue_length}")
         return {'status': 'true'}
