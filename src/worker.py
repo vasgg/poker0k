@@ -57,6 +57,7 @@ async def handle_timeout():
 
 
 async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
+    await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     if await WindowChecker.check_transfer_section():
         await Actions.click_nickname_section()
