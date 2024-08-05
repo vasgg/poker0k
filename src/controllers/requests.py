@@ -27,7 +27,7 @@ async def send_report(task: Task, problem: str | None = None, retries: int = 3, 
         headers = {'x-simpleex-sign': cryptor.encrypt(data_json)}
         text_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}'
         text_not_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:'
-
+        logger.info(f'callback_url: {task.callback_url}')
         for attempt in range(retries):
             try:
                 async with session.post(task.callback_url, data=data, headers=headers) as response:
