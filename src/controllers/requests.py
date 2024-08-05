@@ -42,7 +42,7 @@ async def send_report(task: Task, problem: str | None = None, retries: int = 3, 
 
             if attempt < retries - 1:
                 await asyncio.sleep(delay)
-        logger.error(f"Failed to send report after {attempt} attempts, task id: {task.order_id} failed with error: {e}.")
+        logger.error(f"Failed to send report after {attempt} attempts, task id: {task.order_id} failed with error")
 
 
 async def send_queue_request() -> None:
