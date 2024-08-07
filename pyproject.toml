@@ -31,7 +31,9 @@ dependencies = [
 requires-python = ">=3.11"
 
 [project.scripts]
-bot-run = "main:run_main"
+run-server = "main:run_main"
+run-worker = "worker:run_main"
+run-reporter = "reporter:run_main"
 
 [tool.black]
 line-length = 120

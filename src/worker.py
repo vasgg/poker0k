@@ -123,5 +123,9 @@ async def main():
         last_activity_time = await check_timer(last_activity_time, start_cycle_time)
 
 
-if __name__ == "__main__":
+def run_main():
     asyncio.run(main())
+
+
+if __name__ == '__main__':
+    run_main()
