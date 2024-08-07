@@ -12,7 +12,11 @@ class Settings(BaseSettings):
     TEST_ENDPOINT: str
     MAX_ATTEMPTS: int
     STAGE: Stage
-    # RESTART_HOUR: int
+    DB_HOST: str
+    DB_PORT: int
+    DB_USER: str
+    DB_PASSWORD: SecretStr
+    DB_NAME: str
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', case_sensitive=False, extra='allow')
 
