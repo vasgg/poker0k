@@ -74,7 +74,8 @@ async def execute_task(task: Task, redis_client: redis, attempts: int = 0):
             await Actions.take_screenshot(task=task)
             await send_report(task=task)
             serialized_task = json.dumps(task.model_dump())
-            await redis_client.hset("tasks", task.order_id, serialized_task)
+            await redis_client.hset('tasks', task.order_id, serialized_task)
+            await redis_client.lpush('records', task.model_dump_json())
         else:
             attempts += 1
             await Actions.take_screenshot(task=task, debug=True)
@@ -110,7 +111,7 @@ async def main():
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
     last_activity_time = start_cycle_time
-    logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Worker started, setting up global timer on 50 minutes...')
+    logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Worker started...')
 
     while True:
         # noinspection PyTypeChecker
