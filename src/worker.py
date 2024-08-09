@@ -111,7 +111,7 @@ async def main():
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
     last_activity_time = start_cycle_time
-    logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Worker started...')
+    logging.info(f'{start_cycle_time.strftime("%H:%M:%S")}. Worker started, setting up global timer on 50 minutes...')
 
     while True:
         # noinspection PyTypeChecker
