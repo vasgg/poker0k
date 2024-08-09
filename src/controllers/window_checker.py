@@ -71,8 +71,8 @@ class WindowChecker:
             mouse.position = Coords.CASHIER_BUTTON
             mouse.click(Button.left)
             logger.info("Cashier button clicked...")
-            logger.info("Loading in progress. Awaiting 8 seconds...")
-            await asyncio.sleep(8)
+            logger.info("Loading in progress. Awaiting 10 seconds...")
+            await asyncio.sleep(10)
             return
         logger.info("Cashier button not found...")
 

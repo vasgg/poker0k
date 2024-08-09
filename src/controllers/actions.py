@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 class Actions:
     @staticmethod
     async def click_transfer_section():
+        logger.info("Awaiting 1 seconds...")
+        await asyncio.sleep(1)
         mouse = Controller()
         mouse.position = Coords.TRANSFER_SECTION
         mouse.click(Button.left)
         logger.info("Transfer section clicked...")
-        logger.info("Awaiting 4 seconds...")
-        await asyncio.sleep(4)
 
     @staticmethod
     async def click_close_cashier_button():
