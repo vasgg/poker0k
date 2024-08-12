@@ -24,7 +24,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.enter_amount(amount=str(task.amount).replace('.', ','))
     await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_BUTTON, 3)
     if await WindowChecker.check_transfer_confirm_button():
-        await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, 3)
+        await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, 100)
 
         #
     # if await WindowChecker.check_transfer_section():
