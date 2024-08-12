@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 class WindowChecker:
     @staticmethod
     async def check_logout() -> None:
-        check_logout = pixelMatchesColor(*Coords.RESTART_BUTTON, Colors.LIGHT_GREEN, tolerance=25)
+        check_logout = pixelMatchesColor(*Coords.RESTART_BUTTON.value, Colors.LIGHT_GREEN, tolerance=25)
         if check_logout:
             mouse = Controller()
-            mouse.position = Coords.RESTART_BUTTON
+            mouse.position = Coords.RESTART_BUTTON.value
             mouse.click(Button.left)
             await asyncio.sleep(1)
             logger.info("Disconnected. Restart button clicked...")
@@ -25,10 +25,10 @@ class WindowChecker:
 
     @staticmethod
     async def check_ad() -> None:
-        check_ad = pixelMatchesColor(*Coords.CLOSE_AD_BUTTON, Colors.GRAY, tolerance=35)
+        check_ad = pixelMatchesColor(*Coords.CLOSE_AD_BUTTON.value, Colors.GRAY, tolerance=35)
         if check_ad:
             mouse = Controller()
-            mouse.position = Coords.CLOSE_AD_BUTTON
+            mouse.position = Coords.CLOSE_AD_BUTTON.value
             mouse.click(Button.left)
             await asyncio.sleep(0.1)
             logger.info("Ad closed...")
@@ -37,10 +37,10 @@ class WindowChecker:
 
     @staticmethod
     async def check_login() -> None:
-        check_login = pixelMatchesColor(*Coords.LOGIN_BUTTON, Colors.RUST, tolerance=35)
+        check_login = pixelMatchesColor(*Coords.LOGIN_BUTTON.value, Colors.RUST, tolerance=35)
         if check_login:
             mouse = Controller()
-            mouse.position = Coords.LOGIN_BUTTON
+            mouse.position = Coords.LOGIN_BUTTON.value
             mouse.click(Button.left)
             await asyncio.sleep(0.1)
             logger.info("Disconnected. Login button clicked...")
@@ -51,10 +51,10 @@ class WindowChecker:
 
     @staticmethod
     async def check_confirm_login():
-        check_confirm_login = pixelMatchesColor(*Coords.CONFIRM_LOGIN_BUTTON, Colors.RUST, tolerance=20)
+        check_confirm_login = pixelMatchesColor(*Coords.CONFIRM_LOGIN_BUTTON.value, Colors.RUST, tolerance=20)
         if check_confirm_login:
             mouse = Controller()
-            mouse.position = Coords.CONFIRM_LOGIN_BUTTON
+            mouse.position = Coords.CONFIRM_LOGIN_BUTTON.value
             mouse.click(Button.left)
             await asyncio.sleep(1)
             logger.info("Disconnected. Confirm login button clicked...")
@@ -65,10 +65,10 @@ class WindowChecker:
 
     @staticmethod
     async def check_cashier() -> None:
-        check_cashier = pixelMatchesColor(*Coords.CASHIER_BUTTON, Colors.WHITE, tolerance=25)
+        check_cashier = pixelMatchesColor(*Coords.CASHIER_BUTTON.value, Colors.WHITE, tolerance=25)
         if check_cashier:
             mouse = Controller()
-            mouse.position = Coords.CASHIER_BUTTON
+            mouse.position = Coords.CASHIER_BUTTON.value
             mouse.click(Button.left)
             logger.info("Cashier button clicked...")
             logger.info("Loading in progress. Awaiting 8 seconds...")
@@ -78,7 +78,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_transfer_section():
-        check_transfer_section = pixelMatchesColor(*Coords.TRANSFER_SECTION, Colors.RED, tolerance=25)
+        check_transfer_section = pixelMatchesColor(*Coords.TRANSFER_SECTION.value, Colors.RED, tolerance=25)
         if check_transfer_section:
             logger.info("We are in the transfer section...")
             return True
@@ -87,8 +87,8 @@ class WindowChecker:
 
     @staticmethod
     async def check_transfer_button():
-        check_light_transfer_button = pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.LIGHT_GREEN, tolerance=65)
-        check_dark_transfer_button = pixelMatchesColor(*Coords.TRANSFER_BUTTON, Colors.DARK_GREEN, tolerance=65)
+        check_light_transfer_button = pixelMatchesColor(*Coords.TRANSFER_BUTTON.value, Colors.LIGHT_GREEN, tolerance=65)
+        check_dark_transfer_button = pixelMatchesColor(*Coords.TRANSFER_BUTTON.value, Colors.DARK_GREEN, tolerance=65)
         if check_light_transfer_button or check_dark_transfer_button:
             logger.info("Transfer button detected...")
             return True
@@ -98,10 +98,10 @@ class WindowChecker:
     @staticmethod
     async def check_transfer_confirm_button():
         check_light_transfer_confirm_button = pixelMatchesColor(
-            *Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, Colors.LIGHT_GREEN, tolerance=65
+            *Coords.ANDROID_TRANSFER_CONFIRM_BUTTON.value, Colors.LIGHT_GREEN, tolerance=65
         )
         check_dark_transfer_confirm_button = pixelMatchesColor(
-            *Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, Colors.DARK_GREEN, tolerance=65
+            *Coords.ANDROID_TRANSFER_CONFIRM_BUTTON.value, Colors.DARK_GREEN, tolerance=65
         )
         if check_light_transfer_confirm_button or check_dark_transfer_confirm_button:
             logger.info("Transfer confirm button detected...")
@@ -111,7 +111,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_confirm_transfer_section():
-        check_transfer_section = pixelMatchesColor(*Coords.ANDROID_CONFIRM_TRANSFER_SECTION, Colors.FINAL_GREEN, tolerance=20)
+        check_transfer_section = pixelMatchesColor(*Coords.ANDROID_CONFIRM_TRANSFER_SECTION.value, Colors.FINAL_GREEN, tolerance=20)
         if check_transfer_section:
             logger.info("Confirm transfer section detected...")
             return True
@@ -120,7 +120,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_close_cashier_button():
-        check_close_cashier_button = pixelMatchesColor(*Coords.CLOSE_CASHIER_BUTTON, Colors.GRAY, tolerance=50)
+        check_close_cashier_button = pixelMatchesColor(*Coords.CLOSE_CASHIER_BUTTON.value, Colors.GRAY, tolerance=50)
         if check_close_cashier_button:
             mouse = Controller()
             mouse.position = Coords.CLOSE_CASHIER_BUTTON
@@ -134,7 +134,7 @@ class WindowChecker:
     @staticmethod
     async def check_cashier_fullscreen_button():
         check_cashier_fullscreen_button = pixelMatchesColor(
-            *Coords.CASHIER_FULLSCREEN_BUTTON, Colors.MENU_RED, tolerance=25
+            *Coords.CASHIER_FULLSCREEN_BUTTON.value, Colors.MENU_RED, tolerance=25
         )
         if check_cashier_fullscreen_button:
             mouse = Controller()
@@ -148,7 +148,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_me_section_android():
-        check_me_section_android = pixelMatchesColor(*Coords.ANDROID_ME_SECTION, Colors.ANDROID_RED, tolerance=25)
+        check_me_section_android = pixelMatchesColor(*Coords.ANDROID_ME_SECTION.value, Colors.ANDROID_RED, tolerance=25)
         if check_me_section_android:
             logger.info("Me section detected...")
             return True

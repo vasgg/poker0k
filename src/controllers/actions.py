@@ -19,9 +19,9 @@ class Actions:
         if delay_before > 0:
             logger.info(f"Waiting {delay_before} seconds before clicking {coords.name}...")
             await asyncio.sleep(delay_before)
-        mouse.position = coords
+        mouse.position = coords.value
         mouse.click(Button.left)
-        logger.info(f"Mouse clicked: {coords}...")
+        logger.info(f"Mouse clicked: {coords.name}...")
         if delay_after > 0:
             logger.info(f"Waiting {delay_after} seconds after clicking {coords.name}...")
             await asyncio.sleep(delay_after)
