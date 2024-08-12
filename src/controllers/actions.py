@@ -15,6 +15,18 @@ logger = logging.getLogger(__name__)
 
 class Actions:
     @staticmethod
+    async def mouse_click(mouse: Controller, coords: Coords, delay_after: int = 0, delay_before: int = 0):
+        if delay_before > 0:
+            logger.info(f"Waiting {delay_before} seconds before clicking {coords}...")
+            await asyncio.sleep(delay_before)
+        mouse.position = coords
+        mouse.click(Button.left)
+        logger.info(f"Mouse clicked: {coords}...")
+        if delay_after > 0:
+            logger.info(f"Waiting {delay_after} seconds after clicking {coords}...")
+            await asyncio.sleep(delay_after)
+
+    @staticmethod
     async def click_transfer_section():
         mouse = Controller()
         mouse.position = Coords.TRANSFER_SECTION
@@ -92,6 +104,16 @@ class Actions:
         mouse.click(Button.left)
         await asyncio.sleep(0.1)
         logger.info("Transfer confirm button clicked...")
+        logger.info("Awaiting 3 seconds...")
+        await asyncio.sleep(3)
+
+    @staticmethod
+    async def click_me_section_android():
+        mouse = Controller()
+        mouse.position = Coords.ANDROID_ME_SECTION
+        mouse.click(Button.left)
+        await asyncio.sleep(0.1)
+        logger.info("Me section clicked...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
 
