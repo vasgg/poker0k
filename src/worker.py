@@ -24,7 +24,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.enter_amount(amount=str(task.amount).replace('.', ','))
     await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_BUTTON, 3)
     if await WindowChecker.check_transfer_confirm_button():
-        await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, 100)
+        await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, 10)
 
         #
     # if await WindowChecker.check_transfer_section():
@@ -40,9 +40,9 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
 
         if task.status == 1:
             await Actions.take_screenshot(task=task)
-            await send_report(task=task)
-            serialized_task = json.dumps(task.model_dump())
-            await redis_client.hset('tasks', task.order_id, serialized_task)
+            # await send_report(task=task)
+            # serialized_task = json.dumps(task.model_dump())
+            # await redis_client.hset('tasks', task.order_id, serialized_task)
             await redis_client.lpush('records', task.model_dump_json())
         else:
             attempts += 1

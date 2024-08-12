@@ -17,13 +17,13 @@ class Actions:
     @staticmethod
     async def mouse_click(mouse: Controller, coords: Coords, delay_after: int = 0, delay_before: int = 0):
         if delay_before > 0:
-            logger.info(f"Waiting {delay_before} seconds before clicking {coords}...")
+            logger.info(f"Waiting {delay_before} seconds before clicking {coords.name}...")
             await asyncio.sleep(delay_before)
         mouse.position = coords
         mouse.click(Button.left)
         logger.info(f"Mouse clicked: {coords}...")
         if delay_after > 0:
-            logger.info(f"Waiting {delay_after} seconds after clicking {coords}...")
+            logger.info(f"Waiting {delay_after} seconds after clicking {coords.name}...")
             await asyncio.sleep(delay_after)
 
     @staticmethod
