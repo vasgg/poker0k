@@ -16,25 +16,14 @@ from internal import Task
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
-    # if not WindowChecker.check_me_section_android():
-    #     await Actions.click_me_section_android()
+
     await Actions.mouse_click(mouse, Coords.ANDROID_NICKNAME_SECTION, 3)
     await Actions.enter_nickname(requisite=task.requisite)
     await Actions.mouse_click(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
     await Actions.enter_amount(amount=str(task.amount).replace('.', ','))
     await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_BUTTON, 3)
     if await WindowChecker.check_transfer_confirm_button():
-        await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, 10)
-
-        #
-    # if await WindowChecker.check_transfer_section():
-    #     await Actions.click_nickname_section()
-    #     await Actions.enter_nickname(requisite=task.requisite)
-    #     await Actions.click_amount_section()
-    #     await Actions.enter_amount(amount=str(task.amount))
-    #     await Actions.click_transfer_button()
-    #     if await WindowChecker.check_transfer_confirm_button():
-    #         await Actions.click_transfer_confirm_button()
+        await Actions.mouse_click(mouse, Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, 1)
 
         task.status = 1 if await WindowChecker.check_confirm_transfer_section() else 0
 
