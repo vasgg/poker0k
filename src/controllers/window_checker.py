@@ -98,10 +98,10 @@ class WindowChecker:
     @staticmethod
     async def check_transfer_confirm_button():
         check_light_transfer_confirm_button = pixelMatchesColor(
-            *Coords.TRANSFER_CONFIRM_BUTTON, Colors.LIGHT_GREEN, tolerance=65
+            *Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, Colors.LIGHT_GREEN, tolerance=65
         )
         check_dark_transfer_confirm_button = pixelMatchesColor(
-            *Coords.TRANSFER_CONFIRM_BUTTON, Colors.DARK_GREEN, tolerance=65
+            *Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, Colors.DARK_GREEN, tolerance=65
         )
         if check_light_transfer_confirm_button or check_dark_transfer_confirm_button:
             logger.info("Transfer confirm button detected...")
@@ -111,7 +111,7 @@ class WindowChecker:
 
     @staticmethod
     async def check_confirm_transfer_section():
-        check_transfer_section = pixelMatchesColor(*Coords.CONFIRM_TRANSFER_SECTION, Colors.FINAL_GREEN, tolerance=20)
+        check_transfer_section = pixelMatchesColor(*Coords.ANDROID_CONFIRM_TRANSFER_SECTION, Colors.FINAL_GREEN, tolerance=20)
         if check_transfer_section:
             logger.info("Confirm transfer section detected...")
             return True
@@ -144,4 +144,13 @@ class WindowChecker:
             logger.info("Cashier fullscreen toggled...")
             return True
         logger.info("Something went wrong...")
+        return False
+
+    @staticmethod
+    async def check_me_section_android():
+        check_me_section_android = pixelMatchesColor(*Coords.ANDROID_ME_SECTION, Colors.ANDROID_RED, tolerance=25)
+        if check_me_section_android:
+            logger.info("Me section detected...")
+            return True
+        logger.info("Me section not detected...")
         return False
