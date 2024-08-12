@@ -95,7 +95,7 @@ async def main():
     screenshots_directory = Path("screenshots")
     logs_directory.mkdir(parents=True, exist_ok=True)
     screenshots_directory.mkdir(parents=True, exist_ok=True)
-    logging_config = get_logging_config('pokerok')
+    logging_config = get_logging_config('pokerok_android')
     logging.config.dictConfig(logging_config)
     logging.info("server started...")
 
