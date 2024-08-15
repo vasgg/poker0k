@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging.config
 
 from pynput.mouse import Controller
@@ -29,24 +28,24 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
 
         if task.status == 1:
             await Actions.take_screenshot(task=task)
-            # await send_report(task=task)
+            await send_report(task=task)
             # serialized_task = json.dumps(task.model_dump())
             # await redis_client.hset('tasks', task.order_id, serialized_task)
             await redis_client.lpush('records', task.model_dump_json())
         else:
             attempts += 1
             await Actions.take_screenshot(task=task, debug=True)
-            if await WindowChecker.check_close_cashier_button():
-                await asyncio.sleep(2)
-                await WindowChecker.check_cashier()
-                if await WindowChecker.check_cashier_fullscreen_button():
-                    await Actions.click_transfer_section()
-            else:
-                await send_report(task=task, problem=f'Cashier did not closed after timeout. Check Cashier window.')
-                return
+            # if await WindowChecker.check_close_cashier_button():
+            #     await asyncio.sleep(2)
+            #     await WindowChecker.check_cashier()
+            #     if await WindowChecker.check_cashier_fullscreen_button():
+            #         await Actions.click_transfer_section()
+            # else:
+            #     await send_report(task=task, problem=f'Cashier did not closed after timeout. Check Cashier window.')
+            #     return
 
             if attempts < settings.MAX_ATTEMPTS:
-                await execute_task(task=task, redis_client=redis_client, attempts=attempts)
+                await execute_task(task=task, redis_client=redis_client, mouse=mouse, attempts=attempts)
             else:
                 await Actions.take_screenshot(task=task)
                 logging.info(f"Task {task.order_id} failed after {attempts} attempts.")

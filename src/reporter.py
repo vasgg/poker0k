@@ -34,6 +34,7 @@ class Report(Base):
     amount: Mapped[float]
     status: Mapped[int]
     callback_url: Mapped[str] = mapped_column(String(200))
+    message: Mapped[str] = mapped_column(String(200))
 
 
 async def insert_record_to_db(task: Task):
