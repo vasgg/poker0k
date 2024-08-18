@@ -20,14 +20,17 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.enter_nickname(requisite=task.requisite)
     await Actions.mouse_click_on_const(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
     await Actions.enter_amount(amount=str(task.amount).replace('.', ','))
+    await asyncio.sleep(1)
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT,
                                                         Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
     if transfer_button:
-        await Actions.mouse_click_on_finded(mouse, transfer_button, 'TRANSFER')
+        print(transfer_button)
+        await Actions.mouse_click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
     transfer_confirm_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
     if transfer_confirm_button:
-        await Actions.mouse_click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM')
+        print(transfer_confirm_button)
+        await Actions.mouse_click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
 
     # await Actions.mouse_click_on_const(mouse, Coords.ANDROID_TRANSFER_BUTTON, 3)
     # if await WindowChecker.check_transfer_confirm_button():
