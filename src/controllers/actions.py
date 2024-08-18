@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pyautogui import typewrite, screenshot
+from pyautogui import typewrite, screenshot, press
 from pynput.mouse import Button, Controller
 
 from consts import Coords
@@ -38,6 +38,7 @@ class Actions:
 
     @staticmethod
     async def enter_nickname(requisite: str):
+        press("backspace", presses=30)
         typewrite(requisite)
         logger.info(f'Enter nickname: {requisite}...')
         logger.info("Awaiting 3 seconds...")
@@ -45,6 +46,7 @@ class Actions:
 
     @staticmethod
     async def enter_amount(amount: str):
+        press("backspace", presses=6)
         typewrite(amount)
         logger.info(f'Enter amount: {amount}...')
         logger.info("Awaiting 3 seconds...")
@@ -55,11 +57,12 @@ class Actions:
         return all(abs(pixel[i] - color[i]) / color[i] <= tolerance_percent / 100 for i in range(3) if color[i] != 0)
 
     @staticmethod
-    async def find_color_square(image, color=(0, 128, 0), square_size=11, tolerance_percent=0) -> tuple[int, int] | None:
+    async def find_color_square(image, color=(0, 128, 0), tolerance_percent=0) -> tuple[int, int] | None:
+        size = 11
         width, height = image.size
         pixels = image.load()
 
-        half_square = square_size // 2
+        half_square = size // 2
 
         for x in range(half_square, width - half_square):
             for y in range(half_square, height - half_square):

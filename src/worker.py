@@ -24,11 +24,15 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller):
     transfer_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
+    else:
+        logging.info(f"Task {task.order_id} failed... Can't find transfer button")
 
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_confirm_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
+    else:
+        logging.info(f"Task {task.order_id} failed... Can't find transfer confirm button")
 
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_confirm_section = await Actions.find_color_square(image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10)
@@ -39,7 +43,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller):
         await redis_client.lpush('records', task.model_dump_json())
     else:
         await Actions.take_screenshot(task=task, debug=True)
-        logging.info(f"Task {task.order_id} failed...")
+        logging.info(f"Task {task.order_id} failed... Can't find transfer confirm section")
 
 
 
