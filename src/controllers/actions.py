@@ -34,6 +34,7 @@ class Actions:
         mouse.position = pixel
         mouse.click(Button.left)
         logger.info(f"Mouse clicked on finded button: {label}...")
+        await asyncio.sleep(2)
 
     @staticmethod
     async def enter_nickname(requisite: str):
