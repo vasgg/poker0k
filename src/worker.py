@@ -12,27 +12,36 @@ from controllers.window_checker import WindowChecker
 from internal import Task
 
 
-async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
+async def execute_task(task: Task, redis_client: redis, mouse: Controller):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
-
-    await Actions.mouse_click_on_const(mouse, Coords.ANDROID_NICKNAME_SECTION, 3)
+    await Actions.click_on_const(mouse, Coords.ANDROID_NICKNAME_SECTION, 3)
     await Actions.enter_nickname(requisite=task.requisite)
-    await Actions.mouse_click_on_const(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
+    await Actions.click_on_const(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
     await Actions.enter_amount(amount=str(task.amount).replace('.', ','))
-    await asyncio.sleep(1)
-    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT,
-                                                        Actions.WORKSPACE_BOTTOM_RIGHT)
+
+    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
     if transfer_button:
-        print(transfer_button)
-        await Actions.mouse_click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
-    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT,
-                                                        Actions.WORKSPACE_BOTTOM_RIGHT)
+        await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
+
+    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_confirm_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
     if transfer_confirm_button:
-        print(transfer_confirm_button)
-        await Actions.mouse_click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
+        await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
+
+    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
+    transfer_confirm_section = await Actions.find_color_square(image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10)
+    task.status = 1 if transfer_confirm_section else 0
+    if task.status == 1:
+        await Actions.take_screenshot(task=task)
+        await send_report(task=task)
+        await redis_client.lpush('records', task.model_dump_json())
+    else:
+        await Actions.take_screenshot(task=task, debug=True)
+        logging.info(f"Task {task.order_id} failed...")
+
+
 
     # await Actions.mouse_click_on_const(mouse, Coords.ANDROID_TRANSFER_BUTTON, 3)
     # if await WindowChecker.check_transfer_confirm_button():

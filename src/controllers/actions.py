@@ -18,7 +18,7 @@ class Actions:
     WORKSPACE_BOTTOM_RIGHT = 1385, 750
 
     @staticmethod
-    async def mouse_click_on_const(mouse: Controller, coords: Coords, delay_after: int = 0, delay_before: int = 0):
+    async def click_on_const(mouse: Controller, coords: Coords, delay_after: int = 0, delay_before: int = 0):
         if delay_before > 0:
             logger.info(f"Waiting {delay_before} seconds before clicking {coords.name.replace('_', ' ')}...")
             await asyncio.sleep(delay_before)
@@ -30,7 +30,7 @@ class Actions:
             await asyncio.sleep(delay_after)
 
     @staticmethod
-    async def mouse_click_on_finded(mouse: Controller, pixel: tuple[int, int], label: str):
+    async def click_on_finded(mouse: Controller, pixel: tuple[int, int], label: str):
         mouse.position = pixel
         mouse.click(Button.left)
         logger.info(f"Mouse clicked on finded button: {label}...")
