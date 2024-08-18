@@ -11,7 +11,7 @@ from uvicorn import Config, Server
 
 from config import get_logging_config, settings
 from controllers.crypt import Crypt
-from internal import Stage, Task
+from internal import Stage, Step, Task
 
 
 @asynccontextmanager
@@ -41,11 +41,14 @@ async def add_task(request: Request):
         if task_dict != data or task.status != 0:
             return {'status': False}
     try:
+        task.step = Step.ACCEPTED
         redis_client = request.app.state.redis_client
         await redis_client.lpush('queue', task.model_dump_json())
+        await redis_client.lpush('reports', task.model_dump_json())
         logging.info(f"Task added to queue: {task.model_dump_json()}")
         queue_length = await redis_client.llen('queue')
-        logging.info(f"Current queue length: {queue_length}")
+        reports_length = await redis_client.llen('reports')
+        logging.info(f"Current queue lengths: {queue_length=}, {reports_length=}")
         return {'status': 'true'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
