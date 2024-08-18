@@ -38,21 +38,19 @@ class Report(Base):
     step: Mapped[Step]
 
 
-async def insert_record_to_db(task: Task) -> None:
+async def insert_record_to_db(task: Task, db_session) -> None:
     try:
-        async with AsyncSessionLocal() as db_session:
-            async with db_session.begin():
-                record = Report(
-                    order_id=task.order_id,
-                    user_id=task.user_id,
-                    requisite=task.requisite,
-                    amount=task.amount,
-                    status=task.status,
-                    callback_url=task.callback_url,
-                    step=task.step
-                )
-                db_session.add(record)
-                await db_session.flush()
+        record = Report(
+            order_id=task.order_id,
+            user_id=task.user_id,
+            requisite=task.requisite,
+            amount=task.amount,
+            status=task.status,
+            callback_url=task.callback_url,
+            step=task.step
+        )
+        db_session.add(record)
+        await db_session.flush()
         logging.info(f"Record {record.id} inserted successfully. Task id: {task.order_id}, requisite: {task.requisite}, amount: {task.amount}")
     except Exception as e:
         logging.exception(f"Error interacting with the database: {e}")
@@ -69,12 +67,14 @@ async def main():
     redis_client = redis.Redis(db=10)
     logging.info('Reporter started...')
     while True:
-        # noinspection PyTypeChecker
-        record_data = await redis_client.brpop('records', timeout=5)
-        if record_data:
-            _, record_data = record_data
-            record = Task.model_validate_json(record_data.decode('utf-8'))
-            await insert_record_to_db(record)
+        async with AsyncSessionLocal() as db_session:
+            async with db_session.begin():
+                # noinspection PyTypeChecker
+                record_data = await redis_client.brpop('records', timeout=5)
+                if record_data:
+                    _, record_data = record_data
+                    record = Task.model_validate_json(record_data.decode('utf-8'))
+                    await insert_record_to_db(record, db_session)
 
 
 def run_main():
