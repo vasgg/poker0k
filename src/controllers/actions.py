@@ -14,58 +14,31 @@ logger = logging.getLogger(__name__)
 
 
 class Actions:
+    WORKSPACE_TOP_LEFT = 1270, 290
+    WORKSPACE_BOTTOM_RIGHT = 1385, 750
+
     @staticmethod
-    async def mouse_click(mouse: Controller, coords: Coords, delay_after: int = 0, delay_before: int = 0):
+    async def mouse_click_on_const(mouse: Controller, coords: Coords, delay_after: int = 0, delay_before: int = 0):
         if delay_before > 0:
-            logger.info(f"Waiting {delay_before} seconds before clicking {coords.name}...")
+            logger.info(f"Waiting {delay_before} seconds before clicking {coords.name.replace('_', ' ')}...")
             await asyncio.sleep(delay_before)
         mouse.position = coords.value
         mouse.click(Button.left)
         logger.info(f"Mouse clicked: {coords.name}...")
         if delay_after > 0:
-            logger.info(f"Waiting {delay_after} seconds after clicking {coords.name}...")
+            logger.info(f"Waiting {delay_after} seconds after clicking {coords.name.replace('_', ' ')}...")
             await asyncio.sleep(delay_after)
 
     @staticmethod
-    async def click_transfer_section():
-        mouse = Controller()
-        mouse.position = Coords.TRANSFER_SECTION
+    async def mouse_click_on_finded(mouse: Controller, pixel: tuple[int, int], label: str):
+        mouse.position = pixel
         mouse.click(Button.left)
-        logger.info("Transfer section clicked...")
-        logger.info("Awaiting 4 seconds...")
-        await asyncio.sleep(4)
-
-    @staticmethod
-    async def click_close_cashier_button():
-        mouse = Controller()
-        mouse.position = Coords.CLOSE_CASHIER_BUTTON
-        mouse.click(Button.left)
-        logger.info("Close cashier button clicked...")
-        logger.info("Awaiting 4 seconds...")
-        await asyncio.sleep(4)
-
-    @staticmethod
-    async def click_nickname_section():
-        mouse = Controller()
-        mouse.position = Coords.NICKNAME_SECTION
-        mouse.click(Button.left)
-        logger.info("Nickname section clicked...")
-        logger.info("Awaiting 3 seconds...")
-        await asyncio.sleep(3)
+        logger.info(f"Mouse clicked on finded button: {label}...")
 
     @staticmethod
     async def enter_nickname(requisite: str):
         typewrite(requisite)
         logger.info(f'Enter nickname: {requisite}...')
-        logger.info("Awaiting 3 seconds...")
-        await asyncio.sleep(3)
-
-    @staticmethod
-    async def click_amount_section():
-        mouse = Controller()
-        mouse.position = Coords.AMOUNT_SECTION
-        mouse.click(Button.left)
-        logger.info("Click to amount section...")
         logger.info("Awaiting 3 seconds...")
         await asyncio.sleep(3)
 
@@ -77,45 +50,42 @@ class Actions:
         await asyncio.sleep(3)
 
     @staticmethod
-    async def tab_clicking():
-        mouse = Controller()
-        mouse.position = Coords.NEXT_SECTION_BUTTON
-        mouse.click(Button.left)
-        await asyncio.sleep(3)
-        mouse.position = Coords.HOME_SECTION_BUTTON
-        mouse.click(Button.left)
-        logger.info("Tab clicking performed...")
-        logger.info("Awaiting 3 seconds...")
-        await asyncio.sleep(3)
+    def is_color_match(pixel, color, tolerance_percent):
+        return all(abs(pixel[i] - color[i]) / color[i] <= tolerance_percent / 100 for i in range(3) if color[i] != 0)
 
     @staticmethod
-    async def click_transfer_button():
-        mouse = Controller()
-        mouse.position = Coords.TRANSFER_BUTTON
-        mouse.click(Button.left)
-        logger.info("Click transfer button...")
-        logger.info("Awaiting 4 seconds...")
-        await asyncio.sleep(4)
+    async def find_color_square(image, color=(0, 128, 0), square_size=11, tolerance_percent=0) -> tuple[int, int] | None:
+        width, height = image.size
+        pixels = image.load()
+
+        half_square = square_size // 2
+
+        for x in range(half_square, width - half_square):
+            for y in range(half_square, height - half_square):
+                matched = True
+                for dx in range(-half_square, half_square + 1):
+                    for dy in range(-half_square, half_square + 1):
+                        if not Actions.is_color_match(pixels[x + dx, y + dy][:3], color, tolerance_percent):
+                            matched = False
+                            break
+                    if not matched:
+                        break
+                if matched:
+                    del image
+                    absolute_coords = Actions.WORKSPACE_TOP_LEFT[0] + x, Actions.WORKSPACE_BOTTOM_RIGHT[1] + y
+                    return absolute_coords
+        del image
+        return None
 
     @staticmethod
-    async def click_transfer_confirm_button():
-        mouse = Controller()
-        mouse.position = Coords.TRANSFER_CONFIRM_BUTTON
-        mouse.click(Button.left)
-        await asyncio.sleep(0.1)
-        logger.info("Transfer confirm button clicked...")
-        logger.info("Awaiting 3 seconds...")
-        await asyncio.sleep(3)
-
-    @staticmethod
-    async def click_me_section_android():
-        mouse = Controller()
-        mouse.position = Coords.ANDROID_ME_SECTION
-        mouse.click(Button.left)
-        await asyncio.sleep(0.1)
-        logger.info("Me section clicked...")
-        logger.info("Awaiting 3 seconds...")
-        await asyncio.sleep(3)
+    async def take_screenshot_of_region(top_left: tuple, bottom_right: tuple):
+        x1, y1 = top_left
+        x2, y2 = bottom_right
+        width = x2 - x1
+        height = y2 - y1
+        region = (x1, y1, width, height)
+        scrnsht = screenshot(region=region)
+        return scrnsht
 
     @staticmethod
     async def take_screenshot(task: Task, debug: bool = False):
