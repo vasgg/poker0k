@@ -8,7 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import DateTime, String, func
 
 from config import get_logging_config, settings
-from internal import Task
+from internal import Step, Task
 
 DB_URL = f"mysql+aiomysql://{settings.DB_USER}:{settings.DB_PASSWORD.get_secret_value()}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
 engine = create_async_engine(DB_URL, echo=True)
@@ -34,10 +34,11 @@ class Report(Base):
     amount: Mapped[float]
     status: Mapped[int]
     callback_url: Mapped[str] = mapped_column(String(200))
-    message: Mapped[str] = mapped_column(String(200))
+    message: Mapped[str | None] = mapped_column(String(200))
+    step: Mapped[Step]
 
 
-async def insert_record_to_db(task: Task):
+async def insert_record_to_db(task: Task) -> None:
     try:
         async with AsyncSessionLocal() as db_session:
             async with db_session.begin():
@@ -47,7 +48,8 @@ async def insert_record_to_db(task: Task):
                     requisite=task.requisite,
                     amount=task.amount,
                     status=task.status,
-                    callback_url=task.callback_url
+                    callback_url=task.callback_url,
+                    step=task.step
                 )
                 db_session.add(record)
                 await db_session.flush()
