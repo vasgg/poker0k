@@ -8,11 +8,10 @@ from config import get_logging_config, settings
 from consts import Colors, Coords
 from controllers.actions import Actions
 from controllers.requests import send_report
-from controllers.window_checker import WindowChecker
-from internal import Task
+from internal import Step, Task
 
 
-async def execute_task(task: Task, redis_client: redis, mouse: Controller):
+async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     await Actions.click_on_const(mouse, Coords.ANDROID_NICKNAME_SECTION, 3)
@@ -38,42 +37,27 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller):
     transfer_confirm_section = await Actions.find_color_square(image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10)
     task.status = 1 if transfer_confirm_section else 0
     if task.status == 1:
+        task.step = Step.PROCESSED
+        await redis_client.lpush('reports', task.model_dump_json())
         await Actions.take_screenshot(task=task)
-        await send_report(task=task)
-        await redis_client.lpush('records', task.model_dump_json())
+        await send_report(task=task, redis_client=redis_client)
     else:
+        task.step = Step.FAILED
+        await redis_client.lpush('reports', task.model_dump_json())
+        attempts += 1
         await Actions.take_screenshot(task=task, debug=True)
         logging.info(f"Task {task.order_id} failed... Can't find transfer confirm section")
+        if attempts < settings.MAX_ATTEMPTS:
+            await execute_task(task=task, redis_client=redis_client, mouse=mouse, attempts=attempts)
+        else:
+            await Actions.take_screenshot(task=task)
+            logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
+            await send_report(
+                task=task,
+                redis_client=redis_client,
+                problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Please check the app...',
+            )
 
-
-
-    # await Actions.mouse_click_on_const(mouse, Coords.ANDROID_TRANSFER_BUTTON, 3)
-    # if await WindowChecker.check_transfer_confirm_button():
-    #     await Actions.mouse_click_on_const(mouse, Coords.ANDROID_TRANSFER_CONFIRM_BUTTON, 2)
-    #
-    #     task.status = 1 if await WindowChecker.check_confirm_transfer_section() else 0
-    #
-    #     if task.status == 1:
-    #         await Actions.take_screenshot(task=task)
-    #         await send_report(task=task)
-    #         await redis_client.lpush('records', task.model_dump_json())
-    #     else:
-    #         attempts += 1
-    #         await Actions.take_screenshot(task=task, debug=True)
-    #
-    #         if attempts < settings.MAX_ATTEMPTS:
-    #             await execute_task(task=task, redis_client=redis_client, mouse=mouse, attempts=attempts)
-    #         else:
-    #             await Actions.take_screenshot(task=task)
-    #             logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
-    #             await send_report(task=task)
-    #
-    # else:
-    #     await send_report(
-    #         task=task,
-    #         problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Check Cashier window or transfer section.',
-    #     )
-    #
 
 async def main():
     redis_client = redis.Redis(db=10)
