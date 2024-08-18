@@ -27,6 +27,8 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     if transfer_button:
         print(transfer_button)
         await Actions.mouse_click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
+    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT,
+                                                        Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_confirm_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
     if transfer_confirm_button:
         print(transfer_confirm_button)
