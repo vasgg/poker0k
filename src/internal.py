@@ -18,7 +18,7 @@ class Task(BaseModel):
     amount: float
     status: int
     callback_url: str
-    step: Step | None
+    step: Step | None = None
 
 
 class Stage(StrEnum):
