@@ -6,12 +6,13 @@ import aiohttp
 
 from config import settings
 from controllers.crypt import Crypt
-from internal import Task
+from internal import Step, Task
+from redis.asyncio import Redis
 
 logger = logging.getLogger(__name__)
 
 
-async def send_report(task: Task, problem: str | None = None, retries: int = 3, delay: int = 3) -> None:
+async def send_report(task: Task, redis_client: Redis, problem: str | None = None, retries: int = 3, delay: int = 3) -> None:
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
         data_json = task.model_dump_json()
@@ -32,9 +33,13 @@ async def send_report(task: Task, problem: str | None = None, retries: int = 3, 
             try:
                 async with session.post(task.callback_url, data=data, headers=headers) as response:
                     if response.status == HTTPStatus.OK:
+                        task.step = Step.REPORTED
+                        await redis_client.lpush('reports', task.model_dump_json())
                         logger.info(text_ok)
                         return
                     else:
+                        task.step = Step.REPORT_FAILED
+                        await redis_client.lpush('reports', task.model_dump_json())
                         error_text = await response.text()
                         logger.info(f"{text_not_ok} {response.status}. {error_text}")
             except Exception as e:
