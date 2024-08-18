@@ -63,10 +63,10 @@ async def main():
     redis_client = redis.Redis(db=10)
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
+    logging.info(f'Worker started...')
     mouse = Controller()
 
     await asyncio.sleep(4)
-    logging.info(f'Worker started...')
 
     while True:
         # noinspection PyTypeChecker
