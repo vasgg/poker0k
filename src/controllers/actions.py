@@ -38,7 +38,7 @@ class Actions:
 
     @staticmethod
     async def enter_nickname(requisite: str):
-        press("backspace", presses=30)
+        press("backspace", presses=30, interval=0.05)
         typewrite(requisite)
         logger.info(f'Enter nickname: {requisite}...')
         logger.info("Awaiting 3 seconds...")
@@ -46,7 +46,7 @@ class Actions:
 
     @staticmethod
     async def enter_amount(amount: str):
-        press("backspace", presses=6)
+        press("backspace", presses=6, interval=0.05)
         typewrite(amount)
         logger.info(f'Enter amount: {amount}...')
         logger.info("Awaiting 3 seconds...")
