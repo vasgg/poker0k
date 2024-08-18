@@ -72,7 +72,7 @@ class Actions:
                         break
                 if matched:
                     del image
-                    absolute_coords = Actions.WORKSPACE_TOP_LEFT[0] + x, Actions.WORKSPACE_BOTTOM_RIGHT[1] + y
+                    absolute_coords = Actions.WORKSPACE_TOP_LEFT[0] + x, Actions.WORKSPACE_TOP_LEFT[1] + y
                     return absolute_coords
         del image
         return None
