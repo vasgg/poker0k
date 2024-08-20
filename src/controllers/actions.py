@@ -38,7 +38,7 @@ class Actions:
 
     @staticmethod
     async def input_value(value: str):
-        hotkey('ctrl', 'a')
+        hotkey('ctrlleft', 'a')
         typewrite(value)
         logger.info(f'Input value: {value}... Awaiting 3 seconds...')
 
