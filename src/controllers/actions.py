@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pyautogui import typewrite, screenshot, press
+from pyautogui import hotkey, typewrite, screenshot, press
 from pynput.mouse import Button, Controller
 
 from consts import Coords
@@ -38,8 +38,7 @@ class Actions:
 
     @staticmethod
     async def input_value(value: str):
-        press("end")
-        press("backspace", presses=40, interval=0.05)
+        hotkey('ctrl', 'a')
         typewrite(value)
         logger.info(f'Input value: {value}... Awaiting 3 seconds...')
 
