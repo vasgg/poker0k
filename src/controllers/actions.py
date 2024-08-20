@@ -37,20 +37,11 @@ class Actions:
         await asyncio.sleep(2)
 
     @staticmethod
-    async def enter_nickname(requisite: str):
-        press("backspace", presses=30, interval=0.05)
-        typewrite(requisite)
-        logger.info(f'Enter nickname: {requisite}...')
-        logger.info("Awaiting 3 seconds...")
-        await asyncio.sleep(3)
-
-    @staticmethod
-    async def enter_amount(amount: str):
-        press("backspace", presses=6, interval=0.05)
-        typewrite(amount)
-        logger.info(f'Enter amount: {amount}...')
-        logger.info("Awaiting 3 seconds...")
-        await asyncio.sleep(3)
+    async def input_value(value: str):
+        press("end")
+        press("backspace", presses=40, interval=0.05)
+        typewrite(value)
+        logger.info(f'Input value: {value}... Awaiting 3 seconds...')
 
     @staticmethod
     def is_color_match(pixel, color, tolerance_percent):
