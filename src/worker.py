@@ -17,7 +17,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.click_on_const(mouse, Coords.ANDROID_NICKNAME_SECTION, 3)
     await Actions.input_value(value=task.requisite)
     await Actions.click_on_const(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
-    await Actions.input_value(value=str(task.amount).replace('.', ','))
+    await Actions.input_value(value=str(1.0).replace('.', ','))
 
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
