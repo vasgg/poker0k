@@ -21,14 +21,14 @@ async def send_report(task: Task, redis_client: Redis, problem: str | None = Non
             'user_id': task.user_id,
             'requisite': task.requisite,
             'amount': task.amount,
-            'status': task.status if not problem else 3,
+            'status': task.status if not problem else 2,
             'message': '' if not problem else problem,
             'callback_url': task.callback_url,
+            'step': task.step,
         }
         headers = {'x-simpleex-sign': cryptor.encrypt(data_json)}
         text_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}'
         text_not_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:'
-        logger.info(f'callback_url: {task.callback_url}')
         for attempt in range(retries):
             try:
                 async with session.post(task.callback_url, data=data, headers=headers) as response:
