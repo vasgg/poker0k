@@ -43,11 +43,11 @@ async def send_report(task: Task, redis_client: Redis, problem: str | None = Non
                         error_text = await response.text()
                         logger.info(f"{text_not_ok} {response.status}. {error_text}")
             except Exception as e:
-                logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+                logger.exception(f"Attempt {attempt + 1} failed with error: {e}")
 
             if attempt < retries - 1:
                 await asyncio.sleep(delay)
-    logger.error(f"Failed to send report after {retries} attempts, task id: {task.order_id} failed with error")
+    logger.exception(f"Failed to send report after {retries} attempts, task id: {task.order_id} failed with error")
 
 
 async def send_queue_request() -> None:
