@@ -111,7 +111,9 @@ class WindowChecker:
 
     @staticmethod
     async def check_confirm_transfer_section():
-        check_transfer_section = pixelMatchesColor(*Coords.ANDROID_CONFIRM_TRANSFER_SECTION.value, Colors.FINAL_GREEN, tolerance=30)
+        check_transfer_section = pixelMatchesColor(
+            *Coords.ANDROID_CONFIRM_TRANSFER_SECTION.value, Colors.FINAL_GREEN, tolerance=30
+        )
         if check_transfer_section:
             logger.info("Confirm transfer section detected...")
             return True

@@ -12,7 +12,9 @@ from redis.asyncio import Redis
 logger = logging.getLogger(__name__)
 
 
-async def send_report(task: Task, redis_client: Redis, problem: str | None = None, retries: int = 3, delay: int = 3) -> None:
+async def send_report(
+    task: Task, redis_client: Redis, problem: str | None = None, retries: int = 3, delay: int = 3
+) -> None:
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
         data_json = task.model_dump_json()
@@ -28,7 +30,9 @@ async def send_report(task: Task, redis_client: Redis, problem: str | None = Non
         }
         headers = {'x-simpleex-sign': cryptor.encrypt(data_json)}
         text_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}'
-        text_not_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:'
+        text_not_ok = (
+            f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:'
+        )
         for attempt in range(retries):
             try:
                 async with session.post(task.callback_url, data=data, headers=headers) as response:

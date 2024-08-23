@@ -47,11 +47,13 @@ async def insert_record_to_db(task: Task, db_session) -> None:
             amount=task.amount,
             status=task.status,
             callback_url=task.callback_url,
-            step=task.step
+            step=task.step,
         )
         db_session.add(record)
         await db_session.flush()
-        logging.info(f"Record {record.id} commited. Task id: {task.order_id}, requisite: {task.requisite}, amount: {task.amount}, step: {task.step}")
+        logging.info(
+            f"Record {record.id} commited. Task id: {task.order_id}, requisite: {task.requisite}, amount: {task.amount}, step: {task.step}"
+        )
     except Exception as e:
         logging.exception(f"Error interacting with the database: {e}")
 

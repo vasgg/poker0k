@@ -1,4 +1,5 @@
 import asyncio
+from datetime import timedelta, timezone, datetime
 import logging.config
 
 from pynput.mouse import Controller
@@ -9,6 +10,40 @@ from consts import Colors, Coords
 from controllers.actions import Actions
 from controllers.requests import send_report
 from internal import Step, Task
+
+
+start_cycle_time = None
+
+
+async def check_timer(last_activity_time, start_time, mouse: Controller):
+    current_time = datetime.now(timezone(timedelta(hours=3)))
+    if current_time - last_activity_time >= timedelta(minutes=2):
+        await handle_timeout(mouse)
+        return current_time
+    if current_time - start_time >= timedelta(minutes=50):
+        await handle_timeout(mouse)
+        return current_time
+    return last_activity_time
+
+
+async def handle_timeout(mouse: Controller):
+    logging.info("Global timeout reached 23 hours. Performing scheduled actions...")
+    await Actions.click_on_const(mouse, Coords.ANDROID_CLOSE_EMULATOR_BUTTON)
+    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
+    transfer_button = await Actions.find_color_square(
+        image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=10
+    )
+    if transfer_button:
+        await Actions.click_on_finded(mouse, transfer_button, 'CONFIRM EXIT BUTTON')
+    else:
+        logging.info("Error. Can't find CONFIRM EXIT BUTTON")
+    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
+    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
+    await asyncio.sleep(13)
+
+    global start_cycle_time
+    start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
+    logging.info('Reset global timer on 23 hours, returning to tasks...')
 
 
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
@@ -27,14 +62,18 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         logging.info(f"Task {task.order_id} failed... Can't find transfer button")
 
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
-    transfer_confirm_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
+    transfer_confirm_button = await Actions.find_color_square(
+        image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10
+    )
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed... Can't find transfer confirm button")
 
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
-    transfer_confirm_section = await Actions.find_color_square(image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10)
+    transfer_confirm_section = await Actions.find_color_square(
+        image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10
+    )
     task.status = 1 if transfer_confirm_section else 0
     if task.status == 1:
         task.step = Step.PROCESSED
@@ -63,10 +102,12 @@ async def main():
     redis_client = redis.Redis(db=10)
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
-    logging.info(f'Worker started...')
+    logging.info(f'Worker started... Restart after 23 hours...')
     mouse = Controller()
-
     await asyncio.sleep(4)
+    global start_cycle_time
+    start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
+    last_activity_time = start_cycle_time
 
     while True:
         # noinspection PyTypeChecker
@@ -75,6 +116,8 @@ async def main():
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode('utf-8'))
             await execute_task(task, redis_client, mouse)
+            last_activity_time = datetime.now(timezone(timedelta(hours=3)))
+        last_activity_time = await check_timer(last_activity_time, start_cycle_time, mouse)
 
 
 def run_main():
