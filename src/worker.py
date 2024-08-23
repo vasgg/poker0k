@@ -29,6 +29,7 @@ async def check_timer(last_activity_time, start_time, mouse: Controller):
 async def handle_timeout(mouse: Controller):
     logging.info("Global timeout reached 23 hours. Performing scheduled actions...")
     await Actions.click_on_const(mouse, Coords.ANDROID_CLOSE_EMULATOR_BUTTON)
+    await asyncio.sleep(3)
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_button = await Actions.find_color_square(
         image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=10

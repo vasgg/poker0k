@@ -38,7 +38,7 @@ def get_logging_config(app_name: str):
         "disable_existing_loggers": False,
         "formatters": {
             "main": {
-                "format": "%(asctime)s [%(funcName)s:%(lineno)d] %(message)s",
+                "format": "%(asctime)s [%(funcName)15s:%(lineno)d] %(message)s",
                 "datefmt": "%d.%m.%Y %H:%M:%S",
             },
             "errors": {

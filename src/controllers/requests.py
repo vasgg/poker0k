@@ -29,9 +29,9 @@ async def send_report(
             'step': task.step,
         }
         headers = {'x-simpleex-sign': cryptor.encrypt(data_json)}
-        text_ok = f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}'
+        text_ok = f'Report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}'
         text_not_ok = (
-            f'report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:'
+            f'Report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:'
         )
         for attempt in range(retries):
             try:
