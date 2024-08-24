@@ -17,7 +17,7 @@ start_cycle_time = None
 
 async def check_timer(last_activity_time, start_time, mouse: Controller):
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if current_time - last_activity_time >= timedelta(minutes=2):
+    if current_time - last_activity_time >= timedelta(hours=23):
         await handle_timeout(mouse)
         return current_time
     if current_time - start_time >= timedelta(minutes=50):
