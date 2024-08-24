@@ -26,7 +26,7 @@ class Actions:
         mouse.click(Button.left)
         logger.info(f"Mouse clicked: {coords.name.replace('_', ' ')}...")
         if delay_after > 0:
-            # logger.info(f"Waiting {delay_after} seconds after clicking {coords.name.replace('_', ' ')}...")
+            logger.info(f"Waiting {delay_after} seconds after clicking {coords.name.replace('_', ' ')}...")
             await asyncio.sleep(delay_after)
 
     @staticmethod
