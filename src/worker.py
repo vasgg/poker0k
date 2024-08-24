@@ -39,8 +39,8 @@ async def handle_timeout(mouse: Controller):
     else:
         logging.info("Error. Can't find CONFIRM EXIT BUTTON")
     await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 35)
-    await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 3)
+    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 45)
+    await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
     await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
     await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
     await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 10)
