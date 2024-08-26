@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pyautogui import hotkey, typewrite, screenshot, press
+from pyautogui import hotkey, typewrite, screenshot
 from pynput.mouse import Button, Controller
 
 from consts import Coords
@@ -24,23 +24,23 @@ class Actions:
             await asyncio.sleep(delay_before)
         mouse.position = coords.value
         mouse.click(Button.left)
-        logger.info(f"Mouse clicked: {coords.name.replace('_', ' ')}...")
+        logger.info(f"Mouse clicked: {coords.name.replace('_', ' ')}.")
         if delay_after > 0:
-            logger.info(f"Waiting {delay_after} seconds after clicking {coords.name.replace('_', ' ')}...")
+            logger.info(f"Waiting {delay_after} seconds after clicking {coords.name.replace('_', ' ')}.")
             await asyncio.sleep(delay_after)
 
     @staticmethod
     async def click_on_finded(mouse: Controller, pixel: tuple[int, int], label: str):
         mouse.position = pixel
         mouse.click(Button.left)
-        logger.info(f"Mouse clicked on finded button: {label}...")
+        logger.info(f"Mouse clicked on finded button: {label}.")
         await asyncio.sleep(2)
 
     @staticmethod
     async def input_value(value: str):
         hotkey('ctrlleft', 'a')
         typewrite(value)
-        logger.info(f'Input value: {value}... Awaiting 3 seconds...')
+        logger.info(f'Input value: {value}. Awaiting 3 seconds.')
 
     @staticmethod
     def is_color_match(pixel, color, tolerance_percent):
@@ -94,6 +94,5 @@ class Actions:
         gray_screenshot = scrnsht.convert('L')
         path = Path('screenshots')
         gray_screenshot.save(path / file)
-        logger.info(f"File {file} saved...")
-        logger.info("Awaiting 3 seconds...")
+        logger.info(f"File {file} saved. Awaiting 3 seconds.")
         await asyncio.sleep(3)

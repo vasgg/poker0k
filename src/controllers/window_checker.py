@@ -17,11 +17,11 @@ class WindowChecker:
             mouse.position = Coords.RESTART_BUTTON.value
             mouse.click(Button.left)
             await asyncio.sleep(1)
-            logger.info("Disconnected. Restart button clicked...")
-            logger.info("Connection in progress. Awaiting 10 seconds...")
+            logger.info("Disconnected. Restart button clicked.")
+            logger.info("Connection in progress. Awaiting 10 seconds.")
             await asyncio.sleep(10)
         else:
-            logger.info("Connected, continue...")
+            logger.info("Connected, continue.")
 
     @staticmethod
     async def check_ad() -> None:
@@ -31,9 +31,9 @@ class WindowChecker:
             mouse.position = Coords.CLOSE_AD_BUTTON.value
             mouse.click(Button.left)
             await asyncio.sleep(0.1)
-            logger.info("Ad closed...")
+            logger.info("Ad closed.")
         else:
-            logger.info("No ad, continue...")
+            logger.info("No ad, continue.")
 
     @staticmethod
     async def check_login() -> None:
@@ -43,11 +43,11 @@ class WindowChecker:
             mouse.position = Coords.LOGIN_BUTTON.value
             mouse.click(Button.left)
             await asyncio.sleep(0.1)
-            logger.info("Disconnected. Login button clicked...")
-            logger.info("Connection in progress. Awaiting 5 seconds...")
+            logger.info("Disconnected. Login button clicked.")
+            logger.info("Connection in progress. Awaiting 5 seconds.")
             await asyncio.sleep(5)
         else:
-            logger.info("Connected, continue...")
+            logger.info("Connected, continue.")
 
     @staticmethod
     async def check_confirm_login():
@@ -57,11 +57,11 @@ class WindowChecker:
             mouse.position = Coords.CONFIRM_LOGIN_BUTTON.value
             mouse.click(Button.left)
             await asyncio.sleep(1)
-            logger.info("Disconnected. Confirm login button clicked...")
-            logger.info("Connection in progress. Awaiting 15 seconds...")
+            logger.info("Disconnected. Confirm login button clicked.")
+            logger.info("Connection in progress. Awaiting 15 seconds.")
             await asyncio.sleep(15)
         else:
-            logger.info("Connected, continue...")
+            logger.info("Connected, continue.")
 
     @staticmethod
     async def check_cashier() -> None:
@@ -70,19 +70,19 @@ class WindowChecker:
             mouse = Controller()
             mouse.position = Coords.CASHIER_BUTTON.value
             mouse.click(Button.left)
-            logger.info("Cashier button clicked...")
-            logger.info("Loading in progress. Awaiting 8 seconds...")
+            logger.info("Cashier button clicked.")
+            logger.info("Loading in progress. Awaiting 8 seconds.")
             await asyncio.sleep(8)
             return
-        logger.info("Cashier button not found...")
+        logger.info("Cashier button not found.")
 
     @staticmethod
     async def check_transfer_section():
         check_transfer_section = pixelMatchesColor(*Coords.TRANSFER_SECTION.value, Colors.RED, tolerance=25)
         if check_transfer_section:
-            logger.info("We are in the transfer section...")
+            logger.info("We are in the transfer section.")
             return True
-        logger.info("We are not in the transfer section. Check cashier window and transfer section...")
+        logger.info("We are not in the transfer section. Check cashier window and transfer section.")
         return False
 
     @staticmethod
@@ -90,34 +90,9 @@ class WindowChecker:
         check_light_transfer_button = pixelMatchesColor(*Coords.TRANSFER_BUTTON.value, Colors.LIGHT_GREEN, tolerance=65)
         check_dark_transfer_button = pixelMatchesColor(*Coords.TRANSFER_BUTTON.value, Colors.DARK_GREEN, tolerance=65)
         if check_light_transfer_button or check_dark_transfer_button:
-            logger.info("Transfer button detected...")
+            logger.info("Transfer button detected.")
             return True
-        logger.info("Transfer button not detected...")
-        return False
-
-    @staticmethod
-    async def check_transfer_confirm_button():
-        check_light_transfer_confirm_button = pixelMatchesColor(
-            *Coords.ANDROID_TRANSFER_CONFIRM_BUTTON.value, Colors.LIGHT_GREEN, tolerance=65
-        )
-        check_dark_transfer_confirm_button = pixelMatchesColor(
-            *Coords.ANDROID_TRANSFER_CONFIRM_BUTTON.value, Colors.DARK_GREEN, tolerance=65
-        )
-        if check_light_transfer_confirm_button or check_dark_transfer_confirm_button:
-            logger.info("Transfer confirm button detected...")
-            return True
-        logger.info("Transfer confirm button not detected...")
-        return False
-
-    @staticmethod
-    async def check_confirm_transfer_section():
-        check_transfer_section = pixelMatchesColor(
-            *Coords.ANDROID_CONFIRM_TRANSFER_SECTION.value, Colors.FINAL_GREEN, tolerance=30
-        )
-        if check_transfer_section:
-            logger.info("Confirm transfer section detected...")
-            return True
-        logger.info("Confirm transfer section not detected...")
+        logger.info("Transfer button not detected.")
         return False
 
     @staticmethod
@@ -128,9 +103,9 @@ class WindowChecker:
             mouse.position = Coords.CLOSE_CASHIER_BUTTON
             mouse.click(Button.left)
             await asyncio.sleep(0.1)
-            logger.info("Close Cashier button clicked...")
+            logger.info("Close Cashier button clicked.")
             return True
-        logger.info("Cashier not closed after timeout...")
+        logger.info("Cashier not closed after timeout.")
         return False
 
     @staticmethod
@@ -143,16 +118,16 @@ class WindowChecker:
             mouse.position = Coords.CASHIER_FULLSCREEN_BUTTON
             mouse.click(Button.left)
             await asyncio.sleep(1)
-            logger.info("Cashier fullscreen toggled...")
+            logger.info("Cashier fullscreen toggled.")
             return True
-        logger.info("Something went wrong...")
+        logger.info("Something went wrong.")
         return False
 
     @staticmethod
     async def check_me_section_android():
         check_me_section_android = pixelMatchesColor(*Coords.ANDROID_ME_SECTION.value, Colors.ANDROID_RED, tolerance=25)
         if check_me_section_android:
-            logger.info("Me section detected...")
+            logger.info("Me section detected.")
             return True
-        logger.info("Me section not detected...")
+        logger.info("Me section not detected.")
         return False

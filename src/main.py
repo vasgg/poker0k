@@ -88,7 +88,7 @@ async def queue_status(request: Request):
     queue_length = await redis_client.llen('queue')
     logging.info(f"Requested queue length: {queue_length}")
     return {
-        "queue_count": queue_length,
+        'queue_length': queue_length,
         'resolution': f'{screen_width}x{screen_height}',
     }
 
@@ -100,7 +100,7 @@ async def main():
     screenshots_directory.mkdir(parents=True, exist_ok=True)
     logging_config = get_logging_config('pokerok_android')
     logging.config.dictConfig(logging_config)
-    logging.info("server started...")
+    logging.info("server started.")
 
     config = Config(app=app, host="0.0.0.0", port=8800)
     server = Server(config)

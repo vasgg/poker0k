@@ -27,7 +27,7 @@ async def check_timer(last_activity_time, start_time, mouse: Controller):
 
 
 async def handle_timeout(mouse: Controller):
-    logging.info("Global timeout reached 23 hours. Performing scheduled actions...")
+    logging.info("Global timeout reached 3 hours. Performing scheduled actions.")
     await Actions.click_on_const(mouse, Coords.ANDROID_CLOSE_EMULATOR_BUTTON)
     await asyncio.sleep(3)
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
@@ -48,7 +48,7 @@ async def handle_timeout(mouse: Controller):
 
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
-    logging.info('Reset global timer on 3 hours, returning to tasks...')
+    logging.info('Reset global timer on 3 hours, returning to tasks.')
 
 
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
@@ -64,7 +64,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
     else:
-        logging.info(f"Task {task.order_id} failed... Can't find transfer button")
+        logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
 
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_confirm_button = await Actions.find_color_square(
@@ -73,7 +73,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
     else:
-        logging.info(f"Task {task.order_id} failed... Can't find transfer confirm button")
+        logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
 
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_confirm_section = await Actions.find_color_square(
@@ -90,7 +90,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         await redis_client.lpush('reports', task.model_dump_json())
         attempts += 1
         await Actions.take_screenshot(task=task, debug=True)
-        logging.info(f"Task {task.order_id} failed... Can't find transfer confirm section")
+        logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
         if attempts < settings.MAX_ATTEMPTS:
             await execute_task(task=task, redis_client=redis_client, mouse=mouse, attempts=attempts)
         else:
@@ -99,7 +99,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             await send_report(
                 task=task,
                 redis_client=redis_client,
-                problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Please check the app...',
+                problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.',
             )
 
 
@@ -107,7 +107,7 @@ async def main():
     redis_client = redis.Redis(db=10)
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
-    logging.info(f'Worker started... Restart after 3 hours...')
+    logging.info(f'Worker started. Restart after 3 hours.')
     mouse = Controller()
     await asyncio.sleep(4)
     global start_cycle_time

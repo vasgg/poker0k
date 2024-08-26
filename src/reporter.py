@@ -67,7 +67,7 @@ async def main():
     redis_client = redis.Redis(db=10)
     logging_config = get_logging_config('reporter')
     logging.config.dictConfig(logging_config)
-    logging.info('Reporter started...')
+    logging.info('Reporter started.')
     while True:
         async with AsyncSessionLocal() as db_session:
             async with db_session.begin():
