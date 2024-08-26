@@ -17,10 +17,10 @@ start_cycle_time = None
 
 async def check_timer(last_activity_time, start_time, mouse: Controller):
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if current_time - last_activity_time >= timedelta(hours=23):
+    if current_time - last_activity_time >= timedelta(hours=3):
         await handle_timeout(mouse)
         return current_time
-    if current_time - start_time >= timedelta(minutes=50):
+    if current_time - start_time >= timedelta(hours=3):
         await handle_timeout(mouse)
         return current_time
     return last_activity_time
@@ -39,7 +39,7 @@ async def handle_timeout(mouse: Controller):
     else:
         logging.info("Error. Can't find CONFIRM EXIT BUTTON")
     await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 45)
+    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 180)
     await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
     await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
     await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
@@ -48,7 +48,7 @@ async def handle_timeout(mouse: Controller):
 
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
-    logging.info('Reset global timer on 23 hours, returning to tasks...')
+    logging.info('Reset global timer on 3 hours, returning to tasks...')
 
 
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
@@ -107,7 +107,7 @@ async def main():
     redis_client = redis.Redis(db=10)
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
-    logging.info(f'Worker started... Restart after 23 hours...')
+    logging.info(f'Worker started... Restart after 3 hours...')
     mouse = Controller()
     await asyncio.sleep(4)
     global start_cycle_time
