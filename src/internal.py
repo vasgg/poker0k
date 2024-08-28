@@ -18,7 +18,7 @@ class Task(BaseModel):
     amount: float
     status: int
     callback_url: str
-    message: str = ''
+    message: str | None = None
     step: Step | None = None
 
 
