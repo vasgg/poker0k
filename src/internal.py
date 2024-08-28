@@ -19,6 +19,7 @@ class Task(BaseModel):
     status: int
     callback_url: str
     step: Step | None = None
+    message: str | None = None
 
 
 class Stage(StrEnum):
