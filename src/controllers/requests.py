@@ -16,7 +16,7 @@ async def send_report(
     task: Task, redis_client: Redis, problem: str | None = None, retries: int = 3, delay: int = 3
 ) -> None:
     task.status = task.status if not problem else 2
-    task.message = None if not problem else problem
+    task.message = '' if not problem else problem
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
         data_json = task.model_dump_json()
