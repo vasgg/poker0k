@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 async def send_report(
     task: Task, redis_client: Redis, problem: str | None = None, retries: int = 3, delay: int = 3
 ) -> None:
+    task.status = task.status if not problem else 2
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
         data_json = task.model_dump_json()
@@ -23,7 +24,7 @@ async def send_report(
             'user_id': task.user_id,
             'requisite': task.requisite,
             'amount': task.amount,
-            'status': task.status if not problem else 2,
+            'status': task.status,
             'message': '' if not problem else problem,
             'callback_url': task.callback_url,
             'step': task.step,
