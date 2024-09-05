@@ -17,10 +17,10 @@ start_cycle_time = None
 
 async def check_timer(last_activity_time, start_time, mouse: Controller):
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if current_time - last_activity_time >= timedelta(hours=3):
+    if current_time - last_activity_time >= timedelta(hours=23):
         await handle_timeout(mouse)
         return current_time
-    if current_time - start_time >= timedelta(hours=3):
+    if current_time - start_time >= timedelta(hours=23):
         await handle_timeout(mouse)
         return current_time
     return last_activity_time
@@ -28,8 +28,7 @@ async def check_timer(last_activity_time, start_time, mouse: Controller):
 
 async def handle_timeout(mouse: Controller):
     logging.info("Global timeout reached 3 hours. Performing scheduled actions.")
-    await Actions.click_on_const(mouse, Coords.ANDROID_CLOSE_EMULATOR_BUTTON)
-    await asyncio.sleep(3)
+    await Actions.click_on_const(mouse, Coords.ANDROID_CLOSE_EMULATOR_BUTTON, 3)
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_button = await Actions.find_color_square(
         image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=10
