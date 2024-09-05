@@ -27,7 +27,7 @@ async def check_timer(last_activity_time, start_time, mouse: Controller):
 
 
 async def handle_timeout(mouse: Controller):
-    logging.info("Global timeout reached 3 hours. Performing scheduled actions.")
+    logging.info("Global timeout reached 23 hours. Performing scheduled actions.")
     await Actions.click_on_const(mouse, Coords.ANDROID_CLOSE_EMULATOR_BUTTON, 3)
     workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
     transfer_button = await Actions.find_color_square(
@@ -47,7 +47,7 @@ async def handle_timeout(mouse: Controller):
 
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
-    logging.info('Reset global timer on 3 hours, returning to tasks.')
+    logging.info('Reset global timer on 23 hours, returning to tasks.')
 
 
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
@@ -106,7 +106,7 @@ async def main():
     redis_client = redis.Redis(db=10)
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
-    logging.info(f'Worker started. Restart after 3 hours.')
+    logging.info(f'Worker started. Restart after 23 hours.')
     mouse = Controller()
     await asyncio.sleep(4)
     global start_cycle_time
