@@ -106,7 +106,8 @@ async def main():
     redis_client = redis.Redis(db=10)
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
-    logging.info(f'Worker started. Restart after 23 hours.')
+    logging.info(f'Worker started.')
+    # logging.info(f'Worker started. Restart after 23 hours.')
     mouse = Controller()
     await asyncio.sleep(4)
     # global start_cycle_time
