@@ -109,9 +109,9 @@ async def main():
     logging.info(f'Worker started. Restart after 23 hours.')
     mouse = Controller()
     await asyncio.sleep(4)
-    global start_cycle_time
-    start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
-    last_activity_time = start_cycle_time
+    # global start_cycle_time
+    # start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
+    # last_activity_time = start_cycle_time
 
     while True:
         # noinspection PyTypeChecker
@@ -120,8 +120,8 @@ async def main():
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode('utf-8'))
             await execute_task(task, redis_client, mouse)
-            last_activity_time = datetime.now(timezone(timedelta(hours=3)))
-        last_activity_time = await check_timer(last_activity_time, start_cycle_time, mouse)
+        #     last_activity_time = datetime.now(timezone(timedelta(hours=3)))
+        # last_activity_time = await check_timer(last_activity_time, start_cycle_time, mouse)
 
 
 def run_main():
