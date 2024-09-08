@@ -131,3 +131,14 @@ class WindowChecker:
             return True
         logger.info("Me section not detected.")
         return False
+
+    @staticmethod
+    async def check_pixel_and_click(coords: Coords, color: tuple[int], mouse: Controller) -> bool:
+        check_pixel = pixelMatchesColor(*coords.value, *color, tolerance=25)
+        if check_pixel:
+            mouse.position = coords.value
+            mouse.click(Button.left)
+            logger.info(f"Mouse clicked: {coords.name.replace('_', ' ')}.")
+            return True
+        logger.info(f"Pixel not found: {coords.name.replace('_', ' ')}.")
+        return False

@@ -6,8 +6,8 @@ from pynput.mouse import Controller
 import redis.asyncio as redis
 
 from config import get_logging_config, settings
-from consts import Colors, Coords
-from controllers.actions import Actions
+from consts import Colors, Coords, WorkspaceCoords
+from controllers.actions import Actions, reopen_emulator
 from controllers.requests import send_report
 from internal import Step, Task
 
@@ -28,22 +28,7 @@ async def check_timer(last_activity_time, start_time, mouse: Controller):
 
 async def handle_timeout(mouse: Controller):
     logging.info("Global timeout reached 23 hours. Performing scheduled actions.")
-    await Actions.click_on_const(mouse, Coords.ANDROID_CLOSE_EMULATOR_BUTTON, 3)
-    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
-    transfer_button = await Actions.find_color_square(
-        image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=10
-    )
-    if transfer_button:
-        await Actions.click_on_finded(mouse, transfer_button, 'CONFIRM EXIT BUTTON')
-    else:
-        logging.info("Error. Can't find CONFIRM EXIT BUTTON")
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 180)
-    await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
-    await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 10)
+    await reopen_emulator(mouse)
 
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
@@ -58,14 +43,18 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.click_on_const(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
     await Actions.input_value(value=str(task.amount).replace('.', ','))
 
-    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
+    workspace = await Actions.take_screenshot_of_region(
+        WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+    )
     transfer_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
 
-    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
+    workspace = await Actions.take_screenshot_of_region(
+        WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+    )
     transfer_confirm_button = await Actions.find_color_square(
         image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10
     )
