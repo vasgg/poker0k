@@ -73,11 +73,20 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
-
-    workspace = await Actions.take_screenshot_of_region(Actions.WORKSPACE_TOP_LEFT, Actions.WORKSPACE_BOTTOM_RIGHT)
-    transfer_confirm_section = await Actions.find_color_square(
-        image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10
-    )
+    transfer_confirm_section = None
+    for _ in range(10):
+        workspace = await Actions.take_screenshot_of_region(
+            WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+        )
+        transfer_confirm_section = await Actions.find_color_square(
+            image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10
+        )
+        if transfer_confirm_section:
+            break
+        else:
+            await asyncio.sleep(0.4)
+    else:
+        logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
     task.status = 1 if transfer_confirm_section else 0
     if task.status == 1:
         task.step = Step.PROCESSED
