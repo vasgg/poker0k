@@ -76,7 +76,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             await asyncio.sleep(0.4)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
-    task.status = 1 if transfer_confirm_section else 0
+    task.status = 1 if transfer_confirm_section is not None else 0
     if task.status == 1:
         task.step = Step.PROCESSED
         await redis_client.lpush('reports', task.model_dump_json())
