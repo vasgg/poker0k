@@ -90,7 +90,7 @@ class Actions:
         file = (
             f'{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png'
             if not debug
-            else f'debug_{task.requisite}_${task.amount}_{task.status}.png'
+            else f'{moscow_time}_{task.order_id}_DEBUG_{task.requisite}_${task.amount}_{task.status}.png'
         )
         scrnsht = screenshot()
         gray_screenshot = scrnsht.convert('L')
