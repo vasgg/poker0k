@@ -46,7 +46,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     workspace = await Actions.take_screenshot_of_region(
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     )
-    transfer_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10)
+    transfer_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=25)
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
     else:
@@ -56,7 +56,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     )
     transfer_confirm_button = await Actions.find_color_square(
-        image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=10
+        image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=25
     )
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
@@ -68,7 +68,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
         )
         transfer_confirm_section = await Actions.find_color_square(
-            image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10
+            image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=25
         )
         if transfer_confirm_section:
             break
