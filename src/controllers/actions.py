@@ -107,12 +107,13 @@ async def reopen_emulator(mouse: Controller):
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     )
     transfer_button = await Actions.find_color_square(
-        image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=10
+        image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=20
     )
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, 'CONFIRM EXIT BUTTON')
     else:
         logging.info("Error. Can't find CONFIRM EXIT BUTTON")
+        return
     await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
     await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 180)
     await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
