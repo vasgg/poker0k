@@ -118,9 +118,9 @@ async def reopen_emulator(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 180)
     await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
     await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 10)
+    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 15)
+    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 15)
+    await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 15)
 
 
 async def reopen_cashier(mouse: Controller):
