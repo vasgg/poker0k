@@ -50,7 +50,6 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
-        return
     workspace = await Actions.take_screenshot_of_region(
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     )
@@ -61,7 +60,6 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
-        return
     transfer_confirm_section = None
     for _ in range(10):
         workspace = await Actions.take_screenshot_of_region(
