@@ -17,10 +17,10 @@ start_cycle_time = None
 
 async def check_timer(last_activity_time, start_time, mouse: Controller):
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if current_time - last_activity_time >= timedelta(hours=settings.RESTART_EMULATOR_AFTER_HOURS):
+    if current_time - last_activity_time >= timedelta(minutes=settings.RESTART_EMULATOR_AFTER_HOURS):
         await handle_timeout(mouse)
         return current_time
-    if current_time - start_time >= timedelta(hours=settings.RESTART_EMULATOR_AFTER_HOURS):
+    if current_time - start_time >= timedelta(minutes=settings.RESTART_EMULATOR_AFTER_HOURS):
         await handle_timeout(mouse)
         return current_time
     return last_activity_time
