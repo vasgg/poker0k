@@ -29,3 +29,4 @@ venv.bak/
 *$py.class
 *.so
 *.db
+readme.txt

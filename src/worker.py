@@ -1,7 +1,7 @@
 import asyncio
 from datetime import timedelta, timezone, datetime
 import logging.config
-
+import pygetwindow as gw
 from pynput.mouse import Controller
 import redis.asyncio as redis
 
@@ -104,6 +104,13 @@ async def main():
     logging.config.dictConfig(logging_config)
     logging.info(f'Worker started. Restart emulator after {settings.RESTART_EMULATOR_AFTER_HOURS} hours.')
     mouse = Controller()
+    windows = gw.getAllWindows()
+    for window in windows:
+        if window.title:  # Проверяем, есть ли у окна заголовок
+            print(f"Title: {window.title}")
+            print(f"Size: {window.width}x{window.height}")
+            print(f"Position: ({window.left}, {window.top})")
+            print("-" * 30)
     await asyncio.sleep(4)
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
