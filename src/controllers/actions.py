@@ -130,7 +130,7 @@ class Actions:
             return
         await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
         await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 60)
-        if not WindowChecker.check_window():
+        if not await WindowChecker.check_window():
             await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
             return
         await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
