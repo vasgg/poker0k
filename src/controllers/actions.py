@@ -104,7 +104,8 @@ class Actions:
         gray_screenshot = scrnsht.convert('L')
         path = Path('screenshots')
         gray_screenshot.save(path / file)
-        logger.info(f"File {file} saved. Awaiting 3 seconds.")
+        logger.info(f"Screenshot successfully saved to:\n"
+                    f"                                          {file}")
         await asyncio.sleep(3)
 
     @staticmethod
