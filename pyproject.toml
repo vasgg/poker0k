@@ -39,12 +39,12 @@ run-worker = "worker:run_main"
 run-reporter = "reporter:run_main"
 
 [tool.black]
-line-length = 120
+line-length = 119
 target-version = ['py311']
 skip-string-normalization = true
 
 [tool.ruff]
-line-length = 120
+line-length = 119
 target-version = "py311"
 select = ["ALL"]
 ignore = ["Q", "T", "D", "ANN", "UP", "RUF", "G004", "RET504", "ISC002", "INP001", "EM101", "TRY003", "PTH", "TD", "FIX002"]
