@@ -108,7 +108,7 @@ async def main():
     logging.config.dictConfig(logging_config)
     mouse = Controller()
     if not await WindowChecker.check_window():
-        await Actions.reopen_emulator(mouse)
+        await Actions.open_emulator(mouse)
         return
     logging.info(f'Worker started. Restart emulator after {settings.RESTART_EMULATOR_AFTER_HOURS} hours.')
     await asyncio.sleep(4)
