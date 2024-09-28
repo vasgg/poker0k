@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 class WindowChecker:
     @staticmethod
-    async def check_window_size() -> bool:
+    async def check_window() -> bool:
         windows = gw.getAllWindows()
         for window in windows:
             if window.title == 'BlueStacks App Player':

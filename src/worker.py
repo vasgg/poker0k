@@ -107,7 +107,7 @@ async def main():
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
     mouse = Controller()
-    if not await WindowChecker.check_window_size():
+    if not await WindowChecker.check_window():
         await Actions.reopen_emulator(mouse)
         return
     logging.info(f'Worker started. Restart emulator after {settings.RESTART_EMULATOR_AFTER_HOURS} hours.')
