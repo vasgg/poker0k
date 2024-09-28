@@ -108,7 +108,7 @@ class Actions:
         await asyncio.sleep(3)
 
     @staticmethod
-    async def reopen_emulator(mouse: Controller, size: Size = Size.SMALL, attempts: int = 0):
+    async def reopen_emulator(mouse: Controller, size: Size = Size.SMALL, attempts: int = 1):
         logger.info(f"Starting reopen emulator process. Attempt number {attempts}.")
         if attempts > 3:
             logger.info("Emulator failed after 3 restarts. Check BlueStacks App Player.")
