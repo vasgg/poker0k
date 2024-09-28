@@ -1,14 +1,14 @@
 import asyncio
 from datetime import timedelta, timezone, datetime
 import logging.config
-import pygetwindow as gw
 from pynput.mouse import Controller
 import redis.asyncio as redis
 
 from config import get_logging_config, settings
 from consts import Colors, Coords, WorkspaceCoords
-from controllers.actions import Actions, reopen_emulator
+from controllers.actions import Actions
 from controllers.requests import send_report
+from controllers.window_checker import WindowChecker
 from internal import Step, Task
 
 
@@ -17,18 +17,20 @@ start_cycle_time = None
 
 async def check_timer(last_activity_time, start_time, mouse: Controller):
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if current_time - last_activity_time >= timedelta(hours=settings.RESTART_EMULATOR_AFTER_HOURS):
+    if current_time - last_activity_time >= timedelta(minutes=settings.RESTART_EMULATOR_AFTER_HOURS):
         await handle_timeout(mouse)
         return current_time
-    if current_time - start_time >= timedelta(hours=settings.RESTART_EMULATOR_AFTER_HOURS):
+    if current_time - start_time >= timedelta(minutes=settings.RESTART_EMULATOR_AFTER_HOURS):
         await handle_timeout(mouse)
         return current_time
     return last_activity_time
 
 
 async def handle_timeout(mouse: Controller):
-    logging.info(f"Global timeout reached {settings.RESTART_EMULATOR_AFTER_HOURS} hours. Performing scheduled actions.")
-    await reopen_emulator(mouse)
+    logging.info(
+        f"Global timeout reached {settings.RESTART_EMULATOR_AFTER_HOURS} hours. Performing scheduled actions."
+    )
+    await Actions.reopen_emulator(mouse)
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
     logging.info(f'Reset global timer on {settings.RESTART_EMULATOR_AFTER_HOURS} hours, returning to tasks.')
@@ -45,7 +47,9 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     workspace = await Actions.take_screenshot_of_region(
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     )
-    transfer_button = await Actions.find_color_square(image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=25)
+    transfer_button = await Actions.find_color_square(
+        image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=25
+    )
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
     else:
@@ -100,18 +104,13 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
 
 async def main():
     redis_client = redis.Redis(db=10)
-    windows = gw.getAllWindows()
-    for window in windows:
-        if window.title == 'BlueStacks App Player':
-            print("-" * 30)
-            print(f"Title: {window.title}")
-            print(f"Size: {window.width}x{window.height}")
-            print(f"Position: ({window.left}, {window.top})")
-            print("-" * 30)
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
-    logging.info(f'Worker started. Restart emulator after {settings.RESTART_EMULATOR_AFTER_HOURS} hours.')
     mouse = Controller()
+    if not await WindowChecker.check_window_size():
+        await Actions.reopen_emulator(mouse)
+        return
+    logging.info(f'Worker started. Restart emulator after {settings.RESTART_EMULATOR_AFTER_HOURS} hours.')
     await asyncio.sleep(4)
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
