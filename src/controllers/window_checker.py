@@ -14,5 +14,5 @@ class WindowChecker:
                     logger.info("Check BlueStacks App Player size and position: GOOD.")
                     return True
         logger.info("Check BlueStacks App Player size and position: BAD.\n"
-                    " " * 43 + "Going to restart emulator.")
+                    "                                          Going to restart emulator.")
         return False
