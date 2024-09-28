@@ -25,3 +25,8 @@ class Task(BaseModel):
 class Stage(StrEnum):
     DEV = auto()
     PROD = auto()
+
+
+class Size(StrEnum):
+    BIG = auto()
+    SMALL = auto()
