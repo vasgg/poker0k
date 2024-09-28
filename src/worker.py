@@ -100,17 +100,18 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
 
 async def main():
     redis_client = redis.Redis(db=10)
-    logging_config = get_logging_config('worker_android')
-    logging.config.dictConfig(logging_config)
-    logging.info(f'Worker started. Restart emulator after {settings.RESTART_EMULATOR_AFTER_HOURS} hours.')
-    mouse = Controller()
     windows = gw.getAllWindows()
     for window in windows:
-        if window.title:  # Проверяем, есть ли у окна заголовок
+        if window.title == 'BlueStacks App Player':
+            print("-" * 30)
             print(f"Title: {window.title}")
             print(f"Size: {window.width}x{window.height}")
             print(f"Position: ({window.left}, {window.top})")
             print("-" * 30)
+    logging_config = get_logging_config('worker_android')
+    logging.config.dictConfig(logging_config)
+    logging.info(f'Worker started. Restart emulator after {settings.RESTART_EMULATOR_AFTER_HOURS} hours.')
+    mouse = Controller()
     await asyncio.sleep(4)
     global start_cycle_time
     start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
