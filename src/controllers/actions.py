@@ -9,7 +9,7 @@ from pynput.mouse import Button, Controller
 
 from consts import Colors, Coords, WorkspaceCoords
 from controllers.window_checker import WindowChecker
-from internal import Task
+from internal import Size, Task
 
 logger = logging.getLogger(__name__)
 
@@ -17,24 +17,30 @@ logger = logging.getLogger(__name__)
 class Actions:
     @staticmethod
     async def click_on_const(mouse: Controller, coords: Coords, delay_after: int = 0, delay_before: int = 0):
-        text = f"Mouse clicked: {coords.name.replace('_', ' ')}." if delay_after == 0 else f"Mouse clicked: {coords.name.replace('_', ' ')}. Waiting {delay_after} seconds."
+        text = (
+            f"Mouse clicked: {coords.name.replace('_', ' ')}."
+            if delay_after == 0
+            else f"Waiting {delay_after} seconds after clicking {coords.name.replace('_', ' ')}."
+        )
         if delay_before > 0:
-            # logger.info(f"Waiting {delay_before} seconds before clicking {coords.name.replace('_', ' ')}...")
             await asyncio.sleep(delay_before)
         mouse.position = coords.value
         mouse.click(Button.left)
-        logger.info(f"Mouse clicked: {coords.name.replace('_', ' ')}.")
+        logger.info(text)
         if delay_after > 0:
-            logger.info(f"Waiting {delay_after} seconds after clicking {coords.name.replace('_', ' ')}.")
             await asyncio.sleep(delay_after)
 
     @staticmethod
     async def click_on_finded(mouse: Controller, pixel: tuple[int, int], label: str, delay_after: int = 3):
+        text = (
+            f"Mouse clicked on finded button: {label}."
+            if delay_after == 0
+            else f"Waiting {delay_after} seconds after clicking {label}."
+        )
         mouse.position = pixel
         mouse.click(Button.left)
-        logger.info(f"Mouse clicked on finded button: {label}.")
+        logger.info(text)
         if delay_after > 0:
-            logger.info(f"Waiting {delay_after} seconds after clicking {label}.")
             await asyncio.sleep(delay_after)
 
     @staticmethod
@@ -67,8 +73,10 @@ class Actions:
                         break
                 if matched:
                     del image
-                    absolute_coords = (WorkspaceCoords.WORKSPACE_TOP_LEFT[0] + x,
-                                       WorkspaceCoords.WORKSPACE_TOP_LEFT[1] + y)
+                    absolute_coords = (
+                        WorkspaceCoords.WORKSPACE_TOP_LEFT[0] + x,
+                        WorkspaceCoords.WORKSPACE_TOP_LEFT[1] + y,
+                    )
                     return absolute_coords
         del image
         return None
@@ -99,40 +107,34 @@ class Actions:
         logger.info(f"File {file} saved. Awaiting 3 seconds.")
         await asyncio.sleep(3)
 
-
-async def reopen_emulator(mouse: Controller):
-    logger.info(f"Starting reopen emulator process.")
-    await Actions.click_on_const(mouse, Coords.ANDROID_CLOSE_EMULATOR_BUTTON, 3)
-    workspace = await Actions.take_screenshot_of_region(
-        WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-    )
-    transfer_button = await Actions.find_color_square(
-        image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=20
-    )
-    if transfer_button:
-        await Actions.click_on_finded(mouse, transfer_button, 'CONFIRM EXIT BUTTON')
-    else:
-        logging.info("Error. Can't find CONFIRM EXIT BUTTON")
-        return
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 60)
-    await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
-    await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 10)
-
-
-async def reopen_cashier(mouse: Controller):
-    close_button = await WindowChecker.check_pixel_and_click(
-        Coords.ANDROID_CLOSE_CASHIER_BUTTON, Colors.GRAY.value, mouse
-    )
-    if close_button:
+    @staticmethod
+    async def reopen_emulator(mouse: Controller, size: Size = Size.SMALL, attempts: int = 0):
+        logger.info(f"Starting reopen emulator process. Attempt number {attempts}.")
+        if attempts > 3:
+            logger.info("Emulator failed after 3 restarts. Check BlueStacks App Player.")
+            return
+        coords = (
+            Coords.ANDROID_CLOSE_EMULATOR_BUTTON if size == Size.SMALL else Coords.ANDROID_CLOSE_EMULATOR_BUTTON_BIG
+        )
+        await Actions.click_on_const(mouse, coords, 3)
         workspace = await Actions.take_screenshot_of_region(
-            WorkspaceCoords.CASHIER_BUTTON_TOP_LEFT, WorkspaceCoords.CASHIER_BUTTON_BOTTOM_RIGHT
+            WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
         )
-        cashier_button = await Actions.find_color_square(
-            image=workspace, color=Colors.RUST, tolerance_percent=20
+        exit_button = await Actions.find_color_square(
+            image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=20
         )
-        if cashier_button:
-            await Actions.click_on_finded(mouse, cashier_button, 'CASHIER BUTTON', 10)
+        if exit_button:
+            await Actions.click_on_finded(mouse, exit_button, 'CONFIRM EXIT BUTTON')
+        else:
+            logging.info("Error. Can't find CONFIRM EXIT BUTTON")
+            return
+        await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
+        await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 60)
+        if not WindowChecker.check_window_size():
+            await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
+            return
+        await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
+        await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
+        await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
+        await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 10)
+        await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 10)
