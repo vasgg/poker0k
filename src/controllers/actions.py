@@ -134,6 +134,7 @@ class Actions:
     async def open_emulator(mouse: Controller, attempts: int = 1):
         logger.info(f"Starting open emulator process. Attempt number {attempts}.")
         await start_emulator_flow(mouse, attempts)
+        logger.info(f"Waiting for tasks.")
 
 
 async def start_emulator_flow(mouse: Controller, attempts: int = 1):
