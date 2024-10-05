@@ -127,7 +127,7 @@ async def main():
     last_restart_hour = current_time.hour
     restart_after = await get_next_restart_time()
     if restart_after:
-        text = f"Next restart after {restart_after}."
+        text = f"Next restart after {restart_after}"
     else:
         text = "Working without restarts."
 
