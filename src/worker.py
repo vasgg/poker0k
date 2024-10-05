@@ -33,7 +33,7 @@ async def get_next_restart_time():
     time_until_restart = next_restart_time - current_time
     hours, remainder = divmod(time_until_restart.seconds, 3600)
     minutes = remainder // 60
-    time_until_restart_str = f"{hours:02}:{minutes:02}"
+    time_until_restart_str = f"{hours:02} hours {minutes:02} minutes"
 
     return time_until_restart_str
 
