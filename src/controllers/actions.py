@@ -104,8 +104,7 @@ class Actions:
         gray_screenshot = scrnsht.convert('L')
         path = Path('screenshots')
         gray_screenshot.save(path / file)
-        logger.info(f"Screenshot successfully saved to:\n"
-                    f"                                          {file}")
+        logger.info(f"Screenshot successfully saved to:\n                                          {file}")
         await asyncio.sleep(3)
 
     @staticmethod
@@ -129,27 +128,22 @@ class Actions:
         else:
             logging.info("Error. Can't find CONFIRM EXIT BUTTON")
             return
-        await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
-        await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 60)
-        if not await WindowChecker.check_window():
-            await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
-            return
-        await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
-        await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
-        await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
-        await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 10)
-        await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 10)
+        await start_emulator_flow(mouse, attempts + 1)
 
     @staticmethod
     async def open_emulator(mouse: Controller, attempts: int = 1):
         logger.info(f"Starting open emulator process. Attempt number {attempts}.")
-        await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
-        await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 60)
-        if not await WindowChecker.check_window():
-            await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
-            return
-        await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
-        await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
-        await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
-        await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 10)
-        await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 10)
+        await start_emulator_flow(mouse, attempts)
+
+
+async def start_emulator_flow(mouse: Controller, attempts: int = 1):
+    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
+    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 60)
+    if not await WindowChecker.check_window():
+        await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
+        return
+    await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
+    await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
+    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 10)
+    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 10)
+    await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 10)

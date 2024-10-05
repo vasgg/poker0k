@@ -13,6 +13,8 @@ class WindowChecker:
                 if window.width == 428 and window.left == 1067:
                     logger.info("Checking BlueStacks Player. Size and position: GOOD.")
                     return True
-        logger.info("Checking BlueStacks Player. Size and position: BAD.\n"
-                    "                                          Going to restart emulator.")
+        logger.info(
+            "Checking BlueStacks Player. Size and position: BAD.\n"
+            "                                          Going to restart emulator."
+        )
         return False

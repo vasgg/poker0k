@@ -12,28 +12,35 @@ from controllers.window_checker import WindowChecker
 from internal import Step, Task
 
 
-start_cycle_time = None
+last_restart_hour = None
 
 
-async def check_timer(last_activity_time, start_time, mouse: Controller):
+async def get_next_restart_time():
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if current_time - last_activity_time >= timedelta(hours=settings.RESTART_EMULATOR_AFTER_HOURS):
-        await handle_timeout(mouse)
-        return current_time
-    if current_time - start_time >= timedelta(hours=settings.RESTART_EMULATOR_AFTER_HOURS):
-        await handle_timeout(mouse)
-        return current_time
-    return last_activity_time
+    next_restart_times = []
+    if settings.FIRST_RESTART_AT is not None:
+        next_restart_times.append(
+            current_time.replace(hour=settings.FIRST_RESTART_AT, minute=0, second=0, microsecond=0))
+    if settings.SECOND_RESTART_AT is not None:
+        next_restart_times.append(
+            current_time.replace(hour=settings.SECOND_RESTART_AT, minute=0, second=0, microsecond=0))
+    next_restart_times = [t if t > current_time else t + timedelta(days=1) for t in next_restart_times]
+    if not next_restart_times:
+        return None
+    next_restart_time = min(next_restart_times)
+    return next_restart_time
 
 
-async def handle_timeout(mouse: Controller):
-    logging.info(
-        f"Global timeout reached {settings.RESTART_EMULATOR_AFTER_HOURS} hours. Performing scheduled actions."
-    )
-    await Actions.reopen_emulator(mouse)
-    global start_cycle_time
-    start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
-    logging.info(f'Reset global timer on {settings.RESTART_EMULATOR_AFTER_HOURS} hours, returning to tasks.')
+async def check_time(mouse: Controller):
+    global last_restart_hour
+    current_time = datetime.now(timezone(timedelta(hours=3)))
+    if (
+        current_time.hour in [settings.FIRST_RESTART_AT, settings.SECOND_RESTART_AT]
+        and last_restart_hour != current_time.hour
+    ):
+        logging.info(f"Performing restarting emulator. Check '.env' file for settings.")
+        await Actions.reopen_emulator(mouse)
+        last_restart_hour = current_time.hour
 
 
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
@@ -103,27 +110,34 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
 
 
 async def main():
+    global last_restart_hour
+    current_time = datetime.now(timezone(timedelta(hours=3)))
+    last_restart_hour = current_time.hour
+    next_restart_time = await get_next_restart_time()
+    if next_restart_time:
+        text = f"Next restart scheduled at {next_restart_time}."
+    else:
+        text = "Working without restarts."
+
     redis_client = redis.Redis(db=10)
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
+
     mouse = Controller()
     if not await WindowChecker.check_window():
         await Actions.open_emulator(mouse)
-    logging.info(f'Worker started. Restart emulator after {settings.RESTART_EMULATOR_AFTER_HOURS} hours.')
+
+    logging.info(f'Worker started. {text}')
     await asyncio.sleep(4)
-    global start_cycle_time
-    start_cycle_time = datetime.now(timezone(timedelta(hours=3)))
-    last_activity_time = start_cycle_time
 
     while True:
+        await check_time(mouse)
         # noinspection PyTypeChecker
         task_data = await redis_client.brpop('queue', timeout=5)
         if task_data:
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode('utf-8'))
             await execute_task(task, redis_client, mouse)
-            last_activity_time = datetime.now(timezone(timedelta(hours=3)))
-        last_activity_time = await check_timer(last_activity_time, start_cycle_time, mouse)
 
 
 def run_main():
