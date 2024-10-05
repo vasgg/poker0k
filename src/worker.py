@@ -51,8 +51,7 @@ async def check_time(mouse: Controller):
         await Actions.reopen_emulator(mouse)
         last_restart_hour = current_time.hour
         logging.info(
-            f"Scheduled actions performed. Next restart after {await get_next_restart_time()}."
-            f"                                          Waiting for tasks."
+            f"Emulator started. Next restart after {await get_next_restart_time()}"
         )
 
 
