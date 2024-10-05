@@ -20,10 +20,12 @@ async def get_next_restart_time():
     next_restart_times = []
     if settings.FIRST_RESTART_AT is not None:
         next_restart_times.append(
-            current_time.replace(hour=settings.FIRST_RESTART_AT, minute=0, second=0, microsecond=0))
+            current_time.replace(hour=settings.FIRST_RESTART_AT, minute=0, second=0, microsecond=0)
+        )
     if settings.SECOND_RESTART_AT is not None:
         next_restart_times.append(
-            current_time.replace(hour=settings.SECOND_RESTART_AT, minute=0, second=0, microsecond=0))
+            current_time.replace(hour=settings.SECOND_RESTART_AT, minute=0, second=0, microsecond=0)
+        )
     next_restart_times = [t if t > current_time else t + timedelta(days=1) for t in next_restart_times]
     if not next_restart_times:
         return None, None
@@ -33,7 +35,7 @@ async def get_next_restart_time():
     time_until_restart = next_restart_time - current_time
     hours, remainder = divmod(time_until_restart.seconds, 3600)
     minutes = remainder // 60
-    time_until_restart_str = f"{hours:02} hours {minutes:02} minutes"
+    time_until_restart_str = f"{hours:02} hours {minutes:02} minutes."
 
     return time_until_restart_str
 
@@ -48,6 +50,10 @@ async def check_time(mouse: Controller):
         logging.info(f"Performing restarting emulator. Check '.env' file for settings.")
         await Actions.reopen_emulator(mouse)
         last_restart_hour = current_time.hour
+        logging.info(
+            f"Scheduled actions performed. Next restart after {await get_next_restart_time()}."
+            f"                                          Waiting for tasks."
+        )
 
 
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):

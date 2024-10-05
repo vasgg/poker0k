@@ -66,7 +66,7 @@ def get_logging_config(app_name: str):
                 "level": "INFO",
                 "formatter": "main",
                 "filename": f"logs/{app_name}_log.log",
-                "maxBytes": 500000,
+                "maxBytes": 50000000,
                 "backupCount": 3,
                 "encoding": "utf-8",
             },
