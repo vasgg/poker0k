@@ -26,9 +26,16 @@ async def get_next_restart_time():
             current_time.replace(hour=settings.SECOND_RESTART_AT, minute=0, second=0, microsecond=0))
     next_restart_times = [t if t > current_time else t + timedelta(days=1) for t in next_restart_times]
     if not next_restart_times:
-        return None
+        return None, None
+
     next_restart_time = min(next_restart_times)
-    return next_restart_time
+
+    time_until_restart = next_restart_time - current_time
+    hours, remainder = divmod(time_until_restart.seconds, 3600)
+    minutes = remainder // 60
+    time_until_restart_str = f"{hours:02}:{minutes:02}"
+
+    return time_until_restart_str
 
 
 async def check_time(mouse: Controller):
@@ -113,9 +120,9 @@ async def main():
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
     last_restart_hour = current_time.hour
-    next_restart_time = await get_next_restart_time()
-    if next_restart_time:
-        text = f"Next restart scheduled at {next_restart_time}."
+    restart_after = await get_next_restart_time()
+    if restart_after:
+        text = f"Next restart after {restart_after}."
     else:
         text = "Working without restarts."
 
