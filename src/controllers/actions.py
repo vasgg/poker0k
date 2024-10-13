@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pyautogui import hotkey, screenshot, typewrite, press
+from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
 
 from consts import Colors, Coords, WorkspaceCoords
@@ -49,7 +49,6 @@ class Actions:
         hotkey('ctrlleft', 'a')
         await asyncio.sleep(1)
         typewrite(value)
-        press('esc')
         logger.info(f'Input value: {value}.')
 
     @staticmethod
