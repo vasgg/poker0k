@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pyautogui import hotkey, screenshot, typewrite
+from pyautogui import hotkey, screenshot, typewrite, press
 from pynput.mouse import Button, Controller
 
 from consts import Colors, Coords, WorkspaceCoords
@@ -45,8 +45,11 @@ class Actions:
 
     @staticmethod
     async def input_value(value: str):
+        await asyncio.sleep(1)
         hotkey('ctrlleft', 'a')
+        await asyncio.sleep(1)
         typewrite(value)
+        press('esc')
         logger.info(f'Input value: {value}.')
 
     @staticmethod
@@ -139,7 +142,7 @@ class Actions:
 
 async def start_emulator_flow(mouse: Controller, attempts: int = 1):
     await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 60)
+    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 120)
     if not await WindowChecker.check_window():
         await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
         return
