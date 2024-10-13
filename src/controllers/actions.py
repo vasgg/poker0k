@@ -49,6 +49,7 @@ class Actions:
         hotkey('ctrlleft', 'a')
         await asyncio.sleep(1)
         typewrite(value)
+        await asyncio.sleep(1)
         logger.info(f'Input value: {value}.')
 
     @staticmethod
