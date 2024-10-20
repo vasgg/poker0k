@@ -17,8 +17,7 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: SecretStr
     DB_NAME: str
-    FIRST_RESTART_AT: int | None = None
-    SECOND_RESTART_AT: int | None = None
+    RESTARTS_AT: list[int]
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', case_sensitive=False, extra='allow')
 

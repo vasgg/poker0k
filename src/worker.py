@@ -18,25 +18,18 @@ last_restart_hour = None
 async def get_next_restart_time():
     current_time = datetime.now(timezone(timedelta(hours=3)))
     next_restart_times = []
-    if settings.FIRST_RESTART_AT is not None:
-        next_restart_times.append(
-            current_time.replace(hour=settings.FIRST_RESTART_AT, minute=0, second=0, microsecond=0)
-        )
-    if settings.SECOND_RESTART_AT is not None:
-        next_restart_times.append(
-            current_time.replace(hour=settings.SECOND_RESTART_AT, minute=0, second=0, microsecond=0)
-        )
+    if settings.RESTARTS_AT is not None:
+        for t in settings.RESTARTS_AT:
+            next_restart_times.append(current_time.replace(hour=t, minute=0, second=0, microsecond=0))
     next_restart_times = [t if t > current_time else t + timedelta(days=1) for t in next_restart_times]
     if not next_restart_times:
         return None, None
 
     next_restart_time = min(next_restart_times)
-
     time_until_restart = next_restart_time - current_time
     hours, remainder = divmod(time_until_restart.seconds, 3600)
     minutes = remainder // 60
     time_until_restart_str = f"{hours:02} hours {minutes:02} minutes."
-
     return time_until_restart_str
 
 
