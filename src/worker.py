@@ -37,7 +37,7 @@ async def check_time(mouse: Controller):
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
     if (
-        current_time.hour in [settings.FIRST_RESTART_AT, settings.SECOND_RESTART_AT]
+        current_time.hour in settings.RESTARTS_AT
         and last_restart_hour != current_time.hour
     ):
         logging.info(f"Performing restarting emulator. Check '.env' file for settings.")
