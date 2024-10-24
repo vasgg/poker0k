@@ -94,6 +94,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     if task.status == 1:
         task.step = Step.PROCESSED
         await redis_client.lpush('reports', task.model_dump_json())
+        await redis_client.sadd('completed_tasks', str(task.order_id))
         await Actions.take_screenshot(task=task)
         await send_report(task=task, redis_client=redis_client)
     else:
@@ -142,7 +143,11 @@ async def main():
         if task_data:
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode('utf-8'))
-            await execute_task(task, redis_client, mouse)
+            is_in_set = await redis_client.sismember('completed_tasks', str(task.order_id))
+            if not is_in_set:
+                await execute_task(task, redis_client, mouse)
+            else:
+                logging.info(f"Task {task.order_id} already processed, skipping.")
 
 
 def run_main():
