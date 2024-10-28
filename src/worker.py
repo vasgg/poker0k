@@ -52,9 +52,11 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     await Actions.click_on_const(mouse, Coords.ANDROID_NICKNAME_SECTION, 3)
-    await Actions.input_value(value=task.requisite)
+    await Actions.input_value('dnk-jarod')
+    # await Actions.input_value(value=task.requisite)
     await Actions.click_on_const(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
-    await Actions.input_value(value=str(task.amount).replace('.', ','))
+    await Actions.input_value(value='1,0')
+    # await Actions.input_value(value=str(task.amount).replace('.', ','))
 
     workspace = await Actions.take_screenshot_of_region(
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
@@ -125,7 +127,12 @@ async def main():
     else:
         text = "Working without restarts."
 
-    redis_client = redis.Redis(db=10)
+    redis_client = redis.Redis(
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        password=settings.REDIS_PASSWORD.get_secret_value(),
+        db=settings.REDIS_DB,
+    )
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
 
