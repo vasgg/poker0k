@@ -79,6 +79,7 @@ async def main():
                 record_data = await redis_client.brpop('reports', timeout=5)
                 if record_data:
                     _, record_data = record_data
+
                     record = Task.model_validate_json(record_data.decode('utf-8'))
                     await insert_record_to_db(record, db_session)
 

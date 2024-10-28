@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 async def send_report(
     task: Task, redis_client: Redis, problem: str | None = None, retries: int = 3, delay: int = 3
 ) -> None:
+    set_name = 'prod_reports'
+    if 'dev-' in task.callback_url:
+        set_name = 'dev_reports'
     task.status = task.status if not problem else 0
     task.message = '' if not problem else problem
     async with aiohttp.ClientSession() as session:
@@ -40,12 +43,12 @@ async def send_report(
                 async with session.post(task.callback_url, data=data, headers=headers) as response:
                     if response.status == HTTPStatus.OK:
                         task.step = Step.REPORTED
-                        await redis_client.lpush('reports', task.model_dump_json())
+                        await redis_client.lpush(set_name, task.model_dump_json())
                         logger.info(text_ok)
                         return
                     else:
                         task.step = Step.REPORT_FAILED
-                        await redis_client.lpush('reports', task.model_dump_json())
+                        await redis_client.lpush(set_name, task.model_dump_json())
                         error_text = await response.text()
                         logger.info(f"{text_not_ok} {response.status}. {error_text}")
             except Exception as e:

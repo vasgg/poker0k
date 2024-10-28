@@ -91,10 +91,13 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
     task.status = 1 if transfer_confirm_section is not None else 0
+    set_name_completed = 'prod_completed_tasks'
+    if 'dev-' in task.callback_url:
+        set_name_completed = 'dev_completed_tasks'
     if task.status == 1:
         task.step = Step.PROCESSED
         await redis_client.lpush('reports', task.model_dump_json())
-        await redis_client.sadd('completed_tasks', str(task.order_id))
+        await redis_client.sadd(set_name_completed, str(task.order_id))
         await Actions.take_screenshot(task=task)
         await send_report(task=task, redis_client=redis_client)
     else:
@@ -147,7 +150,10 @@ async def main():
         if task_data:
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode('utf-8'))
-            is_in_set = await redis_client.sismember('completed_tasks', str(task.order_id))
+            set_name = 'prod_completed_tasks'
+            if 'dev-' in task.callback_url:
+                set_name = 'dev_completed_tasks'
+            is_in_set = await redis_client.sismember(set_name, str(task.order_id))
             if not is_in_set:
                 await execute_task(task, redis_client, mouse)
             else:
