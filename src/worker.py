@@ -131,7 +131,6 @@ async def main():
         host=settings.REDIS_HOST,
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD.get_secret_value(),
-        db=settings.REDIS_DB,
     )
     logging_config = get_logging_config('worker_android')
     logging.config.dictConfig(logging_config)
@@ -146,7 +145,7 @@ async def main():
     while True:
         await check_time(mouse)
         # noinspection PyTypeChecker
-        task_data = await redis_client.brpop('queue', timeout=5)
+        task_data = await redis_client.brpop('FER_queue', timeout=5)
         if task_data:
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode('utf-8'))
