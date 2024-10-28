@@ -43,10 +43,10 @@ async def add_task(request: Request):
     try:
         task.step = Step.ACCEPTED
         redis_client = request.app.state.redis_client
-        await redis_client.lpush('queue', task.model_dump_json())
+        await redis_client.lpush('FER_queue', task.model_dump_json())
         await redis_client.lpush('reports', task.model_dump_json())
         logging.info(f"Task added to queue: {task.model_dump_json()}")
-        queue_length = await redis_client.llen('queue')
+        queue_length = await redis_client.llen('FER_queue')
         reports_length = await redis_client.llen('reports')
         logging.info(f"Current queue lengths: {queue_length=}, {reports_length=}")
         return {'status': 'true'}

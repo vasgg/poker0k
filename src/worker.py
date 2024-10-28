@@ -52,11 +52,9 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     await Actions.click_on_const(mouse, Coords.ANDROID_NICKNAME_SECTION, 3)
-    await Actions.input_value('dnk-jarod')
-    # await Actions.input_value(value=task.requisite)
+    await Actions.input_value(value=task.requisite)
     await Actions.click_on_const(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
-    await Actions.input_value(value='1,0')
-    # await Actions.input_value(value=str(task.amount).replace('.', ','))
+    await Actions.input_value(value=str(task.amount).replace('.', ','))
 
     workspace = await Actions.take_screenshot_of_region(
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT

@@ -64,7 +64,11 @@ async def init_db():
 
 
 async def main():
-    redis_client = redis.Redis(db=10)
+    redis_client = redis.Redis(
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        password=settings.REDIS_PASSWORD.get_secret_value(),
+    )
     logging_config = get_logging_config('reporter')
     logging.config.dictConfig(logging_config)
     logging.info('Reporter started.')
