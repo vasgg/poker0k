@@ -96,13 +96,13 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         set_name_completed = 'dev_completed_tasks'
     if task.status == 1:
         task.step = Step.PROCESSED
-        await redis_client.lpush('reports', task.model_dump_json())
+        await redis_client.lpush('FER_reports', task.model_dump_json())
         await redis_client.sadd(set_name_completed, str(task.order_id))
         await Actions.take_screenshot(task=task)
         await send_report(task=task, redis_client=redis_client)
     else:
         task.step = Step.FAILED
-        await redis_client.lpush('reports', task.model_dump_json())
+        await redis_client.lpush('FER_reports', task.model_dump_json())
         attempts += 1
         await Actions.take_screenshot(task=task, debug=True)
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
