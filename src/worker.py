@@ -36,16 +36,11 @@ async def get_next_restart_time():
 async def check_time(mouse: Controller):
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if (
-        current_time.hour in settings.RESTARTS_AT
-        and last_restart_hour != current_time.hour
-    ):
+    if current_time.hour in settings.RESTARTS_AT and last_restart_hour != current_time.hour:
         logging.info(f"Performing restarting emulator. Check '.env' file for settings.")
         await Actions.reopen_emulator(mouse)
         last_restart_hour = current_time.hour
-        logging.info(
-            f"Emulator started. Next restart after {await get_next_restart_time()}"
-        )
+        logging.info(f"Emulator started. Next restart after {await get_next_restart_time()}")
 
 
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):

@@ -38,7 +38,7 @@ class Report(Base):
     step: Mapped[Step]
 
 
-async def insert_record_to_db(task: Task, db_session) -> None:
+async def push_record(task: Task, db_session) -> None:
     try:
         record = Report(
             order_id=task.order_id,
@@ -80,7 +80,7 @@ async def main():
                 if record_data:
                     _, record_data = record_data
                     record = Task.model_validate_json(record_data.decode('utf-8'))
-                    await insert_record_to_db(record, db_session)
+                    await push_record(record, db_session)
 
 
 def run_main():
