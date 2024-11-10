@@ -51,7 +51,7 @@ async def push_record(task: Task, db_session) -> None:
         )
         db_session.add(record)
         await db_session.flush()
-        logging.info(f"Record {record.id} commited. Task id: {task.order_id}. Step: {task.step}")
+        logging.info(f"Record {record.id} commited. Task id: {task.order_id}. Status: {task.step}")
     except Exception as e:
         logging.exception(f"Error interacting with the database: {e}")
 
