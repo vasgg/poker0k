@@ -36,7 +36,7 @@ async def send_telegram_report(task: Task, message: str, image_path: Path | None
         # text_not_ok = f'TG report FAILED with response:'
 
     async with aiohttp.ClientSession() as session:
-        await session.post(url, data=data)
+        await session.post(url, data=data, ssl=False)
         # async with session.post(url, data=data) as response:
         #     if response.status == HTTPStatus.OK:
         #         logging.info(text_ok)
