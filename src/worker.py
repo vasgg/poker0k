@@ -8,7 +8,7 @@ from config import get_logging_config, settings
 from consts import Colors, Coords, WorkspaceCoords
 from controllers.actions import Actions
 from controllers.requests import send_report
-from controllers.telegram import send_telegram_report
+# from controllers.telegram import send_telegram_report
 from controllers.window_checker import WindowChecker
 from internal import Step, Task
 
@@ -62,7 +62,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
-        await send_telegram_report(task, f"Task {task.order_id} failed. Can't find transfer button.")
+        # await send_telegram_report(task, f"Task {task.order_id} failed. Can't find transfer button.")
 
     workspace = await Actions.take_screenshot_of_region(
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
@@ -74,7 +74,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
-        await send_telegram_report(task, f"Task {task.order_id} failed. Can't find transfer confirm button.")
+        # await send_telegram_report(task, f"Task {task.order_id} failed. Can't find transfer confirm button.")
     transfer_confirm_section = None
     for _ in range(10):
         workspace = await Actions.take_screenshot_of_region(
@@ -89,7 +89,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             await asyncio.sleep(0.4)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
-        await send_telegram_report(task, f"Task {task.order_id} failed. Can't find transfer confirm section.")
+        # await send_telegram_report(task, f"Task {task.order_id} failed. Can't find transfer confirm section.")
     task.status = 1 if transfer_confirm_section is not None else 0
     set_name_completed = 'prod_completed_tasks'
     if 'dev-' in task.callback_url:
@@ -110,11 +110,11 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             await execute_task(task=task, redis_client=redis_client, mouse=mouse, attempts=attempts)
         else:
             screen_path = await Actions.take_screenshot(task=task)
-            await send_telegram_report(
-                task,
-                f"Task {task.order_id} failed. Can't find transfer confirm section.",
-                screen_path,
-            )
+            # await send_telegram_report(
+            #     task,
+            #     f"Task {task.order_id} failed. Can't find transfer confirm section.",
+            #     screen_path,
+            # )
             logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
             await send_report(
                 task=task,
