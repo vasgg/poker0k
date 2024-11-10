@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: int
     REDIS_PASSWORD: SecretStr
+    TG_BOT_TOKEN: SecretStr
+    TG_ID: int
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', case_sensitive=False, extra='allow')
 
