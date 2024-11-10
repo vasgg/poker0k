@@ -95,7 +95,7 @@ class Actions:
         return scrnsht
 
     @staticmethod
-    async def take_screenshot(task: Task, debug: bool = False):
+    async def take_screenshot(task: Task, debug: bool = False) -> Path:
         moscow_tz = ZoneInfo("Europe/Moscow")
         moscow_time = datetime.now(moscow_tz).strftime('%d.%m.%Y_%H.%M.%S')
         file = (
@@ -109,6 +109,7 @@ class Actions:
         gray_screenshot.save(path / file)
         logger.info(f"Screenshot successfully saved to:\n                                          {file}")
         await asyncio.sleep(3)
+        return path / file
 
     @staticmethod
     async def reopen_emulator(mouse: Controller, size: Size = Size.SMALL, attempts: int = 1):
