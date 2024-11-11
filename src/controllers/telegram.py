@@ -13,12 +13,13 @@ from internal import Task
 # logging.config.dictConfig(logging_config)
 
 
-async def send_telegram_report(task: Task, message: str, image_path: Path | None = None) -> None:
+async def send_telegram_report(message: str, task: Task | None = None, image_path: Path | None = None) -> None:
+    text = f'{task.order_id}|{task.requisite}|${task.amount}|{message}' if task else message
     if image_path:
         url = f"https://api.telegram.org/bot{settings.TG_BOT_TOKEN.get_secret_value()}/sendPhoto"
         data = FormData()
         data.add_field('chat_id', f'{settings.TG_ID}')
-        data.add_field('caption', f'{task.order_id}|{task.requisite}|${task.amount}|{message}')
+        data.add_field('caption', text)
         data.add_field('disable_notification', False)
         async with aiofiles.open(image_path, 'rb') as photo:
             photo_data = await photo.read()
@@ -29,7 +30,7 @@ async def send_telegram_report(task: Task, message: str, image_path: Path | None
         url = f"https://api.telegram.org/bot{settings.TG_BOT_TOKEN.get_secret_value()}/sendMessage"
         data = {
             'chat_id': f'{settings.TG_ID}',
-            'text': f'{task.order_id}|{task.requisite}|${task.amount}|{message}',
+            'text': text,
             'disable_notification': False,
         }
         # text_ok = f'TG report sent.'

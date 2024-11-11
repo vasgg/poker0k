@@ -8,6 +8,7 @@ from config import get_logging_config, settings
 from consts import Colors, Coords, WorkspaceCoords
 from controllers.actions import Actions
 from controllers.requests import send_report
+from controllers.telegram import send_telegram_report
 # from controllers.telegram import send_telegram_report
 from controllers.window_checker import WindowChecker
 from internal import Step, Task
@@ -144,6 +145,7 @@ async def main():
     mouse = Controller()
     if not await WindowChecker.check_window():
         await Actions.open_emulator(mouse)
+    await send_telegram_report('Worker started.')
 
     logging.info(f'Worker started. {text}')
     await asyncio.sleep(4)
