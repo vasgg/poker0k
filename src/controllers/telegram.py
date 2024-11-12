@@ -20,7 +20,7 @@ async def send_telegram_report(message: str, task: Task | None = None, image_pat
         data = FormData()
         data.add_field('chat_id', f'{settings.TG_ID}')
         data.add_field('caption', text)
-        data.add_field('disable_notification', False)
+        data.add_field('disable_notification', 'false')
         async with aiofiles.open(image_path, 'rb') as photo:
             photo_data = await photo.read()
             data.add_field('photo', photo_data, filename=image_path.name)
