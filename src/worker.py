@@ -134,7 +134,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
 
 
 async def main():
-    register(await send_telegram_report('Worker stopped.'))
+    register(asyncio.create_task(send_telegram_report('Worker stopped.')))
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
     last_restart_hour = current_time.hour
