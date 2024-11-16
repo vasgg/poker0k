@@ -3,6 +3,7 @@ from datetime import timedelta, timezone, datetime
 import logging.config
 from pynput.mouse import Controller
 import redis.asyncio as redis
+from atexit import register
 
 from config import get_logging_config, settings
 from consts import Colors, Coords, WorkspaceCoords
@@ -133,6 +134,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
 
 
 async def main():
+    register(await send_telegram_report('Worker stopped.'))
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
     last_restart_hour = current_time.hour
