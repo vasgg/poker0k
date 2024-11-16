@@ -1,3 +1,4 @@
+from asyncio import run
 from http import HTTPStatus
 from pathlib import Path
 import logging.config
@@ -35,3 +36,7 @@ async def send_telegram_report(message: str, task: Task | None = None, image_pat
 
     async with aiohttp.ClientSession() as session:
         await session.post(url, data=data, ssl=False)
+
+
+def sync_send_telegram_report(message: str):
+    run(send_telegram_report(message))

@@ -9,7 +9,7 @@ from config import get_logging_config, settings
 from consts import Colors, Coords, WorkspaceCoords
 from controllers.actions import Actions
 from controllers.requests import send_report
-from controllers.telegram import send_telegram_report
+from controllers.telegram import send_telegram_report, sync_send_telegram_report
 from controllers.window_checker import WindowChecker
 from internal import Step, Task
 
@@ -134,7 +134,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
 
 
 async def main():
-    register(asyncio.create_task(send_telegram_report('Worker stopped.')))
+    register(sync_send_telegram_report, "Worker stopped.")
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
     last_restart_hour = current_time.hour
