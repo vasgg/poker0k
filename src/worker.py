@@ -9,7 +9,7 @@ from config import get_logging_config, settings
 from consts import Colors, Coords, WorkspaceCoords
 from controllers.actions import Actions
 from controllers.requests import send_report
-from controllers.telegram import send_report_at_exit, send_telegram_report, sync_send_telegram_report
+from controllers.telegram import send_report_at_exit, send_telegram_report
 from controllers.window_checker import WindowChecker
 from internal import Step, Task
 
