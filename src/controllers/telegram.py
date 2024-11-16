@@ -1,11 +1,9 @@
-from asyncio import run
-from http import HTTPStatus
 from pathlib import Path
-import logging.config
 
 import aiofiles
 import aiohttp
 from aiohttp import FormData
+from requests import get
 
 from config import settings
 from internal import Task
@@ -38,5 +36,7 @@ async def send_telegram_report(message: str, task: Task | None = None, image_pat
         await session.post(url, data=data, ssl=False)
 
 
-def sync_send_telegram_report(message: str):
-    run(send_telegram_report(message))
+def send_report_at_exit():
+    url = (f"https://api.telegram.org/bot{settings.TG_BOT_TOKEN.get_secret_value()}"
+           f"/sendMessage?text=Worker_stopped&chat_id={settings.TG_ID}")
+    get(url)
