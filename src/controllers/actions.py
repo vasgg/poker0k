@@ -118,14 +118,14 @@ class Actions:
             logger.info("Emulator failed after 3 restarts. Check BlueStacks App Player.")
             return
         coords = (
-            Coords.ANDROID_CLOSE_EMULATOR_BUTTON if size == Size.SMALL else Coords.ANDROID_CLOSE_EMULATOR_BUTTON_BIG
+            Coords.CLOSE_EMULATOR_BUTTON if size == Size.SMALL else Coords.CLOSE_EMULATOR_BUTTON_BIG
         )
         await Actions.click_on_const(mouse, coords, 3)
         workspace = await Actions.take_screenshot_of_region(
             WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
         )
         exit_button = await Actions.find_color_square(
-            image=workspace, color=Colors.ANDROID_CLOSE_BUTTON_COLOR, tolerance_percent=20
+            image=workspace, color=Colors.CLOSE_BUTTON_COLOR, tolerance_percent=20
         )
         if exit_button:
             await Actions.click_on_finded(mouse, exit_button, 'CONFIRM EXIT BUTTON')
@@ -142,13 +142,13 @@ class Actions:
 
 
 async def start_emulator_flow(mouse: Controller, attempts: int = 1):
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON)
-    await Actions.click_on_const(mouse, Coords.ANDROID_OPEN_EMULATOR_BUTTON, 120)
+    await Actions.click_on_const(mouse, Coords.OPEN_EMULATOR_BUTTON)
+    await Actions.click_on_const(mouse, Coords.OPEN_EMULATOR_BUTTON, 120)
     if not await WindowChecker.check_window():
         await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
         return
-    await Actions.click_on_const(mouse, Coords.ANDROID_DONT_SHOW_TODAY, 5)
-    await Actions.click_on_const(mouse, Coords.ANDROID_ME_SECTION, 10)
-    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_BUTTON, 20)
-    await Actions.click_on_const(mouse, Coords.ANDROID_CASHIER_SETTINGS, 5)
-    await Actions.click_on_const(mouse, Coords.ANDROID_TRANSFER_SECTION, 10)
+    await Actions.click_on_const(mouse, Coords.DONT_SHOW_TODAY, 5)
+    await Actions.click_on_const(mouse, Coords.ME_SECTION, 10)
+    await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
+    await Actions.click_on_const(mouse, Coords.CASHIER_SETTINGS, 5)
+    await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 10)

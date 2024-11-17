@@ -39,7 +39,7 @@ async def check_time(mouse: Controller):
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
     if current_time.hour in settings.RESTARTS_AT and last_restart_hour != current_time.hour:
-        logging.info(f"Performing restarting emulator. Check '.env' file for settings.")
+        logging.info(f"Performing restarting emulator. Check .env file for more info.")
         await Actions.reopen_emulator(mouse)
         last_restart_hour = current_time.hour
         logging.info(f"Emulator started. Next restart after {await get_next_restart_time()}")
@@ -48,16 +48,16 @@ async def check_time(mouse: Controller):
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
-    await Actions.click_on_const(mouse, Coords.ANDROID_NICKNAME_SECTION, 3)
+    await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
     await Actions.input_value(value=task.requisite)
-    await Actions.click_on_const(mouse, Coords.ANDROID_AMOUNT_SECTION, 3)
+    await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
     await Actions.input_value(value=str(task.amount).replace('.', ','))
 
     workspace = await Actions.take_screenshot_of_region(
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     )
     transfer_button = await Actions.find_color_square(
-        image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=25
+        image=workspace, color=Colors.GREEN, tolerance_percent=25
     )
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
@@ -72,7 +72,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     )
     transfer_confirm_button = await Actions.find_color_square(
-        image=workspace, color=Colors.ANDROID_GREEN, tolerance_percent=25
+        image=workspace, color=Colors.GREEN, tolerance_percent=25
     )
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
