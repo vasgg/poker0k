@@ -38,5 +38,5 @@ async def send_telegram_report(message: str, task: Task | None = None, image_pat
 
 def send_report_at_exit():
     url = (f"https://api.telegram.org/bot{settings.TG_BOT_TOKEN.get_secret_value()}"
-           f"/sendMessage?text=Worker_stopped&chat_id={settings.TG_ID}")
+           f"/sendMessage?text=Worker stopped&chat_id={settings.TG_ID}")
     get(url)
