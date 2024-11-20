@@ -45,6 +45,15 @@ async def check_time(mouse: Controller):
         logging.info(f"Emulator started. Next restart after {await get_next_restart_time()}")
 
 
+async def restore_tasks(redis_client):
+    while True:
+        task_data = await redis_client.lpop('FER_queue_IN_PROGRESS')
+        if not task_data:
+            break
+        await redis_client.rpush('FER_queue', task_data)
+    logging.info("All tasks restored to the main queue.")
+
+
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
@@ -106,8 +115,11 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         set_name_completed = 'dev_completed_tasks'
     if task.status == 1:
         task.step = Step.PROCESSED
+
         await redis_client.lpush('FER_reports', task.model_dump_json())
+        await redis_client.lrem('FER_queue_IN_PROGRESS', 1, task.model_dump_json())
         await redis_client.sadd(set_name_completed, str(task.order_id))
+
         await send_report(task=task, redis_client=redis_client)
         await Actions.take_screenshot(task=task)
     else:
@@ -131,6 +143,10 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
                 redis_client=redis_client,
                 problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.',
             )
+            logging.info(f"Restoring tasks to the main queue.")
+            await restore_tasks(redis_client)
+            logging.info(f"Performing restarting emulator after failed task.")
+            await Actions.reopen_emulator(mouse)
 
 
 async def main():
@@ -163,7 +179,9 @@ async def main():
     while True:
         await check_time(mouse)
         # noinspection PyTypeChecker
-        task_data = await redis_client.brpop('FER_queue', timeout=5)
+        # task_data = await redis_client.brpop('FER_queue', timeout=5)
+        task_data = await redis_client.brpoplpush('FER_queue', 'FER_queue_IN_PROGRESS', timeout=5)
+
         if task_data:
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode('utf-8'))
