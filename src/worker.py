@@ -182,7 +182,6 @@ async def main():
         # task_data = await redis_client.brpop('FER_queue', timeout=5)
         await redis_client.brpoplpush('FER_queue', 'FER_queue_IN_PROGRESS', timeout=5)
         task_data = await redis_client.brpop('FER_queue_IN_PROGRESS', timeout=5)
-        logging.info(f"Task data: {task_data}")
 
         if task_data:
             _, task_data = task_data
