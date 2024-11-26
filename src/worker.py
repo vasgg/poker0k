@@ -45,13 +45,9 @@ async def check_time(mouse: Controller):
         logging.info(f"Emulator started. Next restart after {await get_next_restart_time()}")
 
 
-async def restore_tasks(redis_client):
-    while True:
-        task_data = await redis_client.lpop('FER_queue_IN_PROGRESS')
-        if not task_data:
-            break
-        await redis_client.rpush('FER_queue', task_data)
-    logging.info("All tasks restored to the main queue.")
+async def restore_tasks(task: Task, redis_client):
+    await redis_client.rpush('FER_queue', task)
+    logging.info(f"Task {task.order_id} restored to the main queue.")
 
 
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
@@ -144,7 +140,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
                 problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.',
             )
             logging.info(f"Restoring tasks to the main queue.")
-            await restore_tasks(redis_client)
+            await restore_tasks(task, redis_client)
             logging.info(f"Performing restarting emulator after failed task.")
             await Actions.reopen_emulator(mouse)
 
