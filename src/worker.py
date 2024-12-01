@@ -46,7 +46,8 @@ async def check_time(mouse: Controller):
 
 
 async def restore_tasks(task: Task, redis_client):
-    await redis_client.rpush('FER_queue', task)
+    serialized_task = task.model_dump_json()
+    await redis_client.rpush('FER_queue', serialized_task)
     logging.info(f"Task {task.order_id} restored to the main queue.")
 
 
@@ -113,7 +114,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         task.step = Step.PROCESSED
 
         await redis_client.lpush('FER_reports', task.model_dump_json())
-        await redis_client.lrem('FER_queue_IN_PROGRESS', 1, task.model_dump_json())
+        # await redis_client.lrem('FER_queue_IN_PROGRESS', 1, task.model_dump_json())
         await redis_client.sadd(set_name_completed, str(task.order_id))
 
         await send_report(task=task, redis_client=redis_client)
