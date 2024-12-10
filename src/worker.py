@@ -187,7 +187,7 @@ async def main():
             if 'dev-' in task.callback_url:
                 set_name = 'dev_completed_tasks'
             is_in_set = await redis_client.sismember(set_name, str(task.order_id))
-            if not is_in_set:
+            if not is_in_set and 'dev' not in task.callback_url:
                 await execute_task(task, redis_client, mouse)
             else:
                 logging.info(f"Task {task.order_id} already processed, skipping.")
