@@ -9,13 +9,12 @@ class WindowChecker:
     async def check_window() -> bool:
         windows = gw.getAllWindows()
         for window in windows:
-            print(window.title, window.width, window.left)
-        #     if window.title == 'BlueStacks Player':
-        #         if window.width == 428 and window.left == 1067:
-        #             logger.info("Checking BlueStacks Player. Size and position: GOOD.")
-        #             return True
-        # logger.info(
-        #     "Checking BlueStacks Player. Size and position: BAD.\n"
-        #     "                                          Going to restart emulator."
-        # )
-        # return False
+            if window.title == 'ПокерОК':
+                if window.width == 1200 and window.left == 360:
+                    logger.info("Checking PokerOK app. Size and position: GOOD.")
+                    return True
+        logger.info(
+            "Checking PokerOK app. Size and position: BAD.\n"
+            "                                          Going to restart app."
+        )
+        return False
