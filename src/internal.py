@@ -27,11 +27,6 @@ class Stage(StrEnum):
     PROD = auto()
 
 
-class Size(StrEnum):
-    BIG = auto()
-    SMALL = auto()
-
-
 class CheckType(StrEnum):
     MONEY = auto()
     NAME = auto()

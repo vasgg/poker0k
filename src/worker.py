@@ -8,10 +8,10 @@ from atexit import register
 from config import get_logging_config, settings
 from consts import Colors, Coords
 from controllers.actions import Actions
-from controllers.reqs import send_error_report, send_report
+from controllers.reqs import send_report
 from controllers.telegram import send_report_at_exit, send_telegram_report
 from controllers.window_checker import WindowChecker
-from internal import CheckType, ErrorType, Step, Task
+from internal import CheckType, Step, Task
 
 
 last_restart_hour = None
@@ -39,10 +39,10 @@ async def check_time(mouse: Controller):
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
     if current_time.hour in settings.RESTARTS_AT and last_restart_hour != current_time.hour:
-        logging.info(f"Performing restarting emulator. Check .env file for more info.")
-        await Actions.reopen_emulator(mouse)
+        logging.info(f"Performing scheduled restart app.")
+        await Actions.reopen_pokerok(mouse)
         last_restart_hour = current_time.hour
-        logging.info(f"Emulator started. Next restart after {await get_next_restart_time()}")
+        logging.info(f"App started. Next restart after {await get_next_restart_time()}")
 
 
 async def restore_tasks(task: Task, redis_client):
@@ -54,13 +54,19 @@ async def restore_tasks(task: Task, redis_client):
 async def execute_task(task: Task, redis_client: redis, mouse: Controller, attempts: int = 0):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
+    nickname = 'dnk-jarod' if 'dev-' in task.callback_url else task.requisite
+    amount = '1.0' if 'dev-' in task.callback_url else str(task.amount)
     await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
-    await Actions.input_value(value=task.requisite)
+    await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
-    await Actions.input_value(value=str(task.amount).replace('.', ','))
+    await Actions.input_value(value=amount)
     if await Actions.name_or_money_error_check(check=CheckType.MONEY):
         logging.info(f"Task {task.order_id} failed. Insufficient funds.")
-        await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
+        # await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Insufficient funds.",
+            task=task,
+        )
         return
     transfer_button = await Actions.find_square_color(color=Colors.GREEN)
     #
@@ -81,7 +87,11 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     if await Actions.name_or_money_error_check(check=CheckType.NAME):
         logging.info(f"Task {task.order_id} failed. Incorrect name.")
         await redis_client.sadd('incorrect_names', str(task.requisite))
-        await send_error_report(task, ErrorType.INCORRECT_NAME)
+        # await send_error_report(task, ErrorType.INCORRECT_NAME)
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Incorrect name.",
+            task=task,
+        )
         return
     transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
     # workspace = await Actions.take_screenshot_of_region(
@@ -154,7 +164,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             logging.info(f"Restoring tasks to the main queue.")
             await restore_tasks(task, redis_client)
             logging.info(f"Performing restarting emulator after failed task.")
-            await Actions.reopen_emulator(mouse)
+            await Actions.reopen_pokerok(mouse)
 
 
 async def main():
@@ -173,40 +183,36 @@ async def main():
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
-    logging_config = get_logging_config('worker_android')
+    logging_config = get_logging_config('worker_windows')
     logging.config.dictConfig(logging_config)
 
     mouse = Controller()
     if not await WindowChecker.check_window():
-        await Actions.open_emulator(mouse)
+        await Actions.open_pokerok_app(mouse)
     await send_telegram_report('Worker started.')
 
     logging.info(f'Worker started. {text}')
     await asyncio.sleep(4)
-    #
-    # while True:
-    #     await check_time(mouse)
-    #     # noinspection PyTypeChecker
-    #     task_data = await redis_client.brpop('FER_queue', timeout=5)
-    #     # await redis_client.brpoplpush('FER_queue', 'FER_queue_IN_PROGRESS', timeout=5)
-    #     # task_data = await redis_client.brpop('FER_queue_IN_PROGRESS', timeout=5)
-    #
-    #     if task_data:
-    #         _, task_data = task_data
-    #         task = Task.model_validate_json(task_data.decode('utf-8'))
-    #         set_name = 'prod_completed_tasks'
-    #         if 'dev-' in task.callback_url:
-    #             set_name = 'dev_completed_tasks'
-    #         is_in_set = await redis_client.sismember(set_name, str(task.order_id))
-    #         is_in_incorrect_names = await redis_client.sismember('incorrect_names', str(task.requisite))
-    #         if not is_in_set:
-    #             if not is_in_incorrect_names:
-    #                 await execute_task(task, redis_client, mouse)
-    #             else:
-    #                 logging.info(f"Name {task.requisite} is incorrect, skipping.")
-    #         else:
-    #             logging.info(f"Task {task.order_id} already processed, skipping.")
-    #
+
+    while True:
+        await check_time(mouse)
+        # noinspection PyTypeChecker
+        task_data = await redis_client.brpop('FER_queue', timeout=5)
+
+        if task_data:
+            _, task_data = task_data
+            task = Task.model_validate_json(task_data.decode('utf-8'))
+            set_name = 'dev_completed_tasks' if 'dev-' in task.callback_url else 'prod_completed_tasks'
+            is_in_set = await redis_client.sismember(set_name, str(task.order_id))
+            is_in_incorrect_names = await redis_client.sismember('incorrect_names', str(task.requisite))
+            if not is_in_set:
+                if not is_in_incorrect_names:
+                    await execute_task(task, redis_client, mouse)
+                else:
+                    logging.info(f"Name {task.requisite} is incorrect, skipping task.")
+            else:
+                logging.info(f"Task {task.order_id} already processed, skipping task.")
+
 
 def run_main():
     asyncio.run(main())

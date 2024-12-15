@@ -10,7 +10,7 @@ from pynput.mouse import Button, Controller
 from consts import Colors, Coords, WorkspaceCoords
 from controllers.telegram import send_telegram_report
 from controllers.window_checker import WindowChecker
-from internal import CheckType, Size, Task
+from internal import CheckType, Task
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class Actions:
         width, height = image.size
         for x in range(width):
             for y in range(height):
-                if Actions.is_color_match(pixels[x, y][:3], (214, 23, 23), tolerance_percent):
+                if Actions.is_color_match(pixels[x, y][:3], (227, 50, 38), tolerance_percent):
                     del image
                     return True
         del image
@@ -172,42 +172,29 @@ class Actions:
         return path / file
 
     @staticmethod
-    async def reopen_emulator(mouse: Controller, size: Size = Size.SMALL, attempts: int = 1):
-        logger.info(f"Starting reopen emulator process. Attempt number {attempts}.")
+    async def reopen_pokerok(mouse: Controller, attempts: int = 1):
+        logger.info(f"Reopening pokerok app. Attempt number: {attempts}.")
         if attempts > 3:
-            logger.info("Emulator failed after 3 restarts. Check BlueStacks App Player.")
+            logger.info("App failed after 3 restarts. Check Pokerok app.")
             return
-        coords = (
-            Coords.CLOSE_EMULATOR_BUTTON if size == Size.SMALL else Coords.CLOSE_EMULATOR_BUTTON_BIG
-        )
-        await Actions.click_on_const(mouse, coords, 3)
-        # workspace = await Actions.take_screenshot_of_region(
-        #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-        # )
-        exit_button = await Actions.find_square_color(color=Colors.CLOSE_BUTTON_COLOR)
-        if exit_button:
-            await Actions.click_on_finded(mouse, exit_button, 'CONFIRM EXIT BUTTON')
-        else:
-            logging.info("Error. Can't find CONFIRM EXIT BUTTON")
-            await send_telegram_report("Reopen emulator failed. Can't find CONFIRM EXIT BUTTON")
-            return
-        await start_emulator_flow(mouse, attempts + 1)
+        await Actions.click_on_const(mouse, Coords.CLOSE_APP_BUTTON, 3)
+        await start_app_flow(mouse, attempts + 1)
 
     @staticmethod
-    async def open_emulator(mouse: Controller, attempts: int = 1):
-        logger.info(f"Starting open emulator process. Attempt number: {attempts}.")
-        await start_emulator_flow(mouse, attempts)
+    async def open_pokerok_app(mouse: Controller, attempts: int = 1):
+        logger.info(f"Opening app. Attempt number: {attempts}.")
+        await start_app_flow(mouse, attempts)
         logger.info(f"Emulator successfully started.")
 
 
-async def start_emulator_flow(mouse: Controller, attempts: int = 1):
-    await Actions.click_on_const(mouse, Coords.OPEN_EMULATOR_BUTTON)
-    await Actions.click_on_const(mouse, Coords.OPEN_EMULATOR_BUTTON, 35)
+async def start_app_flow(mouse: Controller, attempts: int = 1):
+    await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON)
+    await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
     if not await WindowChecker.check_window():
-        # await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
+        await Actions.reopen_pokerok(mouse, attempts=attempts + 1)
         return
-    # await Actions.click_on_const(mouse, Coords.DONT_SHOW_TODAY, 5)
-    # await Actions.click_on_const(mouse, Coords.ME_SECTION, 10)
-    # await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
-    # await Actions.click_on_const(mouse, Coords.CASHIER_SETTINGS, 5)
-    # await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 10)
+    await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 10)
+    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 10)
+    await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 10)
+    await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 10)
+    await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 10)

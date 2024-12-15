@@ -70,7 +70,7 @@ def get_logging_config(app_name: str):
                 "()": RotatingFileHandler,
                 "level": "INFO",
                 "formatter": "main",
-                "filename": f"logs/{app_name}_log.log",
+                "filename": f"logs/{app_name}.log",
                 "maxBytes": 50000000,
                 "backupCount": 3,
                 "encoding": "utf-8",
