@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ENCRYPT_KEY: SecretStr
     DECRYPT_KEY: SecretStr
     TEST_ENDPOINT: str
+    ERROR_ENDPOINT: str
     MAX_ATTEMPTS: int
     STAGE: Stage
     DB_HOST: str

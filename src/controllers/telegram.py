@@ -8,9 +8,6 @@ from requests import get
 from config import settings
 from internal import Task
 
-# logging_config = get_logging_config('tg_reporter')
-# logging.config.dictConfig(logging_config)
-
 
 async def send_telegram_report(message: str, task: Task | None = None, image_path: Path | None = None) -> None:
     text = f'{task.order_id}|{task.requisite}|${task.amount}|{message}' if task else message

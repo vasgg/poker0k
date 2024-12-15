@@ -6,12 +6,12 @@ import redis.asyncio as redis
 from atexit import register
 
 from config import get_logging_config, settings
-from consts import Colors, Coords, WorkspaceCoords
+from consts import Colors, Coords
 from controllers.actions import Actions
-from controllers.requests import send_report
+from controllers.reqs import send_error_report, send_report
 from controllers.telegram import send_report_at_exit, send_telegram_report
 from controllers.window_checker import WindowChecker
-from internal import Step, Task
+from internal import CheckType, ErrorType, Step, Task
 
 
 last_restart_hour = None
@@ -58,54 +58,65 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.input_value(value=task.requisite)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
     await Actions.input_value(value=str(task.amount).replace('.', ','))
-
-    workspace = await Actions.take_screenshot_of_region(
-        WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-    )
-    transfer_button = await Actions.find_color_square(
-        image=workspace, color=Colors.GREEN, tolerance_percent=25
-    )
+    if await Actions.name_or_money_error_check(check=CheckType.MONEY):
+        logging.info(f"Task {task.order_id} failed. Insufficient funds.")
+        await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
+        return
+    transfer_button = await Actions.find_square_color(color=Colors.GREEN)
+    #
+    # workspace = await Actions.take_screenshot_of_region(
+    #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+    # )
+    # transfer_button = await Actions.find_color_square(
+    #     image=workspace, color=Colors.GREEN, tolerance_percent=25
+    # )
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
-        await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer button.",
-            task=task,
-        )
-
-    workspace = await Actions.take_screenshot_of_region(
-        WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-    )
-    transfer_confirm_button = await Actions.find_color_square(
-        image=workspace, color=Colors.GREEN, tolerance_percent=25
-    )
+        # await send_telegram_report(
+        #     f"Task {task.order_id} failed. Can't find transfer button.",
+        #     task=task,
+        # )
+    if await Actions.name_or_money_error_check(check=CheckType.NAME):
+        logging.info(f"Task {task.order_id} failed. Incorrect name.")
+        await redis_client.sadd('incorrect_names', str(task.requisite))
+        await send_error_report(task, ErrorType.INCORRECT_NAME)
+        return
+    transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
+    # workspace = await Actions.take_screenshot_of_region(
+    #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+    # )
+    # transfer_confirm_button = await Actions.find_color_square(
+    #     image=workspace, color=Colors.GREEN, tolerance_percent=25
+    # )
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
-        await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer confirm button.",
-            task=task,
-        )
+        # await send_telegram_report(
+        #     f"Task {task.order_id} failed. Can't find transfer confirm button.",
+        #     task=task,
+        # )
     transfer_confirm_section = None
     for _ in range(10):
-        workspace = await Actions.take_screenshot_of_region(
-            WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-        )
-        transfer_confirm_section = await Actions.find_color_square(
-            image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10
-        )
+        # workspace = await Actions.take_screenshot_of_region(
+        #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+        # )
+        # transfer_confirm_section = await Actions.find_color_square(
+        #     image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10
+        # )
+        transfer_confirm_section = await Actions.find_square_color(color=Colors.FINAL_GREEN)
         if transfer_confirm_section:
             break
         else:
             await asyncio.sleep(0.4)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
-        await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer confirm section.",
-            task=task
-        )
+        # await send_telegram_report(
+        #     f"Task {task.order_id} failed. Can't find transfer confirm section.",
+        #     task=task
+        # )
     task.status = 1 if transfer_confirm_section is not None else 0
     set_name_completed = 'prod_completed_tasks'
     if 'dev-' in task.callback_url:
@@ -176,9 +187,9 @@ async def main():
     while True:
         await check_time(mouse)
         # noinspection PyTypeChecker
-        # task_data = await redis_client.brpop('FER_queue', timeout=5)
-        await redis_client.brpoplpush('FER_queue', 'FER_queue_IN_PROGRESS', timeout=5)
-        task_data = await redis_client.brpop('FER_queue_IN_PROGRESS', timeout=5)
+        task_data = await redis_client.brpop('FER_queue', timeout=5)
+        # await redis_client.brpoplpush('FER_queue', 'FER_queue_IN_PROGRESS', timeout=5)
+        # task_data = await redis_client.brpop('FER_queue_IN_PROGRESS', timeout=5)
 
         if task_data:
             _, task_data = task_data
@@ -187,8 +198,12 @@ async def main():
             if 'dev-' in task.callback_url:
                 set_name = 'dev_completed_tasks'
             is_in_set = await redis_client.sismember(set_name, str(task.order_id))
-            if not is_in_set and 'dev' not in task.callback_url:
-                await execute_task(task, redis_client, mouse)
+            is_in_incorrect_names = await redis_client.sismember('incorrect_names', str(task.requisite))
+            if not is_in_set:
+                if not is_in_incorrect_names:
+                    await execute_task(task, redis_client, mouse)
+                else:
+                    logging.info(f"Name {task.requisite} is incorrect, skipping.")
             else:
                 logging.info(f"Task {task.order_id} already processed, skipping.")
 

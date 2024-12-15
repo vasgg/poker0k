@@ -30,3 +30,19 @@ class Stage(StrEnum):
 class Size(StrEnum):
     BIG = auto()
     SMALL = auto()
+
+
+class CheckType(StrEnum):
+    MONEY = auto()
+    NAME = auto()
+
+
+class Section(StrEnum):
+    TRANSFER_BUTTON = auto()
+    TRANSFER_CONFIRM_BUTTON = auto()
+    TRANSFER_CONFIRM_SECTION = auto()
+
+
+class ErrorType(StrEnum):
+    INSUFFICIENT_FUNDS = auto()
+    INCORRECT_NAME = auto()

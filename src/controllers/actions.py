@@ -8,8 +8,9 @@ from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
 
 from consts import Colors, Coords, WorkspaceCoords
+from controllers.telegram import send_telegram_report
 from controllers.window_checker import WindowChecker
-from internal import Size, Task
+from internal import CheckType, Size, Task
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +54,67 @@ class Actions:
         logger.info(f'Input value: {value}.')
 
     @staticmethod
-    def is_color_match(pixel, color, tolerance_percent):
-        return all(abs(pixel[i] - color[i]) / color[i] <= tolerance_percent / 100 for i in range(3) if color[i] != 0)
+    def is_color_match(pixel_color, target_color, tolerance_percent=0):
+        tolerance = [tolerance_percent * 255 // 100] * 3
+        return all(abs(pixel_color[i] - target_color[i]) <= tolerance[i] for i in range(3))
+
+    @staticmethod
+    async def name_or_money_error_check(
+        check: CheckType,
+        tolerance_percent: int = 10
+    ) -> bool:
+        match check:
+            case CheckType.MONEY:
+                top_left = WorkspaceCoords.BALANCE_CHECK_TOP_LEFT
+                bottom_right = WorkspaceCoords.BALANCE_CHECK_BOTTOM_RIGHT
+            case CheckType.NAME:
+                top_left = WorkspaceCoords.NAME_CHECK_TOP_LEFT
+                bottom_right = WorkspaceCoords.NAME_CHECK_BOTTOM_RIGHT
+            case _:
+                assert False, f"Unexpected check type: {check}"
+        image = await Actions.take_screenshot_of_region(top_left, bottom_right)
+        pixels = image.load()
+        width, height = image.size
+        for x in range(width):
+            for y in range(height):
+                if Actions.is_color_match(pixels[x, y][:3], (214, 23, 23), tolerance_percent):
+                    del image
+                    return True
+        del image
+        return False
+
+    @staticmethod
+    async def find_square_color(
+        color: tuple[int, int, int],
+        tolerance_percent: int = 20
+    ):
+        top_left = WorkspaceCoords.WORKSPACE_TOP_LEFT
+        bottom_right = WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+        image = await Actions.take_screenshot_of_region(top_left, bottom_right)
+        width, height = image.size
+        pixels = image.load()
+        sqare_size = 11
+        half_square = sqare_size // 2
+
+        for x in range(half_square, width - half_square):
+            for y in range(half_square, height - half_square):
+                matched = True
+                for dx in range(-half_square, half_square + 1):
+                    for dy in range(-half_square, half_square + 1):
+                        if not Actions.is_color_match(pixels[x + dx, y + dy][:3], color, tolerance_percent):
+                            matched = False
+                            break
+                    if not matched:
+                        break
+                if matched:
+                    del image
+                    absolute_coords = (
+                        WorkspaceCoords.WORKSPACE_TOP_LEFT[0] + x,
+                        WorkspaceCoords.WORKSPACE_TOP_LEFT[1] + y,
+                    )
+                    return absolute_coords
+        del image
+        return None
 
     @staticmethod
     async def find_color_square(image, color=(0, 128, 0), tolerance_percent=0) -> tuple[int, int] | None:
@@ -121,16 +181,15 @@ class Actions:
             Coords.CLOSE_EMULATOR_BUTTON if size == Size.SMALL else Coords.CLOSE_EMULATOR_BUTTON_BIG
         )
         await Actions.click_on_const(mouse, coords, 3)
-        workspace = await Actions.take_screenshot_of_region(
-            WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-        )
-        exit_button = await Actions.find_color_square(
-            image=workspace, color=Colors.CLOSE_BUTTON_COLOR, tolerance_percent=20
-        )
+        # workspace = await Actions.take_screenshot_of_region(
+        #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+        # )
+        exit_button = await Actions.find_square_color(color=Colors.CLOSE_BUTTON_COLOR)
         if exit_button:
             await Actions.click_on_finded(mouse, exit_button, 'CONFIRM EXIT BUTTON')
         else:
             logging.info("Error. Can't find CONFIRM EXIT BUTTON")
+            await send_telegram_report("Reopen emulator failed. Can't find CONFIRM EXIT BUTTON")
             return
         await start_emulator_flow(mouse, attempts + 1)
 

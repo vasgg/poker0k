@@ -1,4 +1,5 @@
 import asyncio
+from datetime import UTC, datetime
 from http import HTTPStatus
 import logging
 
@@ -6,7 +7,7 @@ import aiohttp
 
 from config import settings
 from controllers.crypt import Crypt
-from internal import Step, Task
+from internal import ErrorType, Step, Task
 from redis.asyncio import Redis
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,41 @@ async def send_report(
             if attempt < retries - 1:
                 await asyncio.sleep(delay)
     logger.exception(f"Failed to send report after {retries} attempts, task id: {task.order_id} failed with error")
+
+
+async def send_error_report(
+    task: Task, error_type: ErrorType, retries: int = 3, delay: int = 3
+) -> None:
+    now = datetime.now(UTC)
+    async with aiohttp.ClientSession() as session:
+        cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+        data_json = task.model_dump_json()
+        data = {
+            'appName': 'pokerok_android',
+            'type': error_type,
+            'payload': data_json,
+            'timestamp': now,
+        }
+        headers = {'x-simpleex-sign': cryptor.encrypt(data_json)}
+        text_ok = f'Error report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}'
+        text_not_ok = (
+            f'Error report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:'
+        )
+        for attempt in range(retries):
+            try:
+                async with session.post(task.callback_url, data=data, headers=headers) as response:
+                    if response.status == HTTPStatus.OK:
+                        logger.info(text_ok)
+                        return
+                    else:
+                        error_text = await response.text()
+                        logger.info(f"{text_not_ok} {response.status}. {error_text}")
+            except Exception as e:
+                logger.exception(f"Attempt {attempt + 1} failed with error: {e}")
+
+            if attempt < retries - 1:
+                await asyncio.sleep(delay)
+    logger.exception(f"Failed to send error report after {retries} attempts, task id: {task.order_id} failed.")
 
 
 async def send_queue_request() -> None:
