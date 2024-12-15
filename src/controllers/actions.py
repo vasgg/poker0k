@@ -202,12 +202,12 @@ class Actions:
 
 async def start_emulator_flow(mouse: Controller, attempts: int = 1):
     await Actions.click_on_const(mouse, Coords.OPEN_EMULATOR_BUTTON)
-    await Actions.click_on_const(mouse, Coords.OPEN_EMULATOR_BUTTON, 120)
+    await Actions.click_on_const(mouse, Coords.OPEN_EMULATOR_BUTTON, 12)
     if not await WindowChecker.check_window():
         await Actions.reopen_emulator(mouse, size=Size.BIG, attempts=attempts + 1)
         return
-    await Actions.click_on_const(mouse, Coords.DONT_SHOW_TODAY, 5)
-    await Actions.click_on_const(mouse, Coords.ME_SECTION, 10)
-    await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
-    await Actions.click_on_const(mouse, Coords.CASHIER_SETTINGS, 5)
-    await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 10)
+    # await Actions.click_on_const(mouse, Coords.DONT_SHOW_TODAY, 5)
+    # await Actions.click_on_const(mouse, Coords.ME_SECTION, 10)
+    # await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
+    # await Actions.click_on_const(mouse, Coords.CASHIER_SETTINGS, 5)
+    # await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 10)

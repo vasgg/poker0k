@@ -183,30 +183,30 @@ async def main():
 
     logging.info(f'Worker started. {text}')
     await asyncio.sleep(4)
-
-    while True:
-        await check_time(mouse)
-        # noinspection PyTypeChecker
-        task_data = await redis_client.brpop('FER_queue', timeout=5)
-        # await redis_client.brpoplpush('FER_queue', 'FER_queue_IN_PROGRESS', timeout=5)
-        # task_data = await redis_client.brpop('FER_queue_IN_PROGRESS', timeout=5)
-
-        if task_data:
-            _, task_data = task_data
-            task = Task.model_validate_json(task_data.decode('utf-8'))
-            set_name = 'prod_completed_tasks'
-            if 'dev-' in task.callback_url:
-                set_name = 'dev_completed_tasks'
-            is_in_set = await redis_client.sismember(set_name, str(task.order_id))
-            is_in_incorrect_names = await redis_client.sismember('incorrect_names', str(task.requisite))
-            if not is_in_set:
-                if not is_in_incorrect_names:
-                    await execute_task(task, redis_client, mouse)
-                else:
-                    logging.info(f"Name {task.requisite} is incorrect, skipping.")
-            else:
-                logging.info(f"Task {task.order_id} already processed, skipping.")
-
+    #
+    # while True:
+    #     await check_time(mouse)
+    #     # noinspection PyTypeChecker
+    #     task_data = await redis_client.brpop('FER_queue', timeout=5)
+    #     # await redis_client.brpoplpush('FER_queue', 'FER_queue_IN_PROGRESS', timeout=5)
+    #     # task_data = await redis_client.brpop('FER_queue_IN_PROGRESS', timeout=5)
+    #
+    #     if task_data:
+    #         _, task_data = task_data
+    #         task = Task.model_validate_json(task_data.decode('utf-8'))
+    #         set_name = 'prod_completed_tasks'
+    #         if 'dev-' in task.callback_url:
+    #             set_name = 'dev_completed_tasks'
+    #         is_in_set = await redis_client.sismember(set_name, str(task.order_id))
+    #         is_in_incorrect_names = await redis_client.sismember('incorrect_names', str(task.requisite))
+    #         if not is_in_set:
+    #             if not is_in_incorrect_names:
+    #                 await execute_task(task, redis_client, mouse)
+    #             else:
+    #                 logging.info(f"Name {task.requisite} is incorrect, skipping.")
+    #         else:
+    #             logging.info(f"Task {task.order_id} already processed, skipping.")
+    #
 
 def run_main():
     asyncio.run(main())
