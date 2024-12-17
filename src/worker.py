@@ -188,6 +188,7 @@ async def main():
 
     mouse = Controller()
     if not await WindowChecker.check_window():
+        return
         await Actions.open_pokerok_app(mouse)
     await send_telegram_report('Worker started.')
 
