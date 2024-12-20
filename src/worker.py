@@ -183,7 +183,7 @@ async def main():
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
-    logging_config = get_logging_config('worker_windows')
+    logging_config = get_logging_config('worker_windows_notebook')
     logging.config.dictConfig(logging_config)
 
     mouse = Controller()
