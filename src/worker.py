@@ -193,7 +193,7 @@ async def main():
 
     mouse = Controller()
     if not await WindowChecker.check_window():
-        await Actions.open_pokerok_app(mouse)
+        await Actions.open_app(mouse)
     await send_telegram_report('Worker started.')
 
     logging.info(f'Worker started in blind mode. {text}')
