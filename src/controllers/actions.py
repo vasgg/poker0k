@@ -181,10 +181,10 @@ class Actions:
         await start_app_flow(mouse, attempts + 1)
 
     @staticmethod
-    async def open_pokerok_app(mouse: Controller, attempts: int = 1):
+    async def open_app(mouse: Controller, attempts: int = 1):
         logger.info(f"Opening app. Attempt number: {attempts}.")
         await start_app_flow(mouse, attempts)
-        logger.info(f"Emulator successfully started.")
+        logger.info(f"Pokerok app successfully started.")
 
 
 async def start_app_flow(mouse: Controller, attempts: int = 1):
