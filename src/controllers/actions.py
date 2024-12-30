@@ -194,7 +194,7 @@ async def start_app_flow(mouse: Controller, attempts: int = 1):
         await Actions.reopen_pokerok(mouse, attempts=attempts + 1)
         return
     await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 10)
-    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 10)
+    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 15)
     await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 10)
     await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 10)
     await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 10)
