@@ -6,7 +6,7 @@ import redis.asyncio as redis
 from atexit import register
 
 from config import get_logging_config, settings
-from consts import Colors, Coords
+from consts import Colors, Coords, WorkspaceCoords
 from controllers.actions import Actions
 from controllers.reqs import send_report
 from controllers.telegram import send_report_at_exit, send_telegram_report
@@ -60,8 +60,8 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
     await Actions.input_value(value=amount)
-    await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
-    await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
+    # await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
+    # await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
     # if await Actions.name_or_money_error_check(check=CheckType.MONEY):
     #     logging.info(f"Task {task.order_id} failed. Insufficient funds.")
         # await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
@@ -70,22 +70,22 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         #     task=task,
         # )
         # return
-    # transfer_button = await Actions.find_square_color(color=Colors.GREEN)
-    #
+    transfer_button = await Actions.find_square_color(color=Colors.GREEN)
+
     # workspace = await Actions.take_screenshot_of_region(
     #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     # )
     # transfer_button = await Actions.find_color_square(
     #     image=workspace, color=Colors.GREEN, tolerance_percent=25
     # )
-    # if transfer_button:
-    #     await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
-    # else:
-    #     logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
-        # await send_telegram_report(
-        #     f"Task {task.order_id} failed. Can't find transfer button.",
-        #     task=task,
-        # )
+    if transfer_button:
+        await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
+    else:
+        logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Can't find transfer button.",
+            task=task,
+        )
     # if await Actions.name_or_money_error_check(check=CheckType.NAME):
     #     logging.info(f"Task {task.order_id} failed. Incorrect name.")
     #     await redis_client.sadd('incorrect_names', str(task.requisite))
@@ -95,56 +95,56 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         #     task=task,
         # )
         # return
-    # transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
+    transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
     # workspace = await Actions.take_screenshot_of_region(
     #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     # )
     # transfer_confirm_button = await Actions.find_color_square(
     #     image=workspace, color=Colors.GREEN, tolerance_percent=25
     # )
-    # if transfer_confirm_button:
-    #     await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
-    # else:
-    #     logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
-        # await send_telegram_report(
-        #     f"Task {task.order_id} failed. Can't find transfer confirm button.",
-        #     task=task,
-        # )
-    # transfer_confirm_section = None
-    # for _ in range(10):
+    if transfer_confirm_button:
+        await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
+    else:
+        logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Can't find transfer confirm button.",
+            task=task,
+        )
+    transfer_confirm_section = None
+    for _ in range(10):
         # workspace = await Actions.take_screenshot_of_region(
         #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
         # )
         # transfer_confirm_section = await Actions.find_color_square(
         #     image=workspace, color=Colors.FINAL_GREEN, tolerance_percent=10
         # )
-        # transfer_confirm_section = await Actions.find_square_color(color=Colors.FINAL_GREEN)
-        # if transfer_confirm_section:
-        #     break
-        # else:
-        #     await asyncio.sleep(0.4)
-    # else:
-    #     logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
-        # await send_telegram_report(
-        #     f"Task {task.order_id} failed. Can't find transfer confirm section.",
-        #     task=task
-        # )
-    task.status = 1
-    logging.info(f"Task {task.order_id} marked as completed in blind mode.")
+        transfer_confirm_section = await Actions.find_square_color(color=Colors.FINAL_GREEN)
+        if transfer_confirm_section:
+            break
+        else:
+            await asyncio.sleep(0.4)
+    else:
+        logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Can't find transfer confirm section.",
+            task=task
+        )
+    # task.status = 1
+    # logging.info(f"Task {task.order_id} marked as completed in blind mode.")
 
-    # task.status = 1 if transfer_confirm_section is not None else 0
+    task.status = 1 if transfer_confirm_section is not None else 0
     set_name_completed = 'prod_completed_tasks'
     if 'dev-' in task.callback_url:
         set_name_completed = 'dev_completed_tasks'
     if task.status == 1:
         task.step = Step.PROCESSED
 
-        # await redis_client.lpush('FER_reports', task.model_dump_json())
+        await redis_client.lpush('FER_reports', task.model_dump_json())
         # await redis_client.lrem('FER_queue_IN_PROGRESS', 1, task.model_dump_json())
         await redis_client.sadd(set_name_completed, str(task.order_id))
 
         await send_report(task=task, redis_client=redis_client)
-        # await Actions.take_screenshot(task=task)
+        await Actions.take_screenshot(task=task)
     else:
         task.step = Step.FAILED
         await redis_client.lpush('FER_reports', task.model_dump_json())
@@ -196,7 +196,7 @@ async def main():
         await Actions.open_app(mouse)
     await send_telegram_report('Worker started.')
 
-    logging.info(f'Worker started in blind mode. {text}')
+    logging.info(f'Worker started. {text}')
     await asyncio.sleep(4)
 
     while True:
