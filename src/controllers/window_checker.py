@@ -10,11 +10,12 @@ class WindowChecker:
         windows = gw.getAllWindows()
         for window in windows:
             if window.title == 'ПокерОК':
-                if window.width == 1200 and window.left == 596:
-                    logger.info("Checking PokerOK app. Size and position: GOOD.")
-                    return True
-        logger.info(
-            "Checking PokerOK app. Size and position: BAD.\n"
-            "                                          Going to restart app."
-        )
-        return False
+                print(window.width, window.left)
+        #         if window.width == 1200 and window.left == 596:
+        #             logger.info("Checking PokerOK app. Size and position: GOOD.")
+        #             return True
+        # logger.info(
+        #     "Checking PokerOK app. Size and position: BAD.\n"
+        #     "                                          Going to restart app."
+        # )
+        # return False
