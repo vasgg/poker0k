@@ -188,35 +188,32 @@ async def main():
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
-    logging_config = get_logging_config('worker_windows_notebook')
+    logging_config = get_logging_config('worker_pip')
     logging.config.dictConfig(logging_config)
 
     mouse = Controller()
-    if not await WindowChecker.check_window():
-        await Actions.open_app(mouse)
+    await WindowChecker.check_window()
+    # if not await WindowChecker.check_window():
+    #     await Actions.open_app(mouse)
     await send_telegram_report('Worker started.')
 
     logging.info(f'Worker started. {text}')
     await asyncio.sleep(4)
 
-    while True:
-        await check_time(mouse)
-        # noinspection PyTypeChecker
-        task_data = await redis_client.brpop('FER_queue', timeout=5)
-
-        if task_data:
-            _, task_data = task_data
-            task = Task.model_validate_json(task_data.decode('utf-8'))
-            set_name = 'dev_completed_tasks' if 'dev-' in task.callback_url else 'prod_completed_tasks'
-            is_in_set = await redis_client.sismember(set_name, str(task.order_id))
-            # is_in_incorrect_names = await redis_client.sismember('incorrect_names', str(task.requisite))
-            if not is_in_set:
-                # if not is_in_incorrect_names:
-                await execute_task(task, redis_client, mouse)
-#                 else:
-#                     logging.info(f"Name {task.requisite} is incorrect, skipping task.")
-            else:
-                logging.info(f"Task {task.order_id} already processed, skipping task.")
+    # while True:
+    #     await check_time(mouse)
+    #     task_data = await redis_client.brpop('FER_queue', timeout=5)
+    #
+    #     if task_data:
+    #         _, task_data = task_data
+    #         task = Task.model_validate_json(task_data.decode('utf-8'))
+    #         set_name = 'dev_completed_tasks' if 'dev-' in task.callback_url else 'prod_completed_tasks'
+    #         is_in_set = await redis_client.sismember(set_name, str(task.order_id))
+    #         if not is_in_set:
+    #             await execute_task(task, redis_client, mouse)
+    #
+    #         else:
+    #             logging.info(f"Task {task.order_id} already processed, skipping task.")
 
 
 def run_main():
