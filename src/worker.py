@@ -183,11 +183,11 @@ async def main():
     else:
         text = "Working without restarts."
 
-    redis_client = redis.Redis(
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        password=settings.REDIS_PASSWORD.get_secret_value(),
-    )
+    # redis_client = redis.Redis(
+    #     host=settings.REDIS_HOST,
+    #     port=settings.REDIS_PORT,
+    #     password=settings.REDIS_PASSWORD.get_secret_value(),
+    # )
     logging_config = get_logging_config('worker_pip')
     logging.config.dictConfig(logging_config)
 
