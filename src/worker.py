@@ -182,14 +182,14 @@ async def main():
     logs_directory.mkdir(parents=True, exist_ok=True)
     screenshots_directory.mkdir(parents=True, exist_ok=True)
 
-    global last_restart_hour
-    current_time = datetime.now(timezone(timedelta(hours=3)))
-    last_restart_hour = current_time.hour
-    restart_after = await get_next_restart_time()
-    if restart_after:
-        text = f"Next restart after {restart_after}"
-    else:
-        text = "Working without restarts."
+    # global last_restart_hour
+    # current_time = datetime.now(timezone(timedelta(hours=3)))
+    # last_restart_hour = current_time.hour
+    # restart_after = await get_next_restart_time()
+    # if restart_after:
+    #     text = f"Next restart after {restart_after}"
+    # else:
+    #     text = "Working without restarts."
 
     redis_client = redis.Redis(
         host=settings.REDIS_HOST,
@@ -205,23 +205,23 @@ async def main():
     #     await Actions.open_app(mouse)
     await send_telegram_report('Worker started.')
 
-    logging.info(f'Worker started. {text}')
+    logging.info(f'Worker started.')
     await asyncio.sleep(4)
 
-    # while True:
-    #     await check_time(mouse)
-    #     task_data = await redis_client.brpop('FER_queue', timeout=5)
-    #
-    #     if task_data:
-    #         _, task_data = task_data
-    #         task = Task.model_validate_json(task_data.decode('utf-8'))
-    #         set_name = 'dev_completed_tasks' if 'dev-' in task.callback_url else 'prod_completed_tasks'
-    #         is_in_set = await redis_client.sismember(set_name, str(task.order_id))
-    #         if not is_in_set:
-    #             await execute_task(task, redis_client, mouse)
-    #
-    #         else:
-    #             logging.info(f"Task {task.order_id} already processed, skipping task.")
+    while True:
+        # await check_time(mouse)
+        task_data = await redis_client.brpop('FER_queue', timeout=5)
+
+        if task_data:
+            _, task_data = task_data
+            task = Task.model_validate_json(task_data.decode('utf-8'))
+            set_name = 'dev_completed_tasks' if 'dev-' in task.callback_url else 'prod_completed_tasks'
+            is_in_set = await redis_client.sismember(set_name, str(task.order_id))
+            if not is_in_set:
+                await execute_task(task, redis_client, mouse)
+
+            else:
+                logging.info(f"Task {task.order_id} already processed, skipping task.")
 
 
 def run_main():
