@@ -1,6 +1,8 @@
 import asyncio
 from datetime import timedelta, timezone, datetime
 import logging.config
+from pathlib import Path
+
 from pynput.mouse import Controller
 import redis.asyncio as redis
 from atexit import register
@@ -60,8 +62,8 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
     await Actions.input_value(value=amount)
-    # await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
-    # await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
+    await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
+    await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
     # if await Actions.name_or_money_error_check(check=CheckType.MONEY):
     #     logging.info(f"Task {task.order_id} failed. Insufficient funds.")
         # await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
@@ -70,7 +72,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         #     task=task,
         # )
         # return
-    transfer_button = await Actions.find_square_color(color=Colors.GREEN)
+    # transfer_button = await Actions.find_square_color(color=Colors.GREEN)
 
     # workspace = await Actions.take_screenshot_of_region(
     #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
@@ -78,14 +80,14 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     # transfer_button = await Actions.find_color_square(
     #     image=workspace, color=Colors.GREEN, tolerance_percent=25
     # )
-    if transfer_button:
-        await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
-    else:
-        logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
-        await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer button.",
-            task=task,
-        )
+    # if transfer_button:
+    #     await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
+    # else:
+    #     logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
+    #     await send_telegram_report(
+    #         f"Task {task.order_id} failed. Can't find transfer button.",
+    #         task=task,
+    #     )
     # if await Actions.name_or_money_error_check(check=CheckType.NAME):
     #     logging.info(f"Task {task.order_id} failed. Incorrect name.")
     #     await redis_client.sadd('incorrect_names', str(task.requisite))
@@ -95,21 +97,21 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         #     task=task,
         # )
         # return
-    transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
-    # workspace = await Actions.take_screenshot_of_region(
-    #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-    # )
-    # transfer_confirm_button = await Actions.find_color_square(
-    #     image=workspace, color=Colors.GREEN, tolerance_percent=25
-    # )
-    if transfer_confirm_button:
-        await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
-    else:
-        logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
-        await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer confirm button.",
-            task=task,
-        )
+    # transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
+    # # workspace = await Actions.take_screenshot_of_region(
+    # #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+    # # )
+    # # transfer_confirm_button = await Actions.find_color_square(
+    # #     image=workspace, color=Colors.GREEN, tolerance_percent=25
+    # # )
+    # if transfer_confirm_button:
+    #     await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
+    # else:
+    #     logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
+    #     await send_telegram_report(
+    #         f"Task {task.order_id} failed. Can't find transfer confirm button.",
+    #         task=task,
+    #     )
     transfer_confirm_section = None
     for _ in range(10):
         # workspace = await Actions.take_screenshot_of_region(
@@ -168,12 +170,18 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             )
             logging.info(f"Restoring tasks to the main queue.")
             await restore_tasks(task, redis_client)
-            logging.info(f"Performing restarting emulator after failed task.")
-            await Actions.reopen_pokerok(mouse)
+            # logging.info(f"Performing restarting emulator after failed task.")
+            # await Actions.reopen_pokerok(mouse)
 
 
 async def main():
     register(send_report_at_exit)
+
+    logs_directory = Path("logs")
+    screenshots_directory = Path("screenshots")
+    logs_directory.mkdir(parents=True, exist_ok=True)
+    screenshots_directory.mkdir(parents=True, exist_ok=True)
+
     global last_restart_hour
     current_time = datetime.now(timezone(timedelta(hours=3)))
     last_restart_hour = current_time.hour
@@ -183,16 +191,16 @@ async def main():
     else:
         text = "Working without restarts."
 
-    # redis_client = redis.Redis(
-    #     host=settings.REDIS_HOST,
-    #     port=settings.REDIS_PORT,
-    #     password=settings.REDIS_PASSWORD.get_secret_value(),
-    # )
+    redis_client = redis.Redis(
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        password=settings.REDIS_PASSWORD.get_secret_value(),
+    )
     logging_config = get_logging_config('worker_pip')
     logging.config.dictConfig(logging_config)
 
     mouse = Controller()
-    await WindowChecker.check_window()
+    # await WindowChecker.check_window()
     # if not await WindowChecker.check_window():
     #     await Actions.open_app(mouse)
     await send_telegram_report('Worker started.')
