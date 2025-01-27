@@ -12,7 +12,7 @@ from consts import Colors, Coords, WorkspaceCoords
 from controllers.actions import Actions
 from controllers.reqs import send_report
 from controllers.telegram import send_report_at_exit, send_telegram_report
-from controllers.window_checker import WindowChecker
+# from controllers.window_checker import WindowChecker
 from internal import CheckType, Step, Task
 
 
