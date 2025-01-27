@@ -57,11 +57,11 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     nickname = 'dnk-jarod' if 'dev-' in task.callback_url else task.requisite
-    amount = '1.0' if 'dev-' in task.callback_url else str(task.amount)
+    amount = '1.0' if 'dev-' in task.callback_url else str(task.amount).replace(',', '.')
     await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
-    await Actions.input_value(value=amount.replace(',', '.'))
+    await Actions.input_value(value=amount)
     await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
     await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
     # if await Actions.name_or_money_error_check(check=CheckType.MONEY):
