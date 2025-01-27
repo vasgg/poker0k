@@ -61,7 +61,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
-    await Actions.input_value(value=amount)
+    await Actions.input_value(value=amount.replace(',', '.'))
     await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
     await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
     # if await Actions.name_or_money_error_check(check=CheckType.MONEY):
