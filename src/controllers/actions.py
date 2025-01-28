@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pyautogui import hotkey, screenshot, typewrite, press
+from pyautogui import hotkey, screenshot, typewrite, press, keyUp, keyDown
 from pynput.mouse import Button, Controller
 
 from consts import Colors, Coords, WorkspaceCoords
@@ -52,7 +52,9 @@ class Actions:
         if "." in value:
             typewrite(value.split('.')[0])
             await asyncio.sleep(1)
-            press('.')
+            keyDown('.')
+            keyUp('.')
+            # press('.')
             await asyncio.sleep(1)
             typewrite(value.split('.')[1])
         else:
