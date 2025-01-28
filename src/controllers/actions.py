@@ -49,7 +49,14 @@ class Actions:
         await asyncio.sleep(1)
         hotkey('ctrlleft', 'a')
         await asyncio.sleep(1)
-        typewrite(value)
+        if "." in value:
+            typewrite(value.split('.')[0])
+            await asyncio.sleep(1)
+            typewrite('.')
+            await asyncio.sleep(1)
+            typewrite(value.split('.')[1])
+        else:
+            typewrite(value)
         await asyncio.sleep(1)
         logger.info(f'Input value: {value}')
 

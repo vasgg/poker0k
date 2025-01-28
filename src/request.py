@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 async def send_report(
-    task: Task, redis_client, problem: str | None = None, retries: int = 3, delay: int = 3
+    task: Task, redis_client: redis.Redis, problem: str | None = None, retries: int = 3, delay: int = 3
 ) -> None:
     set_name = 'prod_reports'
     if 'dev-' in task.callback_url:
@@ -96,11 +96,11 @@ async def send_error_report(
     logger.exception(f"Failed to send error report after {retries} attempts, task id: {task.order_id} failed.")
 
 
-async def add_test_task(redis_client):
+async def add_test_task(redis_client: redis.Redis):
     task = Task(
         order_id=1000000 + random.randint(0, 999999),
         user_id=13,
-        requisite='dnk.jarod',
+        requisite='dnk-jarod',
         amount=1.01,
         status=0,
         callback_url='https://dev-xyz.simpleex.store/api/v2/fer/callback',
