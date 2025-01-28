@@ -103,7 +103,7 @@ async def add_test_task(redis_client: Redis):
         user_id=13,
         requisite='dnk-jarod',
         amount=1.01,
-        status=1,
+        status=0,
         callback_url='https://dev-xyz.simpleex.store/api/v2/fer/callback',
     )
     await redis_client.rpush('FER_queue', task.model_dump_json())

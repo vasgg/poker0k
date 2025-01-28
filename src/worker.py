@@ -10,7 +10,7 @@ from atexit import register
 from config import get_logging_config, settings
 from consts import Colors, Coords
 from controllers.actions import Actions
-from requests import send_report
+from request import send_report
 from controllers.telegram import send_report_at_exit, send_telegram_report
 # from controllers.window_checker import WindowChecker
 from internal import Step, Task
@@ -217,7 +217,7 @@ async def main():
             task = Task.model_validate_json(task_data.decode('utf-8'))
             set_name = 'dev_completed_tasks' if 'dev-' in task.callback_url else 'prod_completed_tasks'
             is_in_set = await redis_client.sismember(set_name, str(task.order_id))
-            if not is_in_set:
+            if not is_in_set and task.status == 0:
                 await execute_task(task, redis_client, mouse)
 
             else:
