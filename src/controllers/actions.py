@@ -52,8 +52,7 @@ class Actions:
         if "." in value:
             typewrite(value.split('.')[0])
             await asyncio.sleep(1)
-            keyDown('.')
-            keyUp('.')
+            typewrite(u'\u002E')
             # press('.')
             await asyncio.sleep(1)
             typewrite(value.split('.')[1])
