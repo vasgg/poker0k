@@ -8,12 +8,12 @@ import redis.asyncio as redis
 from atexit import register
 
 from config import get_logging_config, settings
-from consts import Colors, Coords, WorkspaceCoords
+from consts import Colors, Coords
 from controllers.actions import Actions
-from controllers.reqs import send_report
+from requests import send_report
 from controllers.telegram import send_report_at_exit, send_telegram_report
 # from controllers.window_checker import WindowChecker
-from internal import CheckType, Step, Task
+from internal import Step, Task
 
 
 last_restart_hour = None

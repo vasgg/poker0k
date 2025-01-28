@@ -38,7 +38,7 @@ requires-python = ">=3.11"
 [project.scripts]
 run-worker = "worker:run_main"
 run-reporter = "reporter:run_main"
-run-test = "controllers.reqs:run_main"
+run-test = "requests:run_main"
 
 [tool.black]
 line-length = 119
