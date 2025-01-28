@@ -2,8 +2,10 @@ import asyncio
 from datetime import UTC, datetime
 from http import HTTPStatus
 import logging
+import random
 
 import aiohttp
+import redis
 
 from config import settings
 from controllers.crypt import Crypt
@@ -95,22 +97,25 @@ async def send_error_report(
     logger.exception(f"Failed to send error report after {retries} attempts, task id: {task.order_id} failed.")
 
 
-async def send_queue_request() -> None:
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{settings.TEST_ENDPOINT}/queue_length/') as response:
-            logger.info(await response.json())
-
-
-async def send_task_request() -> None:
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{settings.TEST_ENDPOINT}/add_task/') as response:
-            logger.info(await response.json())
+async def add_test_task(redis_client: Redis):
+    task = Task(
+        order_id=1000000 + random.randint(0, 999999),
+        user_id=13,
+        requisite='dnk-jarod',
+        amount=1.01,
+        status=1,
+        callback_url='https://dev-xyz.simpleex.store/api/v2/fer/callback',
+    )
+    await redis_client.rpush('FER_queue', task.model_dump_json())
 
 
 def run_main():
-    # asyncio.run(send_report(task=Task(order_id=1, user_id=1, requisite='Mein Herz Brent', amount=1.00, status=1)))
-    asyncio.run(send_queue_request())
-    # asyncio.run(send_task_request())
+    redis_client = redis.Redis(
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        password=settings.REDIS_PASSWORD.get_secret_value(),
+    )
+    asyncio.run(add_test_task(redis_client))
 
 
 if __name__ == '__main__':
