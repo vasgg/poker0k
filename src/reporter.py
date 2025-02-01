@@ -26,7 +26,7 @@ class Base(DeclarativeBase):
 
 
 class Report(Base):
-    __tablename__ = 'reports'
+    __tablename__ = "reports"
 
     order_id: Mapped[int]
     user_id: Mapped[int]
@@ -67,17 +67,17 @@ async def main():
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
-    logging_config = get_logging_config('reporter')
+    logging_config = get_logging_config("reporter")
     logging.config.dictConfig(logging_config)
-    logging.info('Reporter started.')
+    logging.info("Reporter started.")
     while True:
         async with AsyncSessionLocal() as db_session:
             async with db_session.begin():
                 # noinspection PyTypeChecker
-                record_data = await redis_client.brpop('FER_reports', timeout=5)
+                record_data = await redis_client.brpop("FER_reports", timeout=5)
                 if record_data:
                     _, record_data = record_data
-                    record = Task.model_validate_json(record_data.decode('utf-8'))
+                    record = Task.model_validate_json(record_data.decode("utf-8"))
                     await push_record(record, db_session)
 
 
@@ -85,5 +85,5 @@ def run_main():
     asyncio.run(main())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()

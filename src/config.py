@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     TG_BOT_TOKEN: SecretStr
     TG_ID: int
 
-    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', case_sensitive=False, extra='allow')
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="allow")
 
     @property
     def key_decrypt(self) -> bytes:

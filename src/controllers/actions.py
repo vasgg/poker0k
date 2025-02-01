@@ -4,12 +4,11 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pyautogui import hotkey, screenshot, typewrite, press, keyUp, keyDown
+from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
 
 from consts import Colors, Coords, WorkspaceCoords
-from controllers.telegram import send_telegram_report
-# from controllers.window_checker import WindowChecker
+
 from internal import CheckType, Task
 
 logger = logging.getLogger(__name__)
@@ -47,19 +46,18 @@ class Actions:
     @staticmethod
     async def input_value(value: str):
         await asyncio.sleep(1)
-        hotkey('ctrlleft', 'a')
+        hotkey("ctrlleft", "a")
         await asyncio.sleep(1)
         if "." in value:
-            typewrite(value.split('.')[0])
+            typewrite(value.split(".")[0])
             await asyncio.sleep(1)
-            typewrite(u'\u002E')
-            # press('.')
+            typewrite("\u002e")
             await asyncio.sleep(1)
-            typewrite(value.split('.')[1])
+            typewrite(value.split(".")[1])
         else:
             typewrite(value)
         await asyncio.sleep(1)
-        logger.info(f'Input value: {value}')
+        logger.info(f"Input value: {value}")
 
     @staticmethod
     def is_color_match(pixel_color, target_color, tolerance_percent=0):
@@ -67,10 +65,7 @@ class Actions:
         return all(abs(pixel_color[i] - target_color[i]) <= tolerance[i] for i in range(3))
 
     @staticmethod
-    async def name_or_money_error_check(
-        check: CheckType,
-        tolerance_percent: int = 10
-    ) -> bool:
+    async def name_or_money_error_check(check: CheckType, tolerance_percent: int = 10) -> bool:
         match check:
             case CheckType.MONEY:
                 top_left = WorkspaceCoords.BALANCE_CHECK_TOP_LEFT
@@ -92,10 +87,7 @@ class Actions:
         return False
 
     @staticmethod
-    async def find_square_color(
-        color: tuple[int, int, int],
-        tolerance_percent: int = 10
-    ):
+    async def find_square_color(color: tuple[int, int, int], tolerance_percent: int = 10):
         if color == Colors.FINAL_GREEN:
             top_left = WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT
             bottom_right = WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT
@@ -170,22 +162,22 @@ class Actions:
     @staticmethod
     async def take_screenshot(task: Task, debug: bool = False) -> Path:
         moscow_tz = ZoneInfo("Europe/Moscow")
-        moscow_time = datetime.now(moscow_tz).strftime('%d.%m.%Y_%H.%M.%S')
+        moscow_time = datetime.now(moscow_tz).strftime("%d.%m.%Y_%H.%M.%S")
         file = (
-            f'{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png'
+            f"{moscow_time}_{task.order_id}_{task.user_id}_{task.requisite}_${task.amount}_{task.status}.png"
             if not debug
-            else f'{moscow_time}_{task.order_id}_DEBUG_{task.requisite}_${task.amount}_{task.status}.png'
+            else f"{moscow_time}_{task.order_id}_DEBUG_{task.requisite}_${task.amount}_{task.status}.png"
         )
         scrnsht = screenshot()
-        gray_screenshot = scrnsht.convert('L')
-        path = Path('screenshots')
+        gray_screenshot = scrnsht.convert("L")
+        path = Path("screenshots")
         gray_screenshot.save(path / file)
         logger.info(f"Screenshot successfully saved to:\n                                          {file}")
         await asyncio.sleep(3)
         return path / file
 
     @staticmethod
-    async def reopen_pokerok(mouse: Controller, attempts: int = 1):
+    async def reopen_pokerok_client(mouse: Controller, attempts: int = 1):
         logger.info(f"Reopening pokerok app. Attempt number: {attempts}.")
         if attempts > 3:
             logger.info("App failed after 3 restarts. Check Pokerok app.")
@@ -197,7 +189,7 @@ class Actions:
     async def open_app(mouse: Controller, attempts: int = 1):
         logger.info(f"Opening app. Attempt number: {attempts}.")
         await start_app_flow(mouse, attempts)
-        logger.info(f"Pokerok app successfully started.")
+        logger.info("Pokerok app successfully started.")
 
 
 async def start_app_flow(mouse: Controller, attempts: int = 1):

@@ -12,11 +12,12 @@ from consts import Colors, Coords
 from controllers.actions import Actions
 from request import send_report
 from controllers.telegram import send_report_at_exit, send_telegram_report
+
 # from controllers.window_checker import WindowChecker
 from internal import Step, Task
 
 
-last_restart_hour = None
+last_restart_time: datetime | None = None
 
 
 async def get_next_restart_time():
@@ -38,18 +39,18 @@ async def get_next_restart_time():
 
 
 async def check_time(mouse: Controller):
-    global last_restart_hour
+    global last_restart_time
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if current_time.hour in settings.RESTARTS_AT and last_restart_hour != current_time.hour:
-        logging.info(f"Performing scheduled restart app.")
-        await Actions.reopen_pokerok(mouse)
-        last_restart_hour = current_time.hour
-        logging.info(f"App started. Next restart after {await get_next_restart_time()}")
+    if current_time - last_restart_time >= timedelta(minutes=50):
+        logging.info("Performing scheduled restart app.")
+        await Actions.reopen_pokerok_client(mouse)
+        last_restart_time = current_time.hour
+        logging.info("App started.")
 
 
 async def restore_tasks(task: Task, redis_client):
     serialized_task = task.model_dump_json()
-    await redis_client.rpush('FER_queue', serialized_task)
+    await redis_client.rpush("FER_queue", serialized_task)
     logging.info(f"Task {task.order_id} restored to the main queue.")
 
 
@@ -66,12 +67,12 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
     # if await Actions.name_or_money_error_check(check=CheckType.MONEY):
     #     logging.info(f"Task {task.order_id} failed. Insufficient funds.")
-        # await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
-        # await send_telegram_report(
-        #     f"Task {task.order_id} failed. Insufficient funds.",
-        #     task=task,
-        # )
-        # return
+    # await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
+    # await send_telegram_report(
+    #     f"Task {task.order_id} failed. Insufficient funds.",
+    #     task=task,
+    # )
+    # return
     # transfer_button = await Actions.find_square_color(color=Colors.GREEN)
 
     # workspace = await Actions.take_screenshot_of_region(
@@ -91,12 +92,12 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     # if await Actions.name_or_money_error_check(check=CheckType.NAME):
     #     logging.info(f"Task {task.order_id} failed. Incorrect name.")
     #     await redis_client.sadd('incorrect_names', str(task.requisite))
-        # await send_error_report(task, ErrorType.INCORRECT_NAME)
-        # await send_telegram_report(
-        #     f"Task {task.order_id} failed. Incorrect name.",
-        #     task=task,
-        # )
-        # return
+    # await send_error_report(task, ErrorType.INCORRECT_NAME)
+    # await send_telegram_report(
+    #     f"Task {task.order_id} failed. Incorrect name.",
+    #     task=task,
+    # )
+    # return
     # transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
     # # workspace = await Actions.take_screenshot_of_region(
     # #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
@@ -127,21 +128,18 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             await asyncio.sleep(0.4)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
-        await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer confirm section.",
-            task=task
-        )
+        await send_telegram_report(f"Task {task.order_id} failed. Can't find transfer confirm section.", task=task)
     # task.status = 1
     # logging.info(f"Task {task.order_id} marked as completed in blind mode.")
 
     task.status = 1 if transfer_confirm_section is not None else 0
-    set_name_completed = 'prod_completed_tasks'
-    if 'dev-' in task.callback_url:
-        set_name_completed = 'dev_completed_tasks'
+    logging.info(f"Task {task.order_id} status: {task.status}")
+    set_name_completed = "dev_completed_tasks" if "dev-" in task.callback_url else "prod_completed_tasks"
+
     if task.status == 1:
         task.step = Step.PROCESSED
 
-        await redis_client.lpush('FER_reports', task.model_dump_json())
+        await redis_client.lpush("FER_reports", task.model_dump_json())
         # await redis_client.lrem('FER_queue_IN_PROGRESS', 1, task.model_dump_json())
         await redis_client.sadd(set_name_completed, str(task.order_id))
 
@@ -149,7 +147,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         await Actions.take_screenshot(task=task)
     else:
         task.step = Step.FAILED
-        await redis_client.lpush('FER_reports', task.model_dump_json())
+        await redis_client.lpush("FER_reports", task.model_dump_json())
         attempts += 1
         await Actions.take_screenshot(task=task, debug=True)
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
@@ -166,9 +164,9 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
             await send_report(
                 task=task,
                 redis_client=redis_client,
-                problem=f'Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.',
+                problem=f"Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.",
             )
-            logging.info(f"Restoring tasks to the main queue.")
+            logging.info("Restoring task to the main queue.")
             await restore_tasks(task, redis_client)
             # logging.info(f"Performing restarting emulator after failed task.")
             # await Actions.reopen_pokerok(mouse)
@@ -182,40 +180,35 @@ async def main():
     logs_directory.mkdir(parents=True, exist_ok=True)
     screenshots_directory.mkdir(parents=True, exist_ok=True)
 
-    # global last_restart_hour
-    # current_time = datetime.now(timezone(timedelta(hours=3)))
-    # last_restart_hour = current_time.hour
-    # restart_after = await get_next_restart_time()
-    # if restart_after:
-    #     text = f"Next restart after {restart_after}"
-    # else:
-    #     text = "Working without restarts."
+    global last_restart_time
+    current_time = datetime.now(timezone(timedelta(hours=3)))
+    last_restart_time = current_time
 
     redis_client = redis.Redis(
         host=settings.REDIS_HOST,
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
-    logging_config = get_logging_config('worker_pip')
+    logging_config = get_logging_config("worker_pip")
     logging.config.dictConfig(logging_config)
 
     mouse = Controller()
     # await WindowChecker.check_window()
     # if not await WindowChecker.check_window():
     #     await Actions.open_app(mouse)
-    await send_telegram_report('Worker started.')
+    await send_telegram_report("Worker started.")
 
-    logging.info(f'Worker started.')
+    logging.info("Worker started.")
     await asyncio.sleep(4)
 
     while True:
-        # await check_time(mouse)
-        task_data = await redis_client.brpop('FER_queue', timeout=5)
+        await check_time(mouse)
+        task_data = await redis_client.brpop("FER_queue", timeout=5)
 
         if task_data:
             _, task_data = task_data
-            task = Task.model_validate_json(task_data.decode('utf-8'))
-            set_name = 'dev_completed_tasks' if 'dev-' in task.callback_url else 'prod_completed_tasks'
+            task = Task.model_validate_json(task_data.decode("utf-8"))
+            set_name = "dev_completed_tasks" if "dev-" in task.callback_url else "prod_completed_tasks"
             is_in_set = await redis_client.sismember(set_name, str(task.order_id))
             if not is_in_set and task.status == 0:
                 await execute_task(task, redis_client, mouse)
@@ -228,5 +221,5 @@ def run_main():
     asyncio.run(main())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
