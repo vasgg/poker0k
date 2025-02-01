@@ -41,10 +41,10 @@ async def get_next_restart_time():
 async def check_time(mouse: Controller):
     global last_restart_time
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if current_time - last_restart_time >= timedelta(minutes=50):
+    if (current_time - last_restart_time) >= timedelta(minutes=50):
         logging.info("Performing scheduled restart app.")
         await Actions.reopen_pokerok_client(mouse)
-        last_restart_time = current_time.hour
+        last_restart_time = current_time
         logging.info("App started.")
 
 
