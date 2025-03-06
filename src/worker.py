@@ -166,8 +166,8 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
                 redis_client=redis_client,
                 problem=f"Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.",
             )
-            logging.info("Restoring task to the main queue.")
-            await restore_tasks(task, redis_client)
+            # logging.info("Restoring task to the main queue.")
+            # await restore_tasks(task, redis_client)
             # logging.info(f"Performing restarting emulator after failed task.")
             # await Actions.reopen_pokerok(mouse)
 
