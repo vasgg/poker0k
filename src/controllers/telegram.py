@@ -42,6 +42,6 @@ def send_report_at_exit():
     for chat_id in settings.REPORT_TG_IDS:
         url = (
             f"https://api.telegram.org/bot{settings.TG_BOT_TOKEN.get_secret_value()}"
-            f"/sendMessage?text=Worker stopped&chat_id={chat_id}&disable_notification=true"
+            f"/sendMessage?text=Worker stopped.&chat_id={chat_id}&disable_notification=true"
         )
         get(url)
