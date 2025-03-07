@@ -159,7 +159,10 @@ async def main():
     logging.config.dictConfig(logging_config)
 
     mouse = Controller()
-    await send_telegram_report("Worker started.")
+    await send_telegram_report(
+        message="Worker started.",
+        disable_notification=True
+    )
 
     logging.info("Worker started.")
     await asyncio.sleep(4)
