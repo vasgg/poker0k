@@ -87,7 +87,7 @@ class Actions:
         return False
 
     @staticmethod
-    async def find_square_color(color: tuple[int, int, int], tolerance_percent: int = 10):
+    async def find_square_color(color: tuple[int, int, int], tolerance_percent: int = 15):
         if color == Colors.FINAL_GREEN:
             top_left = WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT
             bottom_right = WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT
@@ -100,34 +100,6 @@ class Actions:
         pixels = image.load()
         sqare_size = 11
         half_square = sqare_size // 2
-
-        for x in range(half_square, width - half_square):
-            for y in range(half_square, height - half_square):
-                matched = True
-                for dx in range(-half_square, half_square + 1):
-                    for dy in range(-half_square, half_square + 1):
-                        if not Actions.is_color_match(pixels[x + dx, y + dy][:3], color, tolerance_percent):
-                            matched = False
-                            break
-                    if not matched:
-                        break
-                if matched:
-                    del image
-                    absolute_coords = (
-                        WorkspaceCoords.WORKSPACE_TOP_LEFT[0] + x,
-                        WorkspaceCoords.WORKSPACE_TOP_LEFT[1] + y,
-                    )
-                    return absolute_coords
-        del image
-        return None
-
-    @staticmethod
-    async def find_color_square(image, color=(0, 128, 0), tolerance_percent=0) -> tuple[int, int] | None:
-        size = 11
-        width, height = image.size
-        pixels = image.load()
-
-        half_square = size // 2
 
         for x in range(half_square, width - half_square):
             for y in range(half_square, height - half_square):
@@ -177,27 +149,15 @@ class Actions:
         return path / file
 
     @staticmethod
-    async def reopen_pokerok_client(mouse: Controller, attempts: int = 1):
-        logger.info(f"Reopening pokerok app. Attempt number: {attempts}.")
-        if attempts > 3:
-            logger.info("App failed after 3 restarts. Check Pokerok app.")
-            return
+    async def reopen_pokerok_client(mouse: Controller):
+        logger.info(f"Reopening pokerok app.")
         await Actions.click_on_const(mouse, Coords.CLOSE_APP_BUTTON, 3)
-        await start_app_flow(mouse, attempts + 1)
-
-    @staticmethod
-    async def open_app(mouse: Controller, attempts: int = 1):
-        logger.info(f"Opening app. Attempt number: {attempts}.")
-        await start_app_flow(mouse, attempts)
-        logger.info("Pokerok app successfully started.")
+        await start_app_flow(mouse)
 
 
-async def start_app_flow(mouse: Controller, attempts: int = 1):
+async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON)
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
-    # if not await WindowChecker.check_window():
-    #     await Actions.reopen_pokerok(mouse, attempts=attempts + 1)
-    #     return
     await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 15)
     await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 20)
     await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 15)

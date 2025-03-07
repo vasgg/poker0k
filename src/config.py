@@ -1,3 +1,5 @@
+from datetime import datetime
+from logging import Formatter
 from logging.handlers import RotatingFileHandler
 import sys
 from pydantic import SecretStr
@@ -9,8 +11,6 @@ from internal import Stage
 class Settings(BaseSettings):
     ENCRYPT_KEY: SecretStr
     DECRYPT_KEY: SecretStr
-    TEST_ENDPOINT: str
-    ERROR_ENDPOINT: str
     MAX_ATTEMPTS: int
     STAGE: Stage
     DB_HOST: str
@@ -18,12 +18,11 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: SecretStr
     DB_NAME: str
-    RESTARTS_AT: list[int]
     REDIS_HOST: str
     REDIS_PORT: int
     REDIS_PASSWORD: SecretStr
     TG_BOT_TOKEN: SecretStr
-    TG_ID: int
+    REPORT_TG_IDS: list[int]
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="allow")
 
@@ -39,18 +38,42 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
+class CustomFormatter(Formatter):
+    def formatTime(self, record, datefmt=None):
+        ct = datetime.fromtimestamp(record.created).astimezone()
+        if datefmt:
+            base_time = ct.strftime("%d.%m.%Y %H:%M:%S")
+            msecs = f"{int(record.msecs):03d}"
+            tz = ct.strftime("%z")
+            return f"{base_time}.{msecs}{tz}"
+        else:
+            return super().formatTime(record, datefmt)
+
+
+main_template = {
+    "format": "%(asctime)s | %(message)s",
+    "datefmt": "%d.%m.%Y %H:%M:%S%z",
+}
+error_template = {
+    "format": "%(asctime)s [%(levelname)8s] [%(module)s:%(funcName)s:%(lineno)d] %(message)s",
+    "datefmt": "%d.%m.%Y %H:%M:%S%z",
+}
+
+
 def get_logging_config(app_name: str):
     return {
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": {
             "main": {
-                "format": "%(asctime)s %(message)s",
-                "datefmt": "%d.%m.%Y %H:%M:%S",
+                "()": CustomFormatter,
+                "format": main_template["format"],
+                "datefmt": main_template["datefmt"],
             },
             "errors": {
-                "format": "%(asctime)s [%(funcName)15s:%(lineno)-3d] %(message)s",
-                "datefmt": "%d.%m.%Y %H:%M:%S",
+                "()": CustomFormatter,
+                "format": error_template["format"],
+                "datefmt": error_template["datefmt"],
             },
         },
         "handlers": {

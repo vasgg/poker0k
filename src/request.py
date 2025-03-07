@@ -67,7 +67,7 @@ async def send_error_report(task: Task, error_type: ErrorType, retries: int = 3,
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
         data_json = task.model_dump_json()
         data = {
-            "appName": "pokerok_android",
+            "appName": "pokerok_app",
             "type": error_type,
             "payload": data_json,
             "timestamp": now,
