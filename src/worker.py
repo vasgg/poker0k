@@ -10,32 +10,13 @@ from atexit import register
 from config import get_logging_config, settings
 from consts import Colors, Coords
 from controllers.actions import Actions
-from request import send_report
+from request import send_error_report, send_report
 from controllers.telegram import send_report_at_exit, send_telegram_report
 
-# from controllers.window_checker import WindowChecker
-from internal import Step, Task
+from internal import CheckType, ErrorType, Step, Task
 
 
 last_restart_time: datetime | None = None
-
-
-async def get_next_restart_time():
-    current_time = datetime.now(timezone(timedelta(hours=3)))
-    next_restart_times = []
-    if settings.RESTARTS_AT is not None:
-        for t in settings.RESTARTS_AT:
-            next_restart_times.append(current_time.replace(hour=t, minute=0, second=0, microsecond=0))
-    next_restart_times = [t if t > current_time else t + timedelta(days=1) for t in next_restart_times]
-    if not next_restart_times:
-        return None, None
-
-    next_restart_time = min(next_restart_times)
-    time_until_restart = next_restart_time - current_time
-    hours, remainder = divmod(time_until_restart.seconds, 3600)
-    minutes = remainder // 60
-    time_until_restart_str = f"{hours:02} hours {minutes:02} minutes."
-    return time_until_restart_str
 
 
 async def check_time(mouse: Controller):
@@ -63,56 +44,44 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
     await Actions.input_value(value=amount)
-    await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
-    await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
-    # if await Actions.name_or_money_error_check(check=CheckType.MONEY):
-    #     logging.info(f"Task {task.order_id} failed. Insufficient funds.")
-    # await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
-    # await send_telegram_report(
-    #     f"Task {task.order_id} failed. Insufficient funds.",
-    #     task=task,
-    # )
-    # return
-    # transfer_button = await Actions.find_square_color(color=Colors.GREEN)
-
-    # workspace = await Actions.take_screenshot_of_region(
-    #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-    # )
-    # transfer_button = await Actions.find_color_square(
-    #     image=workspace, color=Colors.GREEN, tolerance_percent=25
-    # )
-    # if transfer_button:
-    #     await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
-    # else:
-    #     logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
-    #     await send_telegram_report(
-    #         f"Task {task.order_id} failed. Can't find transfer button.",
-    #         task=task,
-    #     )
-    # if await Actions.name_or_money_error_check(check=CheckType.NAME):
-    #     logging.info(f"Task {task.order_id} failed. Incorrect name.")
-    #     await redis_client.sadd('incorrect_names', str(task.requisite))
-    # await send_error_report(task, ErrorType.INCORRECT_NAME)
-    # await send_telegram_report(
-    #     f"Task {task.order_id} failed. Incorrect name.",
-    #     task=task,
-    # )
-    # return
-    # transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
-    # # workspace = await Actions.take_screenshot_of_region(
-    # #     WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-    # # )
-    # # transfer_confirm_button = await Actions.find_color_square(
-    # #     image=workspace, color=Colors.GREEN, tolerance_percent=25
-    # # )
-    # if transfer_confirm_button:
-    #     await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
-    # else:
-    #     logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
-    #     await send_telegram_report(
-    #         f"Task {task.order_id} failed. Can't find transfer confirm button.",
-    #         task=task,
-    #     )
+    # await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
+    transfer_button = await Actions.find_square_color(color=Colors.GREEN)
+    if transfer_button:
+        await Actions.click_on_finded(mouse, transfer_button, 'TRANSFER BUTTON')
+    else:
+        logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Can't find transfer button.",
+            task=task,
+        )
+        return
+    if await Actions.name_or_money_error_check(check=CheckType.NAME):
+        logging.info(f"Task {task.order_id} failed. Incorrect name.")
+        await redis_client.sadd('incorrect_names', str(task.requisite))
+        await send_error_report(task, ErrorType.INCORRECT_NAME)
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Incorrect name.",
+            task=task,
+        )
+        return
+    if await Actions.name_or_money_error_check(check=CheckType.MONEY):
+        logging.info(f"Task {task.order_id} failed. Insufficient funds.")
+        await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS)
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Insufficient funds.",
+            task=task,
+        )
+        return
+    # await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
+    transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN)
+    if transfer_confirm_button:
+        await Actions.click_on_finded(mouse, transfer_confirm_button, 'TRANSFER CONFIRM BUTTON')
+    else:
+        logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Can't find transfer confirm button.",
+            task=task,
+        )
     transfer_confirm_section = None
     for _ in range(10):
         # workspace = await Actions.take_screenshot_of_region(
@@ -129,8 +98,6 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
         await send_telegram_report(f"Task {task.order_id} failed. Can't find transfer confirm section.", task=task)
-    # task.status = 1
-    # logging.info(f"Task {task.order_id} marked as completed in blind mode.")
 
     task.status = 1 if transfer_confirm_section is not None else 0
     logging.info(f"Task {task.order_id} status: {task.status}")
@@ -140,7 +107,6 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         task.step = Step.PROCESSED
 
         await redis_client.lpush("FER_reports", task.model_dump_json())
-        # await redis_client.lrem('FER_queue_IN_PROGRESS', 1, task.model_dump_json())
         await redis_client.sadd(set_name_completed, str(task.order_id))
 
         await send_report(task=task, redis_client=redis_client)
@@ -193,9 +159,6 @@ async def main():
     logging.config.dictConfig(logging_config)
 
     mouse = Controller()
-    # await WindowChecker.check_window()
-    # if not await WindowChecker.check_window():
-    #     await Actions.open_app(mouse)
     await send_telegram_report("Worker started.")
 
     logging.info("Worker started.")
@@ -209,11 +172,16 @@ async def main():
             _, task_data = task_data
             task = Task.model_validate_json(task_data.decode("utf-8"))
             set_name = "dev_completed_tasks" if "dev-" in task.callback_url else "prod_completed_tasks"
-            is_in_set = await redis_client.sismember(set_name, str(task.order_id))
-            if not is_in_set and task.status not in [1, 2]:  # все статусы, кроме complete & cancel.
-                await execute_task(task, redis_client, mouse)
+            is_in_completed = await redis_client.sismember(set_name, str(task.order_id))
+            is_in_bad_names = await redis_client.sismember("incorrect_names", task.requisite)
+            if not is_in_completed:
+                if not is_in_bad_names:
+                    if task.status not in [1, 2]:  # все статусы, кроме complete & cancel.
+                        await execute_task(task, redis_client, mouse)
+                else:
+                    logging.info(f"Task {task.order_id} skipped — incorrect name...")
             else:
-                logging.info(f"Task {task.order_id} already processed, skipping task.")
+                logging.info(f"Task {task.order_id} skipped — already processed...")
 
 
 def run_main():
