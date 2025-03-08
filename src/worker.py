@@ -39,7 +39,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     nickname = 'dnk-jarod' if 'dev-' in task.callback_url else task.requisite
-    amount = '5111.11' if 'dev-' in task.callback_url else str(task.amount)
+    amount = '1.11' if 'dev-' in task.callback_url else str(task.amount)
     await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
