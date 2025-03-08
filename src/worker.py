@@ -57,7 +57,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, attem
         return
     if await Actions.name_or_money_error_check(check=CheckType.NAME):
         logging.info(f"Task {task.order_id} failed. Incorrect name.")
-        await redis_client.sadd('incorrect_names', str(task.requisite))
+        # await redis_client.sadd('incorrect_names', str(task.requisite))
         await send_error_report(task, ErrorType.INCORRECT_NAME)
         await send_telegram_report(
             f"Task {task.order_id} failed. Incorrect name.",
@@ -176,13 +176,13 @@ async def main():
             task = Task.model_validate_json(task_data.decode("utf-8"))
             set_name = "dev_completed_tasks" if "dev-" in task.callback_url else "prod_completed_tasks"
             is_in_completed = await redis_client.sismember(set_name, str(task.order_id))
-            is_in_bad_names = await redis_client.sismember("incorrect_names", task.requisite)
+            # is_in_bad_names = await redis_client.sismember("incorrect_names", task.requisite)
             if not is_in_completed:
-                if not is_in_bad_names:
-                    if task.status not in [1, 2]:  # все статусы, кроме complete & cancel.
-                        await execute_task(task, redis_client, mouse)
-                else:
-                    logging.info(f"Task {task.order_id} skipped — incorrect name...")
+                # if not is_in_bad_names:
+                if task.status not in [1, 2]:  # все статусы, кроме complete & cancel.
+                    await execute_task(task, redis_client, mouse)
+                # else:
+                #     logging.info(f"Task {task.order_id} skipped — incorrect name...")
             else:
                 logging.info(f"Task {task.order_id} skipped — already processed...")
 
