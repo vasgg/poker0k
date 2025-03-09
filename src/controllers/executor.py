@@ -121,7 +121,6 @@ async def execute_task(
 async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
     from worker import check_time
 
-    logging.info("Worker started.")
     await asyncio.sleep(4)
 
     try:
