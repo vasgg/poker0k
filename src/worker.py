@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import timedelta, timezone, datetime
+import signal
 
 from pynput.mouse import Controller
 from redis import asyncio as redis
@@ -26,9 +27,6 @@ async def main():
     setup_worker("pokerok_worker")
     bot, dispatcher = setup_bot()
 
-    global last_restart_time
-    last_restart_time = datetime.now(timezone(timedelta(hours=3)))
-
     redis_client = redis.Redis(
         host=settings.REDIS_HOST,
         port=settings.REDIS_PORT,
@@ -42,24 +40,27 @@ async def main():
     polling_task = asyncio.create_task(dispatcher.start_polling(bot))
     worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event))
 
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGINT, stop_event.set)
+    loop.add_signal_handler(signal.SIGTERM, stop_event.set)
+
+    logging.info("Worker and bot polling started.")
     try:
-        await asyncio.gather(polling_task, worker_task)
-    except (asyncio.CancelledError, KeyboardInterrupt):
-        logging.info("Shutdown signal received (main).")
+        await stop_event.wait()
     finally:
-        logging.info("Stopping background tasks...")
+        logging.info("Shutdown initiated...")
         stop_event.set()
         polling_task.cancel()
         worker_task.cancel()
         await asyncio.gather(polling_task, worker_task, return_exceptions=True)
-        logging.info("All tasks stopped. App shutdown complete.")
+        logging.info("Application stopped gracefully.")
 
 
 def run_main():
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logging.info("Manual shutdown.")
+        logging.info("Manual shutdown complete.")
 
 
 if __name__ == "__main__":

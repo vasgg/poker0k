@@ -15,10 +15,7 @@ async def balance(message: Message):
         WorkspaceCoords.BALANCE_WINDOW_TOP_LEFT, WorkspaceCoords.BALANCE_WINDOW_BOTTOM_RIGHT
     )
     buffer = BytesIO()
-    picture.save(buffer, format='PNG')
+    picture.save(buffer, format="PNG")
     buffer.seek(0)
 
-    await message.answer_photo(
-        BufferedInputFile(buffer.read(), filename='balance.png'),
-        disable_notification=True
-    )
+    await message.answer_photo(BufferedInputFile(buffer.read(), filename="balance.png"), disable_notification=True)
