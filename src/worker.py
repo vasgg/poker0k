@@ -34,26 +34,23 @@ async def main():
     )
 
     mouse = Controller()
-
     stop_event = asyncio.Event()
 
     polling_task = asyncio.create_task(dispatcher.start_polling(bot))
     worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event))
 
     loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGINT, stop_event.set)
+    loop.add_signal_handler(signal.SIGTERM, stop_event.set)
 
-    loop.add_signal_handler(asyncio.constants.SIGINT, stop_event.set)
-
-    logging.info("Worker and bot started.")
-
+    logging.info("Worker and polling tasks started.")
     await stop_event.wait()
 
-    logging.info("SIGINT received, cancelling tasks...")
+    logging.info("Shutdown signal received, cancelling tasks...")
     polling_task.cancel()
     worker_task.cancel()
-
     await asyncio.gather(polling_task, worker_task, return_exceptions=True)
-    logging.info("All tasks cancelled, shutting down.")
+    logging.info("All tasks cancelled, shutdown complete.")
 
 
 def run_main():
