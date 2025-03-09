@@ -7,11 +7,8 @@ from zoneinfo import ZoneInfo
 from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
 
-from consts import Colors, Coords, WorkspaceCoords
-
-from internal import CheckType, Task
-
-logger = logging.getLogger(__name__)
+from internal.consts import Colors, Coords, WorkspaceCoords
+from internal.schemas import CheckType, Task
 
 
 class Actions:
@@ -26,7 +23,7 @@ class Actions:
             await asyncio.sleep(delay_before)
         mouse.position = coords.value
         mouse.click(Button.left)
-        logger.info(text)
+        logging.info(text)
         if delay_after > 0:
             await asyncio.sleep(delay_after)
 
@@ -39,7 +36,7 @@ class Actions:
         )
         mouse.position = pixel
         mouse.click(Button.left)
-        logger.info(text)
+        logging.info(text)
         if delay_after > 0:
             await asyncio.sleep(delay_after)
 
@@ -57,7 +54,7 @@ class Actions:
         else:
             typewrite(value)
         await asyncio.sleep(1)
-        logger.info(f"Input value: {value}")
+        logging.info(f"Input value: {value}")
 
     @staticmethod
     def is_color_match(pixel_color, target_color, tolerance_percent=0):
@@ -74,7 +71,7 @@ class Actions:
                 top_left = WorkspaceCoords.NAME_CHECK_TOP_LEFT
                 bottom_right = WorkspaceCoords.NAME_CHECK_BOTTOM_RIGHT
             case _:
-                assert False, f"Unexpected check type: {check}"
+                return False
         image = await Actions.take_screenshot_of_region(top_left, bottom_right)
         pixels = image.load()
         width, height = image.size
@@ -144,13 +141,13 @@ class Actions:
         gray_screenshot = scrnsht.convert("L")
         path = Path("screenshots")
         gray_screenshot.save(path / file)
-        logger.info(f"Screenshot saved to: {file}")
+        logging.info(f"Screenshot saved to: {file}")
         await asyncio.sleep(3)
         return path / file
 
     @staticmethod
     async def reopen_pokerok_client(mouse: Controller):
-        logger.info(f"Reopening pokerok app.")
+        logging.info("Reopening pokerok app.")
         await Actions.click_on_const(mouse, Coords.CLOSE_APP_BUTTON, 3)
         await start_app_flow(mouse)
 
