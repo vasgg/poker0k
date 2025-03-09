@@ -1,12 +1,13 @@
 import asyncio
-from datetime import timedelta, timezone, datetime
 import logging
+from datetime import timedelta, timezone, datetime
+
 from pynput.mouse import Controller
 from redis import asyncio as redis
 
 from config import settings, setup_worker, setup_bot
-from controllers.executor import worker_loop
 from controllers.actions import Actions
+from controllers.executor import worker_loop
 
 last_restart_time: datetime | None = None
 
@@ -26,8 +27,7 @@ async def main():
     bot, dispatcher = setup_bot()
 
     global last_restart_time
-    current_time = datetime.now(timezone(timedelta(hours=3)))
-    last_restart_time = current_time
+    last_restart_time = datetime.now(timezone(timedelta(hours=3)))
 
     redis_client = redis.Redis(
         host=settings.REDIS_HOST,
@@ -37,15 +37,20 @@ async def main():
 
     mouse = Controller()
 
+    stop_event = asyncio.Event()
+
+    # Запускаем поллинг в отдельной задаче
     polling_task = asyncio.create_task(dispatcher.start_polling(bot))
-    worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings))
+    # Запускаем твою основную рабочую задачу
+    worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event))
 
     try:
         await asyncio.gather(polling_task, worker_task)
     except (asyncio.CancelledError, KeyboardInterrupt):
-        logging.info("Shutdown signal received.")
+        logging.info("Shutdown signal received (main).")
     finally:
         logging.info("Stopping background tasks...")
+        stop_event.set()
         polling_task.cancel()
         worker_task.cancel()
         await asyncio.gather(polling_task, worker_task, return_exceptions=True)
@@ -56,7 +61,7 @@ def run_main():
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logging.info("Manual shutdown from console.")
+        logging.info("Manual shutdown.")
 
 
 if __name__ == "__main__":

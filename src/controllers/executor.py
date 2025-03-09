@@ -18,7 +18,7 @@ async def restore_tasks(task: Task, redis_client):
     logging.info(f"Task {task.order_id} restored to the main queue.")
 
 
-async def execute_task(task: Task, redis_client: redis, mouse: Controller, settings: Settings, attempts: int = 0):
+async def execute_task(task: Task, redis_client: redis.Redis, mouse: Controller, settings: Settings, attempts: int = 0):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     nickname = "dnk-jarod" if "dev-" in task.callback_url else task.requisite
@@ -116,24 +116,30 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, setti
             # await Actions.reopen_pokerok(mouse)
 
 
-async def worker_loop(redis_client, mouse, settings):
+async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
     from worker import check_time
     logging.info("Worker started.")
     await asyncio.sleep(4)
     try:
-        while True:
+        while not stop_event.is_set():
             await check_time(mouse)
-            task_data = await redis_client.brpop("FER_queue", timeout=5)
+
+            task_data = await redis_client.brpop("FER_queue", timeout=3)
 
             if task_data:
                 _, task_data = task_data
                 task = Task.model_validate_json(task_data.decode("utf-8"))
                 set_name = "dev_completed_tasks" if "dev-" in task.callback_url else "prod_completed_tasks"
                 is_in_completed = await redis_client.sismember(set_name, str(task.order_id))
-                if not is_in_completed:
-                    if task.status not in [1, 2]:  # все статусы, кроме complete & cancel.
-                        await execute_task(task, redis_client, mouse, settings)
+                if not is_in_completed and task.status not in [1, 2]:
+                    await execute_task(task, redis_client, mouse, settings)
                 else:
                     logging.info(f"Task {task.order_id} skipped — already processed...")
+
+        if stop_event.is_set():
+            logging.info("Worker loop received stop event.")
+
     except asyncio.CancelledError:
-        logging.info("Worker loop cancelled, exiting.")
+        logging.info("worker_loop cancelled.")
+    finally:
+        logging.info("Worker loop stopped.")
