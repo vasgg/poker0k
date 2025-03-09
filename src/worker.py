@@ -44,16 +44,18 @@ async def main():
 
     logging.info("Worker and polling tasks started.")
 
-    try:
-        await asyncio.gather(polling_task, worker_task)
-    except (asyncio.CancelledError, KeyboardInterrupt):
-        logging.info("Shutdown signal received, cancelling tasks...")
-    finally:
-        stop_event.set()
-        polling_task.cancel()
-        worker_task.cancel()
-        await asyncio.gather(polling_task, worker_task, return_exceptions=True)
-        logging.info("App shutdown completed gracefully.")
+    done, pending = await asyncio.wait(
+        [polling_task, worker_task], return_when=asyncio.FIRST_COMPLETED
+    )
+
+    logging.info("One of the tasks completed, initiating shutdown...")
+    stop_event.set()
+
+    for task in pending:
+        task.cancel()
+
+    await asyncio.gather(*pending, return_exceptions=True)
+    logging.info("App shutdown completed gracefully.")
 
 
 def run_main():
