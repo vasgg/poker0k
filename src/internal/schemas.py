@@ -22,11 +22,6 @@ class Task(BaseModel):
     step: Step | None = None
 
 
-class Stage(StrEnum):
-    DEV = auto()
-    PROD = auto()
-
-
 class CheckType(StrEnum):
     MONEY = auto()
     NAME = auto()
