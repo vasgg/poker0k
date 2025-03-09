@@ -13,4 +13,4 @@ async def balance(message: Message):
     picture = await Actions.take_screenshot_of_region(
         WorkspaceCoords.BALANCE_WINDOW_TOP_LEFT, WorkspaceCoords.BALANCE_WINDOW_BOTTOM_RIGHT
     )
-    await message.answer_photo(picture)
+    await message.answer_photo(picture, disable_notification=True)
