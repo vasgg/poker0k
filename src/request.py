@@ -7,15 +7,20 @@ import random
 import aiohttp
 import redis.asyncio as redis
 
-from config import settings
+from config import Settings, settings
 from controllers.crypt import Crypt
-from internal import ErrorType, Step, Task
+from internal.schemas import ErrorType, Step, Task
 
 logger = logging.getLogger(__name__)
 
 
 async def send_report(
-    task: Task, redis_client: redis.Redis, problem: str | None = None, retries: int = 3, delay: int = 3
+    task: Task,
+    redis_client: redis.Redis,
+    settings: Settings,
+    problem: str | None = None,
+    retries: int = 3,
+    delay: int = 3,
 ) -> None:
     set_name = "prod_reports"
     if "dev-" in task.callback_url:
@@ -61,7 +66,9 @@ async def send_report(
     logger.exception(f"Failed to send report after {retries} attempts, task id: {task.order_id} failed with error")
 
 
-async def send_error_report(task: Task, error_type: ErrorType, retries: int = 3, delay: int = 3) -> None:
+async def send_error_report(
+    task: Task, error_type: ErrorType, settings: Settings, retries: int = 3, delay: int = 3
+) -> None:
     now = datetime.now(UTC)
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)

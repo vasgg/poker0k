@@ -1,18 +1,26 @@
 from datetime import datetime
+import logging.config
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 import sys
+from bot.handlers import router as main_router
+
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from internal import Stage
+from bot.commands import set_bot_commands
+from bot.helpers import on_shutdown, on_startup
 
 
 class Settings(BaseSettings):
     ENCRYPT_KEY: SecretStr
     DECRYPT_KEY: SecretStr
     MAX_ATTEMPTS: int
-    STAGE: Stage
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
@@ -22,7 +30,8 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_PASSWORD: SecretStr
     TG_BOT_TOKEN: SecretStr
-    REPORT_TG_IDS: list[int]
+    TG_BOT_ADMIN_ID: int
+    TG_REPORTS_CHAT: int
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="allow")
 
@@ -36,6 +45,27 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def setup_worker(app_name: str):
+    Path("logs").mkdir(parents=True, exist_ok=True)
+    Path("screenshots").mkdir(parents=True, exist_ok=True)
+    logging_config = get_logging_config(app_name)
+    logging.config.dictConfig(logging_config)
+
+
+def setup_bot():
+    storage = MemoryStorage()
+    bot = Bot(
+        token=settings.TG_BOT_TOKEN.get_secret_value(),
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    )
+    dispatcher = Dispatcher(storage=storage, settings=settings)
+    dispatcher.startup.register(on_startup)
+    dispatcher.shutdown.register(on_shutdown)
+    dispatcher.startup.register(set_bot_commands)
+    dispatcher.include_router(main_router)
+    return bot, dispatcher
 
 
 class CustomFormatter(Formatter):
