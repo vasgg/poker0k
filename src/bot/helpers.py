@@ -16,7 +16,7 @@ async def on_startup(bot: Bot, settings):
         logging.warning("Failed to send on shutdown notify")
 
 
-async def on_shutdown(bot: Bot, settings: Settings):
+async def on_shutdown(bot: Bot, settings):
     try:
         for chat_id in settings.TG_BOT_ADMIN_ID, settings.TG_REPORTS_CHAT:
             await bot.send_message(
