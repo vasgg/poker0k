@@ -10,7 +10,6 @@ from controllers.telegram import send_telegram_report
 from internal.consts import Colors, Coords
 from internal.schemas import CheckType, ErrorType, Step, Task
 from request import send_error_report, send_report
-from worker import check_time
 
 
 async def restore_tasks(task: Task, redis_client):
@@ -118,6 +117,7 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, setti
 
 
 async def worker_loop(redis_client, mouse, settings):
+    from worker import check_time
     logging.info("Worker started.")
     await asyncio.sleep(4)
     try:
