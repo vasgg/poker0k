@@ -132,6 +132,9 @@ async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
                 task_data = await asyncio.wait_for(redis_client.brpop("FER_queue"), timeout=1)
             except asyncio.TimeoutError:
                 continue
+            except asyncio.CancelledError:
+                logging.info("Worker loop cancelled during Redis waiting.")
+                break
 
             if task_data:
                 _, task_data = task_data
@@ -145,4 +148,4 @@ async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
     except asyncio.CancelledError:
         logging.info("Worker loop cancelled.")
     finally:
-        logging.info("Worker loop stopped gracefully.")
+        logging.info("Worker loop stopped correctly.")
