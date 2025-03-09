@@ -14,6 +14,8 @@ from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from bot.helpers import on_shutdown, on_startup
+from bot.logging_middleware import LoggingMiddleware
+from bot.updates_dumper_middleware import UpdatesDumperMiddleware
 
 
 class Settings(BaseSettings):
@@ -63,6 +65,10 @@ def setup_bot():
     dispatcher.startup.register(on_startup)
     dispatcher.shutdown.register(on_shutdown)
     # dispatcher.startup.register(set_bot_commands)
+
+    dispatcher.update.outer_middleware(UpdatesDumperMiddleware())
+    dispatcher.message.middleware.register(LoggingMiddleware())
+
     dispatcher.include_router(main_router)
     return bot, dispatcher
 
