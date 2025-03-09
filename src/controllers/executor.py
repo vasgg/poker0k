@@ -126,7 +126,7 @@ async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
             await check_time(mouse)
 
             try:
-                task_data = await asyncio.wait_for(redis_client.brpop("FER_queue"), timeout=4)
+                task_data = await asyncio.wait_for(redis_client.brpop("FER_queue"), timeout=1)
             except asyncio.TimeoutError:
                 continue
 
