@@ -2,7 +2,7 @@ import asyncio
 from datetime import timedelta, timezone, datetime
 import logging
 from pynput.mouse import Controller
-import redis.asyncio as redis
+from redis import asyncio as redis
 
 from config import settings, setup_worker, setup_bot
 from controllers.executor import worker_loop
