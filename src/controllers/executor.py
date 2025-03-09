@@ -120,7 +120,6 @@ async def execute_task(
 
 async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
     from worker import check_time
-
     logging.info("Worker started.")
     await asyncio.sleep(4)
 
@@ -129,12 +128,11 @@ async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
             await check_time(mouse)
 
             try:
-                task_data = await asyncio.wait_for(redis_client.brpop("FER_queue"), timeout=1)
+                task_data = await asyncio.wait_for(
+                    redis_client.brpop("FER_queue"), timeout=1
+                )
             except asyncio.TimeoutError:
                 continue
-            except asyncio.CancelledError:
-                logging.info("Redis waiting cancelled.")
-                break
 
             if task_data:
                 _, task_data = task_data
@@ -144,8 +142,8 @@ async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
                 if not is_in_completed and task.status not in [1, 2]:
                     await execute_task(task, redis_client, mouse, settings)
                 else:
-                    logging.info(f"Task {task.order_id} skipped — already processed.")
+                    logging.info(f"Task {task.order_id} skipped — already processed...")
     except asyncio.CancelledError:
-        logging.info("Worker loop cancelled by main program.")
+        logging.info("Worker loop cancelled.")
     finally:
-        logging.info("Worker loop stopped.")
+        logging.info("Worker loop stopped gracefully.")
