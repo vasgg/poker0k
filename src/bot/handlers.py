@@ -7,7 +7,7 @@ from internal.consts import WorkspaceCoords
 router = Router()
 
 
-@router.message(F.chat_id == -4655514577, F.text == "/balance")
+@router.message(F.chat.id == -4655514577, F.text == "/balance")
 async def balance(message: Message):
     picture = await Actions.take_screenshot_of_region(
         WorkspaceCoords.BALANCE_WINDOW_TOP_LEFT, WorkspaceCoords.BALANCE_WINDOW_BOTTOM_RIGHT
