@@ -1,12 +1,10 @@
 import logging
-
 from aiogram import Bot
-from config import Settings
 
 logging = logging.getLogger(__name__)
 
 
-async def on_startup(bot: Bot, settings: Settings):
+async def on_startup(bot: Bot, settings):
     try:
         for chat_id in settings.TG_BOT_ADMIN_ID, settings.TG_REPORTS_CHAT:
             await bot.send_message(
