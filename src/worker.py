@@ -39,9 +39,7 @@ async def main():
 
     stop_event = asyncio.Event()
 
-    # Запускаем поллинг в отдельной задаче
     polling_task = asyncio.create_task(dispatcher.start_polling(bot))
-    # Запускаем твою основную рабочую задачу
     worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event))
 
     try:
