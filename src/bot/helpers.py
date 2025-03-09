@@ -9,7 +9,7 @@ async def on_startup(bot: Bot, settings):
         for chat_id in settings.TG_BOT_ADMIN_ID, settings.TG_REPORTS_CHAT:
             await bot.send_message(
                 chat_id,
-                "<b>Worker started</b>\n\n/balance for check balance",
+                "<b>Worker started</b>\n\nuse <code>/balance</code> for check balance",
                 disable_notification=True,
             )
     except:
