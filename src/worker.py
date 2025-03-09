@@ -5,10 +5,8 @@ from pynput.mouse import Controller
 import redis.asyncio as redis
 
 from config import settings, setup_worker, setup_bot
-from controllers.executor import execute_task
+from controllers.executor import worker_loop
 from controllers.actions import Actions
-from internal.schemas import Task
-
 
 last_restart_time: datetime | None = None
 
@@ -26,7 +24,6 @@ async def check_time(mouse: Controller):
 async def main():
     setup_worker("pokerok_worker")
     bot, dispatcher = setup_bot()
-    polling_task = asyncio.create_task(dispatcher.start_polling(bot))
 
     global last_restart_time
     current_time = datetime.now(timezone(timedelta(hours=3)))
@@ -40,38 +37,26 @@ async def main():
 
     mouse = Controller()
 
-    logging.info("Worker started.")
-    await asyncio.sleep(4)
-    try:
-        while True:
-            await check_time(mouse)
-            task_data = await redis_client.brpop("FER_queue", timeout=5)
+    polling_task = asyncio.create_task(dispatcher.start_polling(bot))
+    worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings))
 
-            if task_data:
-                _, task_data = task_data
-                task = Task.model_validate_json(task_data.decode("utf-8"))
-                set_name = "dev_completed_tasks" if "dev-" in task.callback_url else "prod_completed_tasks"
-                is_in_completed = await redis_client.sismember(set_name, str(task.order_id))
-                if not is_in_completed:
-                    if task.status not in [1, 2]:  # все статусы, кроме complete & cancel.
-                        await execute_task(task, redis_client, mouse, settings)
-                else:
-                    logging.info(f"Task {task.order_id} skipped — already processed...")
-    except asyncio.CancelledError:
-        logging.info("Exiting from app.")
-    except KeyboardInterrupt:
-        logging.info("KeyboardInterrupt received.")
+    try:
+        await asyncio.gather(polling_task, worker_task)
+    except (asyncio.CancelledError, KeyboardInterrupt):
+        logging.info("Shutdown signal received.")
     finally:
-        logging.info("Shutting down bot polling.")
+        logging.info("Stopping background tasks...")
         polling_task.cancel()
-        await polling_task
+        worker_task.cancel()
+        await asyncio.gather(polling_task, worker_task, return_exceptions=True)
+        logging.info("All tasks stopped. App shutdown complete.")
 
 
 def run_main():
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logging.info("Manual shutdown.")
+        logging.info("Manual shutdown from console.")
 
 
 if __name__ == "__main__":

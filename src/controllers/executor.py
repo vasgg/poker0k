@@ -10,6 +10,7 @@ from controllers.telegram import send_telegram_report
 from internal.consts import Colors, Coords
 from internal.schemas import CheckType, ErrorType, Step, Task
 from request import send_error_report, send_report
+from worker import check_time
 
 
 async def restore_tasks(task: Task, redis_client):
@@ -114,3 +115,25 @@ async def execute_task(task: Task, redis_client: redis, mouse: Controller, setti
             # await restore_tasks(task, redis_client)
             # logging.info(f"Performing restarting emulator after failed task.")
             # await Actions.reopen_pokerok(mouse)
+
+
+async def worker_loop(redis_client, mouse, settings):
+    logging.info("Worker started.")
+    await asyncio.sleep(4)
+    try:
+        while True:
+            await check_time(mouse)
+            task_data = await redis_client.brpop("FER_queue", timeout=5)
+
+            if task_data:
+                _, task_data = task_data
+                task = Task.model_validate_json(task_data.decode("utf-8"))
+                set_name = "dev_completed_tasks" if "dev-" in task.callback_url else "prod_completed_tasks"
+                is_in_completed = await redis_client.sismember(set_name, str(task.order_id))
+                if not is_in_completed:
+                    if task.status not in [1, 2]:  # все статусы, кроме complete & cancel.
+                        await execute_task(task, redis_client, mouse, settings)
+                else:
+                    logging.info(f"Task {task.order_id} skipped — already processed...")
+    except asyncio.CancelledError:
+        logging.info("Worker loop cancelled, exiting.")
