@@ -13,7 +13,6 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from bot.commands import set_bot_commands
 from bot.helpers import on_shutdown, on_startup
 
 
@@ -63,7 +62,7 @@ def setup_bot():
     dispatcher = Dispatcher(storage=storage, settings=settings)
     dispatcher.startup.register(on_startup)
     dispatcher.shutdown.register(on_shutdown)
-    dispatcher.startup.register(set_bot_commands)
+    # dispatcher.startup.register(set_bot_commands)
     dispatcher.include_router(main_router)
     return bot, dispatcher
 
