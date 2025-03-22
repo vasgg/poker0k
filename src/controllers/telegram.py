@@ -11,7 +11,7 @@ async def send_telegram_report(
     message: str, task: Task | None = None, image_path: Path | None = None, disable_notification: bool = False
 ) -> None:
     text = f"{task.order_id}|{task.requisite}|${task.amount}|{message}" if task else message
-    for chat_id in settings.REPORT_TG_IDS:
+    for chat_id in settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID:
         if image_path:
             url = f"https://api.telegram.org/bot{settings.TG_BOT_TOKEN.get_secret_value()}/sendPhoto"
             data = FormData()
