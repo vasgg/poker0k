@@ -35,26 +35,35 @@ async def execute_task(
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON")
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
+        transfer_button_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
             f"Task {task.order_id} failed. Can't find transfer button.",
             task=task,
+            image_path=transfer_button_image_path,
         )
+        # await send_error_report(task, ErrorType.UNEXPECTED_ERROR, settings)
+        # if await Actions.find_square_color(color=Colors.VIOLET, sqare_size=52):
+        #     ...
         return
     if await Actions.name_or_money_error_check(check=CheckType.NAME):
         logging.info(f"Task {task.order_id} failed. Incorrect name.")
         # await redis_client.sadd('incorrect_names', str(task.requisite))
         await send_error_report(task, ErrorType.INCORRECT_NAME, settings)
+        name_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
             f"Task {task.order_id} failed. Incorrect name.",
             task=task,
+            image_path=name_image_path,
         )
         return
     if await Actions.name_or_money_error_check(check=CheckType.MONEY):
         logging.info(f"Task {task.order_id} failed. Insufficient funds.")
         await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS, settings)
+        funds_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
             f"Task {task.order_id} failed. Insufficient funds.",
             task=task,
+            image_path=funds_image_path,
         )
         return
     # await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
@@ -63,10 +72,13 @@ async def execute_task(
         await Actions.click_on_finded(mouse, transfer_confirm_button, "TRANSFER CONFIRM BUTTON")
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
+        button_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
             f"Task {task.order_id} failed. Can't find transfer confirm button.",
             task=task,
+            image_path=button_image_path,
         )
+        # await send_error_report(task, ErrorType.UNEXPECTED_ERROR, settings)
     transfer_confirm_section = None
     for _ in range(10):
         transfer_confirm_section = await Actions.find_square_color(color=Colors.FINAL_GREEN)
@@ -128,9 +140,7 @@ async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
             await check_time(mouse)
 
             try:
-                task_data = await asyncio.wait_for(
-                    redis_client.brpop("FER_queue"), timeout=1
-                )
+                task_data = await asyncio.wait_for(redis_client.brpop("FER_queue"), timeout=1)
             except asyncio.TimeoutError:
                 continue
             except asyncio.CancelledError:
