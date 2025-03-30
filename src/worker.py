@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from datetime import timedelta, timezone, datetime
-import signal
 
 from pynput.mouse import Controller
 from redis import asyncio as redis
@@ -44,9 +43,7 @@ async def main():
 
     logging.info("Worker and polling tasks started.")
 
-    done, pending = await asyncio.wait(
-        [polling_task, worker_task], return_when=asyncio.FIRST_COMPLETED
-    )
+    done, pending = await asyncio.wait([polling_task, worker_task], return_when=asyncio.FIRST_COMPLETED)
 
     logging.info("One of the tasks completed, initiating shutdown...")
     stop_event.set()
