@@ -36,3 +36,4 @@ class Section(StrEnum):
 class ErrorType(StrEnum):
     INSUFFICIENT_FUNDS = auto()
     INCORRECT_NAME = auto()
+    UNEXPECTED_ERROR = auto()
