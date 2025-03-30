@@ -84,7 +84,7 @@ class Actions:
         return False
 
     @staticmethod
-    async def find_square_color(color: tuple[int, int, int], tolerance_percent: int = 15):
+    async def find_square_color(color: tuple[int, int, int], tolerance_percent: int = 15, sqare_size: int = 11):
         if color == Colors.FINAL_GREEN:
             top_left = WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT
             bottom_right = WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT
@@ -95,7 +95,6 @@ class Actions:
         image = await Actions.take_screenshot_of_region(top_left, bottom_right)
         width, height = image.size
         pixels = image.load()
-        sqare_size = 11
         half_square = sqare_size // 2
 
         for x in range(half_square, width - half_square):
@@ -142,7 +141,6 @@ class Actions:
         path = Path("screenshots")
         gray_screenshot.save(path / file)
         logging.info(f"Screenshot saved to: {file}")
-        await asyncio.sleep(3)
         return path / file
 
     @staticmethod

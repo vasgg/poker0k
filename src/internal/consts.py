@@ -39,3 +39,4 @@ class WorkspaceCoords:
 class Colors:
     FINAL_GREEN = 206, 234, 214
     GREEN = 68, 143, 105
+    VIOLET = 142, 142, 215
