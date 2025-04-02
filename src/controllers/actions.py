@@ -153,8 +153,8 @@ class Actions:
 async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON)
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
-    await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 15)
+    await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 20)
     await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 20)
-    await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 15)
-    await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 15)
-    await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 15)
+    await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 20)
+    await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
+    await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 20)

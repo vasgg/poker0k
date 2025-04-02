@@ -8,10 +8,15 @@ from internal.schemas import Task
 
 
 async def send_telegram_report(
-    message: str, task: Task | None = None, image_path: Path | None = None, disable_notification: bool = False
+    message: str,
+    task: Task | None = None,
+    image_path: Path | None = None,
+    disable_notification: bool = False,
+    verbose: bool = True,
 ) -> None:
     text = f"{task.order_id}|{task.requisite}|${task.amount}|{message}" if task else message
-    for chat_id in settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID:
+    chats = [settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID] if verbose else [settings.TG_BOT_ADMIN_ID]
+    for chat_id in chats:
         if image_path:
             url = f"https://api.telegram.org/bot{settings.TG_BOT_TOKEN.get_secret_value()}/sendPhoto"
             data = FormData()

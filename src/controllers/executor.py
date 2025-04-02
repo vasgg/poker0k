@@ -25,6 +25,7 @@ async def execute_task(
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     nickname = "dnk-jarod" if "dev-" in task.callback_url else task.requisite
     amount = "1.11" if "dev-" in task.callback_url else str(task.amount)
+    await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION, 3)
     await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
@@ -88,7 +89,12 @@ async def execute_task(
             await asyncio.sleep(0.4)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
-        await send_telegram_report(f"Task {task.order_id} failed. Can't find transfer confirm section.", task=task)
+        confirm_section_image_path = await Actions.take_screenshot(task=task)
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Can't find transfer confirm section.",
+            task=task,
+            image_path=confirm_section_image_path,
+        )
 
     task.status = 1 if transfer_confirm_section is not None else 0
     logging.info(f"Task {task.order_id} status: {task.status}")
