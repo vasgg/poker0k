@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from pyautogui import press
 from pynput.mouse import Controller
 from redis import asyncio as redis
 
@@ -26,6 +27,7 @@ async def execute_task(
     nickname = "dnk-jarod" if "dev-" in task.callback_url else task.requisite
     amount = "1.11" if "dev-" in task.callback_url else str(task.amount)
     await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION, 3)
+    press("pgup")
     await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
