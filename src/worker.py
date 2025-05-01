@@ -38,7 +38,7 @@ async def main():
     mouse = Controller()
     stop_event = asyncio.Event()
 
-    polling_task = asyncio.create_task(dispatcher.start_polling(bot))
+    polling_task = asyncio.create_task(dispatcher.start_polling(bot, skip_updates=True))
     worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event))
 
     logging.info("Worker and polling tasks started.")
