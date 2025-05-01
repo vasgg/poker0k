@@ -94,12 +94,12 @@ class Actions:
             top_left = WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT
             bottom_right = WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT
         else:
-            top_left = WorkspaceCoords.WORKSPACE_TOP_LEFT
-            bottom_right = WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-
-        if confirm_button:
-            top_left = WorkspaceCoords.CONFIRM_BUTTON_TOP_LEFT
-            bottom_right = WorkspaceCoords.CONFIRM_BUTTON_BOTTOM_RIGHT
+            if confirm_button:
+                top_left = WorkspaceCoords.CONFIRM_BUTTON_TOP_LEFT
+                bottom_right = WorkspaceCoords.CONFIRM_BUTTON_BOTTOM_RIGHT
+            else:
+                top_left = WorkspaceCoords.WORKSPACE_TOP_LEFT
+                bottom_right = WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
 
         image = await Actions.take_screenshot_of_region(top_left, bottom_right)
         width, height = image.size
@@ -119,8 +119,8 @@ class Actions:
                 if matched:
                     del image
                     absolute_coords = (
-                        WorkspaceCoords.WORKSPACE_TOP_LEFT[0] + x,
-                        WorkspaceCoords.WORKSPACE_TOP_LEFT[1] + y,
+                        top_left[0] + x,
+                        top_left[1] + y,
                     )
                     return absolute_coords
         del image

@@ -45,7 +45,7 @@ async def main():
 
     done, pending = await asyncio.wait([polling_task, worker_task], return_when=asyncio.FIRST_COMPLETED)
 
-    logging.info("One of the tasks completed, initiating shutdown...")
+    logging.info("One of the process stopped, initiating shutdown...")
     stop_event.set()
 
     for task in pending:
