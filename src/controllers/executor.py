@@ -36,7 +36,7 @@ async def execute_task(
     # await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
     transfer_button = await Actions.find_square_color(color=Colors.GREEN)
     if transfer_button:
-        await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON")
+        await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON", delay_after=5)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
         transfer_button_image_path = await Actions.take_screenshot(task=task)
