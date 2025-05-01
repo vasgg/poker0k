@@ -34,7 +34,7 @@ async def execute_task(
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
     await Actions.input_value(value=amount)
     # await Actions.click_on_const(mouse, Coords.TRANSFER_BUTTON, 3)
-    transfer_button = await Actions.find_square_color(color=Colors.GREEN, tolerance_percent=25)
+    transfer_button = await Actions.find_square_color(color=Colors.GREEN)
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON")
     else:
@@ -71,7 +71,7 @@ async def execute_task(
         )
         return
     # await Actions.click_on_const(mouse, Coords.TRANSFER_CONFIRM_BUTTON, 5)
-    transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN, tolerance_percent=25)
+    transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN, confirm_button=True)
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, "TRANSFER CONFIRM BUTTON")
     else:

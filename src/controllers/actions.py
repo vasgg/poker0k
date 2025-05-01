@@ -84,13 +84,24 @@ class Actions:
         return False
 
     @staticmethod
-    async def find_square_color(color: tuple[int, int, int], tolerance_percent: int = 15, sqare_size: int = 11):
+    async def find_square_color(
+        color: tuple[int, int, int],
+        tolerance_percent: int = 15,
+        sqare_size: int = 11,
+        confirm_button: bool = False,
+    ):
         if color == Colors.FINAL_GREEN:
             top_left = WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT
             bottom_right = WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT
         else:
-            top_left = WorkspaceCoords.WORKSPACE_TOP_LEFT
-            bottom_right = WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+            top_left = (
+                WorkspaceCoords.WORKSPACE_TOP_LEFT if not confirm_button else WorkspaceCoords.CONFIRM_BUTTON_TOP_LEFT
+            )
+            bottom_right = (
+                WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+                if not confirm_button
+                else WorkspaceCoords.CONFIRM_BUTTON_BOTTOM_RIGHT
+            )
 
         image = await Actions.take_screenshot_of_region(top_left, bottom_right)
         width, height = image.size
