@@ -54,12 +54,11 @@ def setup_worker(app_name: str):
 
 
 def setup_bot():
-    storage = MemoryStorage()
     bot = Bot(
         token=settings.TG_BOT_TOKEN.get_secret_value(),
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
-    dispatcher = Dispatcher(storage=storage, settings=settings)
+    dispatcher = Dispatcher(settings=settings)
     dispatcher.startup.register(on_startup)
     dispatcher.shutdown.register(on_shutdown)
     # dispatcher.startup.register(set_bot_commands)
