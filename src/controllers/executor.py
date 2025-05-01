@@ -74,6 +74,7 @@ async def execute_task(
     transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN, confirm_button=True)
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, "TRANSFER CONFIRM BUTTON")
+        print('TRANSFER CONFIRM BUTTON COORDS: ', transfer_confirm_button)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
         button_image_path = await Actions.take_screenshot(task=task)
