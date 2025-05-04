@@ -7,7 +7,6 @@ import random
 import aiohttp
 import redis.asyncio as redis
 
-from config import Settings, settings
 from controllers.crypt import Crypt
 from internal.consts import RedisNames
 from internal.schemas import ErrorType, Step, Task
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 async def send_report(
     task: Task,
     redis_client: redis.Redis,
-    settings: Settings,
+    settings,
     problem: str | None = None,
     retries: int = 3,
     delay: int = 3,
@@ -68,7 +67,7 @@ async def send_report(
 
 
 async def send_error_report(
-    task: Task, error_type: ErrorType, settings: Settings, retries: int = 3, delay: int = 3
+    task: Task, error_type: ErrorType, settings, retries: int = 3, delay: int = 3
 ) -> None:
     now = datetime.now(UTC)
     async with aiohttp.ClientSession() as session:
@@ -113,6 +112,7 @@ async def add_test_task(redis_client: redis.Redis):
 
 
 def run_main():
+    from config import settings
     redis_client = redis.Redis(
         host=settings.REDIS_HOST,
         port=settings.REDIS_PORT,
