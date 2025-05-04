@@ -1,12 +1,11 @@
 import asyncio
 import logging
-from datetime import timedelta, timezone, datetime
-
+from datetime import timedelta, datetime
 from pynput.mouse import Controller
 from redis import asyncio as redis
 
 from config import settings, setup_worker, setup_bot
-from controllers.actions import Actions
+from controllers.actions import Actions, get_current_moscow_time
 from controllers.executor import worker_loop
 
 last_restart_time: datetime | None = None
@@ -14,7 +13,7 @@ last_restart_time: datetime | None = None
 
 async def check_time(mouse: Controller):
     global last_restart_time
-    current_time = datetime.now(timezone(timedelta(hours=3)))
+    current_time = get_current_moscow_time()
     if (current_time - last_restart_time) >= timedelta(minutes=35):
         logging.info("Performing scheduled restart app.")
         await Actions.reopen_pokerok_client(mouse)
@@ -24,7 +23,7 @@ async def check_time(mouse: Controller):
 
 async def main():
     global last_restart_time
-    last_restart_time = datetime.now(timezone(timedelta(hours=3)))
+    last_restart_time = get_current_moscow_time()
 
     setup_worker("pokerok_worker")
     bot, dispatcher = setup_bot()
