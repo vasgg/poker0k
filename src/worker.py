@@ -4,7 +4,6 @@ from datetime import timedelta, datetime
 from pynput.mouse import Controller
 from redis import asyncio as redis
 
-from controllers.actions import Actions, get_current_moscow_time
 from controllers.executor import worker_loop
 
 last_restart_time: datetime | None = None
@@ -21,6 +20,7 @@ async def check_time(mouse: Controller):
 
 
 async def main():
+    from controllers.actions import Actions, get_current_moscow_time
     from config import settings, setup_worker, setup_bot
     global last_restart_time
     last_restart_time = get_current_moscow_time()
