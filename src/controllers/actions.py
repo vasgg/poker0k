@@ -18,15 +18,11 @@ async def restore_current_task_to_queue(task: Task, redis_client):
     logging.info(f"Task {task.order_id} restored to the main queue.")
 
 
-def get_current_moscow_time():
-    return datetime.now(timezone(timedelta(hours=3)))
-
-
 async def handle_failure_and_restart(task, redis_client, mouse):
     await restore_current_task_to_queue(task, redis_client)
     logging.info("Performing restart app after failed task.")
     await Actions.reopen_pokerok_client(mouse)
-    worker.last_restart_time = get_current_moscow_time()
+    worker.last_restart_time = datetime.now(timezone(timedelta(hours=3)))
 
 
 class Actions:
