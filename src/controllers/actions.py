@@ -1,14 +1,32 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
+import src.worker
 
 from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
 
-from internal.consts import Colors, Coords, WorkspaceCoords
+from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
 from internal.schemas import CheckType, Task
+
+
+async def restore_current_task_to_queue(task: Task, redis_client):
+    serialized_task = task.model_dump_json()
+    await redis_client.rpush(RedisNames.QUEUE, serialized_task)
+    logging.info(f"Task {task.order_id} restored to the main queue.")
+
+
+def get_current_moscow_time():
+    return datetime.now(timezone(timedelta(hours=3)))
+
+
+async def handle_failure_and_restart(task, redis_client, mouse):
+    await restore_current_task_to_queue(task, redis_client)
+    logging.info("Performing restart app after failed task.")
+    await Actions.reopen_pokerok_client(mouse)
+    src.worker.last_restart_time = get_current_moscow_time()
 
 
 class Actions:
@@ -93,6 +111,9 @@ class Actions:
         if color == Colors.FINAL_GREEN:
             top_left = WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT
             bottom_right = WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT
+        elif color == Colors.DARK_GRAY:
+            top_left = WorkspaceCoords.CASHIER_BOTTOM_TOP_LEFT
+            bottom_right = WorkspaceCoords.CASHIER_BOTTOM_TOP_RIGHT
         else:
             if confirm_button:
                 top_left = WorkspaceCoords.CONFIRM_BUTTON_TOP_LEFT
@@ -154,7 +175,6 @@ class Actions:
 
     @staticmethod
     async def reopen_pokerok_client(mouse: Controller):
-        logging.info("Reopening pokerok app.")
         await Actions.click_on_const(mouse, Coords.CLOSE_APP_BUTTON, 3)
         await start_app_flow(mouse)
 
