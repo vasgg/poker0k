@@ -23,6 +23,7 @@ class Coords(Enum):
 class WorkspaceCoords:
     WORKSPACE_TOP_LEFT = 860, 575
     WORKSPACE_BOTTOM_RIGHT = 1500, 800
+
     CONFIRM_BUTTON_TOP_LEFT = 1200, 670
     CONFIRM_BUTTON_BOTTOM_RIGHT = 1390, 700
 
@@ -38,8 +39,18 @@ class WorkspaceCoords:
     BALANCE_WINDOW_TOP_LEFT = 1694, 298
     BALANCE_WINDOW_BOTTOM_RIGHT = 1792, 350
 
+    CASHIER_BOTTOM_TOP_LEFT = 850, 910
+    CASHIER_BOTTOM_TOP_RIGHT = 1530, 960
+
 
 class Colors:
     FINAL_GREEN = 206, 234, 214
     GREEN = 68, 143, 105
+    DARK_GRAY = 33, 33, 33
     VIOLET = 142, 142, 215
+
+
+class RedisNames:
+    QUEUE = "FER_queue"
+    PROD_SET = "prod_completed_tasks"
+    DEV_SET = "dev_completed_tasks"
