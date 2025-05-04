@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
-import worker
 
 from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
@@ -19,6 +18,7 @@ async def restore_current_task_to_queue(task: Task, redis_client):
 
 
 async def handle_failure_and_restart(task, redis_client, mouse):
+    import worker
     await restore_current_task_to_queue(task, redis_client)
     logging.info("Performing restart app after failed task.")
     await Actions.reopen_pokerok_client(mouse)
