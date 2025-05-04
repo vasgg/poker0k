@@ -9,6 +9,7 @@ import redis.asyncio as redis
 
 from config import Settings, settings
 from controllers.crypt import Crypt
+from internal.consts import RedisNames
 from internal.schemas import ErrorType, Step, Task
 
 logger = logging.getLogger(__name__)
@@ -108,7 +109,7 @@ async def add_test_task(redis_client: redis.Redis):
         status=0,
         callback_url="https://dev-xyz.simpleex.store/api/v2/fer/callback",
     )
-    await redis_client.rpush("FER_queue", task.model_dump_json())
+    await redis_client.rpush(RedisNames.QUEUE, task.model_dump_json())
 
 
 def run_main():
