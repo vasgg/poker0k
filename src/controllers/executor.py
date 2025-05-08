@@ -40,6 +40,16 @@ async def execute_task(
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON", delay_after=5)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
+        is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
+        if is_already_restarted:
+            logging.info(f"Task {task.order_id} skipped — already restarted...")
+            screenshot = await Actions.take_screenshot(task=task)
+            await send_telegram_report(
+                f"Task {task.order_id} failed after restart PokerokClient. Can't find transfer button.",
+                task=task,
+                image_path=screenshot,
+            )
+            return
         await handle_failure_and_restart(task, redis_client, mouse)
         return
     if await Actions.name_or_money_error_check(check=CheckType.NAME):
@@ -67,6 +77,16 @@ async def execute_task(
         await Actions.click_on_finded(mouse, transfer_confirm_button, "TRANSFER CONFIRM BUTTON")
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
+        is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
+        if is_already_restarted:
+            logging.info(f"Task {task.order_id} skipped — already restarted...")
+            screenshot = await Actions.take_screenshot(task=task)
+            await send_telegram_report(
+                f"Task {task.order_id} failed after restart PokerokClient. Can't find transfer confirm button.",
+                task=task,
+                image_path=screenshot,
+            )
+            return
         await handle_failure_and_restart(task, redis_client, mouse)
         return
         # button_image_path = await Actions.take_screenshot(task=task)

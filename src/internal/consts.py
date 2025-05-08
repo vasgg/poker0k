@@ -54,3 +54,4 @@ class RedisNames:
     QUEUE = "FER_queue"
     PROD_SET = "prod_completed_tasks"
     DEV_SET = "dev_completed_tasks"
+    RESTARTED_TASKS = "vas_restarted_tasks"
