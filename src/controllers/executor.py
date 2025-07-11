@@ -26,7 +26,7 @@ async def execute_task(
     if check_cashier_bottom_section:
         cashier = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task {task.order_id} failed. Problem with cashier detected.",
+            f"Task failed. Problem with cashier detected.",
             task=task,
             image_path=cashier,
         )
@@ -42,7 +42,7 @@ async def execute_task(
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
         screenshot = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer button.",
+            f"Task failed. Can't find transfer button.",
             task=task,
             image_path=screenshot,
         )
@@ -63,7 +63,7 @@ async def execute_task(
         await send_error_report(task, ErrorType.INCORRECT_NAME, settings)
         name_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task {task.order_id} failed. Incorrect name.",
+            f"Task failed. Incorrect name.",
             task=task,
             image_path=name_image_path,
         )
@@ -73,7 +73,7 @@ async def execute_task(
         await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS, settings)
         funds_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task {task.order_id} failed. Insufficient funds.",
+            f"Task failed. Insufficient funds.",
             task=task,
             image_path=funds_image_path,
         )
@@ -85,7 +85,7 @@ async def execute_task(
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
         screenshot = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer confirm button.",
+            f"Task failed. Can't find transfer confirm button.",
             task=task,
             image_path=screenshot,
         )
@@ -119,7 +119,7 @@ async def execute_task(
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
         confirm_section_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task {task.order_id} failed. Can't find transfer confirm section.",
+            f"Task failed. Can't find transfer confirm section.",
             task=task,
             image_path=confirm_section_image_path,
         )
@@ -143,7 +143,7 @@ async def execute_task(
         # await Actions.take_screenshot(task=task, debug=True)
         image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task {task.order_id} failed.",
+            f"Task failed.",
             task=task,
             image_path=image_path,
         )
