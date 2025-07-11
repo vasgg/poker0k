@@ -40,17 +40,23 @@ async def execute_task(
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON", delay_after=5)
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
-        is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
-        if is_already_restarted:
-            logging.info(f"Task {task.order_id} skipped — already restarted...")
-            screenshot = await Actions.take_screenshot(task=task)
-            await send_telegram_report(
-                f"Task {task.order_id} failed after restart PokerokClient. Can't find transfer button.",
-                task=task,
-                image_path=screenshot,
-            )
-            return
-        await handle_failure_and_restart(task, redis_client, mouse)
+        screenshot = await Actions.take_screenshot(task=task)
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Can't find transfer button.",
+            task=task,
+            image_path=screenshot,
+        )
+        # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
+        # if is_already_restarted:
+        #     logging.info(f"Task {task.order_id} skipped — already restarted...")
+        #     screenshot = await Actions.take_screenshot(task=task)
+        #     await send_telegram_report(
+        #         f"Task {task.order_id} failed after restart PokerokClient. Can't find transfer button.",
+        #         task=task,
+        #         image_path=screenshot,
+        #     )
+        #     return
+        # await handle_failure_and_restart(task, redis_client, mouse)
         return
     if await Actions.name_or_money_error_check(check=CheckType.NAME):
         logging.info(f"Task {task.order_id} failed. Incorrect name.")
@@ -77,17 +83,23 @@ async def execute_task(
         await Actions.click_on_finded(mouse, transfer_confirm_button, "TRANSFER CONFIRM BUTTON")
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
-        is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
-        if is_already_restarted:
-            logging.info(f"Task {task.order_id} skipped — already restarted...")
-            screenshot = await Actions.take_screenshot(task=task)
-            await send_telegram_report(
-                f"Task {task.order_id} failed after restart PokerokClient. Can't find transfer confirm button.",
-                task=task,
-                image_path=screenshot,
-            )
-            return
-        await handle_failure_and_restart(task, redis_client, mouse)
+        screenshot = await Actions.take_screenshot(task=task)
+        await send_telegram_report(
+            f"Task {task.order_id} failed. Can't find transfer confirm button.",
+            task=task,
+            image_path=screenshot,
+        )
+        # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
+        # if is_already_restarted:
+        #     logging.info(f"Task {task.order_id} skipped — already restarted...")
+        #     screenshot = await Actions.take_screenshot(task=task)
+        #     await send_telegram_report(
+        #         f"Task {task.order_id} failed after restart PokerokClient. Can't find transfer confirm button.",
+        #         task=task,
+        #         image_path=screenshot,
+        #     )
+        #     return
+        # await handle_failure_and_restart(task, redis_client, mouse)
         return
         # button_image_path = await Actions.take_screenshot(task=task)
         # await send_telegram_report(
@@ -125,27 +137,33 @@ async def execute_task(
         await send_report(task=task, redis_client=redis_client, settings=settings)
         await Actions.take_screenshot(task=task)
     else:
-        task.step = Step.FAILED
-        await redis_client.lpush("FER_reports", task.model_dump_json())
-        attempts += 1
-        await Actions.take_screenshot(task=task, debug=True)
-        logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
-        if attempts < settings.MAX_ATTEMPTS:
-            await execute_task(task=task, redis_client=redis_client, mouse=mouse, attempts=attempts, settings=settings)
-        else:
-            image_path = await Actions.take_screenshot(task=task)
-            await send_telegram_report(
-                f"Task {task.order_id} failed after {attempts} attempts, check the app.",
-                task=task,
-                image_path=image_path,
-            )
-            logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
-            await send_report(
-                task=task,
-                redis_client=redis_client,
-                problem=f"Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.",
-                settings=settings,
-            )
+        # task.step = Step.FAILED
+        # await redis_client.lpush("FER_reports", task.model_dump_json())
+        # attempts += 1
+        # await Actions.take_screenshot(task=task, debug=True)
+        image_path = await Actions.take_screenshot(task=task)
+        await send_telegram_report(
+            f"Task {task.order_id} failed.",
+            task=task,
+            image_path=image_path,
+        )
+        logging.info(f"Task {task.order_id} failed.")
+        # if attempts < settings.MAX_ATTEMPTS:
+        #     await execute_task(task=task, redis_client=redis_client, mouse=mouse, attempts=attempts, settings=settings)
+        # else:
+        #     image_path = await Actions.take_screenshot(task=task)
+        #     await send_telegram_report(
+        #         f"Task {task.order_id} failed after {attempts} attempts, check the app.",
+        #         task=task,
+        #         image_path=image_path,
+        #     )
+        #     logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
+        #     await send_report(
+        #         task=task,
+        #         redis_client=redis_client,
+        #         problem=f"Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.",
+        #         settings=settings,
+        #     )
             # logging.info("Restoring task to the main queue.")
             # await restore_tasks(task, redis_client)
             # logging.info(f"Performing restarting emulator after failed task.")
