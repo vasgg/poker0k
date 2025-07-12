@@ -4,7 +4,6 @@ from pathlib import Path
 import aiofiles
 from aiohttp import FormData, ClientSession
 
-from config import settings
 from controllers.actions import Actions
 from internal.consts import WorkspaceCoords
 from internal.schemas import Task
@@ -17,6 +16,8 @@ async def send_telegram_report(
     image: Path | BytesIO | bytes | None = None,
     disable_notification: bool = False,
 ) -> None:
+    from config import settings
+
     text = f"{task.order_id}|{task.requisite}|${task.amount}|{message}" if task else message
     token = settings.TG_BOT_TOKEN.get_secret_value()
 
