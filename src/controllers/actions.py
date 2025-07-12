@@ -19,6 +19,7 @@ async def restore_current_task_to_queue(task: Task, redis_client):
 
 async def handle_failure_and_restart(task, redis_client, mouse):
     import worker
+
     await restore_current_task_to_queue(task, redis_client)
     await redis_client.sadd(RedisNames.RESTARTED_TASKS, str(task.order_id))
     logging.info("Performing restart app after failed task.")

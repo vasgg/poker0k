@@ -22,6 +22,7 @@ async def check_time(mouse: Controller):
 
 async def main():
     from config import settings, setup_worker, setup_bot
+
     global last_restart_time
     last_restart_time = datetime.now(timezone(timedelta(hours=3)))
     setup_worker("pokerok_worker")

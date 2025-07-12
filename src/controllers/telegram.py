@@ -37,3 +37,13 @@ async def send_telegram_report(
 
         async with ClientSession() as session:
             await session.post(url, data=data, ssl=False)
+
+
+async def get_balance_pic():
+    picture = await Actions.take_screenshot_of_region(
+        WorkspaceCoords.BALANCE_WINDOW_TOP_LEFT, WorkspaceCoords.BALANCE_WINDOW_BOTTOM_RIGHT
+    )
+    buffer = BytesIO()
+    picture.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer

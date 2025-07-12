@@ -9,7 +9,6 @@ from bot.handlers import router as main_router
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.fsm.storage.memory import MemoryStorage
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

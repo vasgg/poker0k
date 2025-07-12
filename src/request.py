@@ -66,9 +66,7 @@ async def send_report(
     logger.exception(f"Failed to send report after {retries} attempts, task id: {task.order_id} failed with error")
 
 
-async def send_error_report(
-    task: Task, error_type: ErrorType, settings, retries: int = 3, delay: int = 3
-) -> None:
+async def send_error_report(task: Task, error_type: ErrorType, settings, retries: int = 3, delay: int = 3) -> None:
     now = datetime.now(UTC)
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
@@ -113,6 +111,7 @@ async def add_test_task(redis_client: redis.Redis):
 
 def run_main():
     from config import settings
+
     redis_client = redis.Redis(
         host=settings.REDIS_HOST,
         port=settings.REDIS_PORT,
