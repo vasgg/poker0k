@@ -5,8 +5,8 @@ from pynput.mouse import Controller
 from redis import asyncio as redis
 
 from config import Settings
-from controllers.actions import Actions, handle_failure_and_restart
-from controllers.telegram import send_telegram_report
+from controllers.actions import Actions
+from controllers.telegram import get_balance_pic, send_telegram_report
 from internal.consts import Colors, Coords, RedisNames
 from internal.schemas import CheckType, ErrorType, Step, Task
 from request import send_error_report, send_report
@@ -26,9 +26,10 @@ async def execute_task(
     if check_cashier_bottom_section:
         cashier = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task failed. Problem with cashier detected.",
+            "Task failed. Problem with cashier detected.",
             task=task,
-            image_path=cashier,
+            image=cashier,
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         return
     await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
@@ -42,9 +43,10 @@ async def execute_task(
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
         screenshot = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task failed. Can't find transfer button.",
+            "Task failed. Can't find transfer button.",
             task=task,
-            image_path=screenshot,
+            image=screenshot,
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
         # if is_already_restarted:
@@ -63,9 +65,10 @@ async def execute_task(
         await send_error_report(task, ErrorType.INCORRECT_NAME, settings)
         name_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task failed. Incorrect name.",
+            "Task failed. Incorrect name.",
             task=task,
-            image_path=name_image_path,
+            image=name_image_path,
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         return
     if await Actions.name_or_money_error_check(check=CheckType.MONEY):
@@ -73,9 +76,10 @@ async def execute_task(
         await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS, settings)
         funds_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task failed. Insufficient funds.",
+            "Task failed. Insufficient funds.",
             task=task,
-            image_path=funds_image_path,
+            image=funds_image_path,
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         return
     transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN, confirm_button=True)
@@ -85,9 +89,10 @@ async def execute_task(
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
         screenshot = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task failed. Can't find transfer confirm button.",
+            "Task failed. Can't find transfer confirm button.",
             task=task,
-            image_path=screenshot,
+            image=screenshot,
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
         # if is_already_restarted:
@@ -119,9 +124,10 @@ async def execute_task(
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
         confirm_section_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task failed. Can't find transfer confirm section.",
+            "Task failed. Can't find transfer confirm section.",
             task=task,
-            image_path=confirm_section_image_path,
+            image=confirm_section_image_path,
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
 
     task.status = 1 if transfer_confirm_section is not None else 0
@@ -136,6 +142,14 @@ async def execute_task(
 
         await send_report(task=task, redis_client=redis_client, settings=settings)
         await Actions.take_screenshot(task=task)
+        balance_pic = await get_balance_pic()
+        await send_telegram_report(
+            "Task completed.",
+            task=task,
+            image=balance_pic,
+            chats=(settings.TG_REPORTS_CHAT,),
+            disable_notification=True,
+        )
     else:
         # task.step = Step.FAILED
         # await redis_client.lpush("FER_reports", task.model_dump_json())
@@ -143,9 +157,10 @@ async def execute_task(
         # await Actions.take_screenshot(task=task, debug=True)
         image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
-            f"Task failed.",
+            "Task failed.",
             task=task,
-            image_path=image_path,
+            image=image_path,
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         logging.info(f"Task {task.order_id} failed.")
         # if attempts < settings.MAX_ATTEMPTS:
@@ -164,10 +179,10 @@ async def execute_task(
         #         problem=f"Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.",
         #         settings=settings,
         #     )
-            # logging.info("Restoring task to the main queue.")
-            # await restore_tasks(task, redis_client)
-            # logging.info(f"Performing restarting emulator after failed task.")
-            # await Actions.reopen_pokerok(mouse)
+        # logging.info("Restoring task to the main queue.")
+        # await restore_tasks(task, redis_client)
+        # logging.info(f"Performing restarting emulator after failed task.")
+        # await Actions.reopen_pokerok(mouse)
 
 
 async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
