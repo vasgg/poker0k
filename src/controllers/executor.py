@@ -46,7 +46,10 @@ async def execute_task(
             "Task failed. Insufficient funds.",
             task=task,
             image=funds_image_path,
-            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            chats=(
+                settings.TG_REPORTS_CHAT,
+                settings.TG_BOT_ADMIN_ID
+            ),
         )
         return
     transfer_button = await Actions.find_square_color(color=Colors.GREEN)
@@ -59,7 +62,10 @@ async def execute_task(
             "Task failed. Can't find transfer button.",
             task=task,
             image=screenshot,
-            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            chats=(
+                settings.TG_REPORTS_CHAT,
+                settings.TG_BOT_ADMIN_ID
+            ),
         )
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
         # if is_already_restarted:
