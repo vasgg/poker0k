@@ -6,8 +6,8 @@ from redis import asyncio as redis
 
 from config import Settings
 from controllers.actions import Actions
-from controllers.telegram import get_balance_pic, get_test_pic, send_telegram_report
-from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
+from controllers.telegram import get_balance_pic, send_telegram_report
+from internal.consts import Colors, Coords, RedisNames
 from internal.schemas import CheckType, ErrorType, Step, Task
 from request import send_error_report, send_report
 
@@ -64,7 +64,7 @@ async def execute_task(
             task=task,
             image=screenshot,
             chats=(
-                settings.TG_BOT_ADMIN_ID,
+                settings.TG_REPORTS_CHAT,
                 settings.TG_BOT_ADMIN_ID
             ),
         )
