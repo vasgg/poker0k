@@ -52,21 +52,7 @@ async def execute_task(
             ),
         )
         return
-    transfer_button = await Actions.find_square_color(color=Colors.GREEN)
-
-
-    screenshot = await get_test_pic()
-    await send_telegram_report(
-        "AREA OF SEARCH",
-        task=task,
-        image=screenshot,
-        chats=(
-            settings.TG_BOT_ADMIN_ID,
-            settings.TG_BOT_ADMIN_ID
-        ),
-    )
-
-
+    transfer_button = await Actions.find_square_color(color=Colors.GREEN, sqare_size=5)
 
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON", delay_after=5)
