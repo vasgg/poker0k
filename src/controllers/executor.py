@@ -7,7 +7,7 @@ from redis import asyncio as redis
 from config import Settings
 from controllers.actions import Actions
 from controllers.telegram import get_balance_pic, send_telegram_report
-from internal.consts import Colors, Coords, RedisNames
+from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
 from internal.schemas import CheckType, ErrorType, Step, Task
 from request import send_error_report, send_report
 
@@ -53,6 +53,23 @@ async def execute_task(
         )
         return
     transfer_button = await Actions.find_square_color(color=Colors.GREEN)
+
+
+    screenshot = await Actions.take_screenshot_of_region(
+        top_left=WorkspaceCoords.WORKSPACE_TOP_LEFT,
+        bottom_right=WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT)
+    await send_telegram_report(
+        "AREA OF SEARCH",
+        task=task,
+        image=screenshot,
+        chats=(
+            settings.TG_BOT_ADMIN_ID,
+            settings.TG_BOT_ADMIN_ID
+        ),
+    )
+
+
+
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON", delay_after=5)
     else:
@@ -63,7 +80,7 @@ async def execute_task(
             task=task,
             image=screenshot,
             chats=(
-                settings.TG_REPORTS_CHAT,
+                settings.TG_BOT_ADMIN_ID,
                 settings.TG_BOT_ADMIN_ID
             ),
         )
