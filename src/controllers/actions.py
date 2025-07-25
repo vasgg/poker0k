@@ -102,7 +102,7 @@ class Actions:
     @staticmethod
     async def find_square_color(
         color: tuple[int, int, int],
-        tolerance_percent: int = 15,
+        tolerance_percent: int = 20,
         sqare_size: int = 11,
         confirm_button: bool = False,
     ):
@@ -185,3 +185,4 @@ async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 20)
     await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
     await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 20)
+    await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 5)

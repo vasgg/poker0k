@@ -13,7 +13,7 @@ from request import send_error_report, send_report
 
 
 async def execute_task(
-    task: Task, redis_client: redis.Redis, mouse: Controller, settings: Settings, attempts: int = 0
+    task: Task, redis_client: redis.Redis, mouse: Controller, settings: Settings
 ):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
@@ -32,10 +32,23 @@ async def execute_task(
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         return
+    # await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 3)
+    # await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 3)
     await Actions.click_on_const(mouse, Coords.NICKNAME_SECTION, 3)
     await Actions.input_value(value=nickname)
     await Actions.click_on_const(mouse, Coords.AMOUNT_SECTION, 3)
     await Actions.input_value(value=amount)
+    if await Actions.name_or_money_error_check(check=CheckType.MONEY):
+        logging.info(f"Task {task.order_id} failed. Insufficient funds.")
+        await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS, settings)
+        funds_image_path = await Actions.take_screenshot(task=task)
+        await send_telegram_report(
+            "Task failed. Insufficient funds.",
+            task=task,
+            image=funds_image_path,
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+        )
+        return
     transfer_button = await Actions.find_square_color(color=Colors.GREEN)
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON", delay_after=5)
@@ -71,17 +84,7 @@ async def execute_task(
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         return
-    if await Actions.name_or_money_error_check(check=CheckType.MONEY):
-        logging.info(f"Task {task.order_id} failed. Insufficient funds.")
-        await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS, settings)
-        funds_image_path = await Actions.take_screenshot(task=task)
-        await send_telegram_report(
-            "Task failed. Insufficient funds.",
-            task=task,
-            image=funds_image_path,
-            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
-        )
-        return
+
     transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN, confirm_button=True)
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, "TRANSFER CONFIRM BUTTON")
@@ -113,13 +116,11 @@ async def execute_task(
         #     image_path=button_image_path,
         # )
         # return
-    transfer_confirm_section = None
-    for _ in range(10):
-        transfer_confirm_section = await Actions.find_square_color(color=Colors.FINAL_GREEN)
-        if transfer_confirm_section:
-            break
-        else:
-            await asyncio.sleep(0.4)
+    transfer_confirm_section = await Actions.find_square_color(color=Colors.FINAL_GREEN)
+    if transfer_confirm_section:
+        await Actions.click_on_finded(mouse, transfer_confirm_section, "TRANSFER SUCCESSFUL BUTTON")
+        await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 3)
+
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
         confirm_section_image_path = await Actions.take_screenshot(task=task)
@@ -141,7 +142,7 @@ async def execute_task(
         await redis_client.sadd(set_name_completed, str(task.order_id))
 
         await send_report(task=task, redis_client=redis_client, settings=settings)
-        await Actions.take_screenshot(task=task)
+        # await Actions.take_screenshot(task=task)
         balance_pic = await get_balance_pic()
         await send_telegram_report(
             "Task completed.",
