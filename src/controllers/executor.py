@@ -8,8 +8,7 @@ from config import Settings
 from controllers.actions import Actions
 from controllers.telegram import get_balance_pic, send_telegram_report
 from internal.consts import Colors, Coords, RedisNames
-from internal.schemas import CheckType, ErrorType, Step, Task
-from request import send_error_report, send_report
+from internal.schemas import CheckType, Step, Task
 
 
 async def execute_task(
@@ -40,7 +39,7 @@ async def execute_task(
     await Actions.input_value(value=amount)
     if await Actions.name_or_money_error_check(check=CheckType.MONEY):
         logging.info(f"Task {task.order_id} failed. Insufficient funds.")
-        await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS, settings)
+        # await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS, settings)
         funds_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
             "Task failed. Insufficient funds.",
@@ -82,7 +81,7 @@ async def execute_task(
         return
     if await Actions.name_or_money_error_check(check=CheckType.NAME):
         logging.info(f"Task {task.order_id} failed. Incorrect name.")
-        await send_error_report(task, ErrorType.INCORRECT_NAME, settings)
+        # await send_error_report(task, ErrorType.INCORRECT_NAME, settings)
         name_image_path = await Actions.take_screenshot(task=task)
         await send_telegram_report(
             "Task failed. Incorrect name.",
@@ -148,7 +147,7 @@ async def execute_task(
         await redis_client.lpush("FER_reports", task.model_dump_json())
         await redis_client.sadd(set_name_completed, str(task.order_id))
 
-        await send_report(task=task, redis_client=redis_client, settings=settings)
+        # await send_report(task=task, redis_client=redis_client, settings=settings)
         # await Actions.take_screenshot(task=task)
         balance_pic = await get_balance_pic()
         await send_telegram_report(
