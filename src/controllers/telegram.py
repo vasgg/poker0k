@@ -63,3 +63,13 @@ async def get_balance_pic():
     picture.save(buffer, format="PNG")
     buffer.seek(0)
     return buffer
+
+
+async def get_test_pic():
+    picture = await Actions.take_screenshot_of_region(
+        WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
+    )
+    buffer = BytesIO()
+    picture.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer

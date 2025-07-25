@@ -6,7 +6,7 @@ from redis import asyncio as redis
 
 from config import Settings
 from controllers.actions import Actions
-from controllers.telegram import get_balance_pic, send_telegram_report
+from controllers.telegram import get_balance_pic, get_test_pic, send_telegram_report
 from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
 from internal.schemas import CheckType, ErrorType, Step, Task
 from request import send_error_report, send_report
@@ -55,9 +55,7 @@ async def execute_task(
     transfer_button = await Actions.find_square_color(color=Colors.GREEN)
 
 
-    screenshot = await Actions.take_screenshot_of_region(
-        top_left=WorkspaceCoords.WORKSPACE_TOP_LEFT,
-        bottom_right=WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT)
+    screenshot = await get_test_pic()
     await send_telegram_report(
         "AREA OF SEARCH",
         task=task,
