@@ -9,6 +9,7 @@ from controllers.actions import Actions
 from controllers.telegram import get_balance_pic, send_telegram_report
 from internal.consts import Colors, Coords, RedisNames
 from internal.schemas import CheckType, Step, Task
+from request import send_report
 
 
 async def execute_task(
@@ -147,7 +148,7 @@ async def execute_task(
         await redis_client.lpush("FER_reports", task.model_dump_json())
         await redis_client.sadd(set_name_completed, str(task.order_id))
 
-        # await send_report(task=task, redis_client=redis_client, settings=settings)
+        await send_report(task=task, redis_client=redis_client, settings=settings)
         # await Actions.take_screenshot(task=task)
         balance_pic = await get_balance_pic()
         await send_telegram_report(
