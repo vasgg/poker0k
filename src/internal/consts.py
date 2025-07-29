@@ -3,7 +3,7 @@ from enum import Enum
 
 class Coords(Enum):
     LOGIN_BUTTON = 1710, 500
-    CONFIRM_LOGIN_BUTTON = 1200, 600
+    CONFIRM_LOGIN_BUTTON = 1280, 600
     CLOSE_BANNER_BUTTON = 1373, 351
 
     CASHIER_BUTTON = 1715, 515
