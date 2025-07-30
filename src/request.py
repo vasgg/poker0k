@@ -138,9 +138,8 @@ def run_main():
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
-    # asyncio.run(add_test_task(redis_client))
-    asyncio.run(blink('red'))
-    asyncio.run(extract_requisites(redis_client))
+    asyncio.run(add_test_task(redis_client))
+    asyncio.run(blink('green'))
 
 
 if __name__ == "__main__":
