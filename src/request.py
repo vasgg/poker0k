@@ -1,11 +1,12 @@
 import asyncio
 from datetime import UTC, datetime
 from http import HTTPStatus
-from json import loads
+from json import JSONDecodeError, loads
 import logging
 import random
 
 import aiohttp
+from redis.asyncio import Redis
 import redis.asyncio as redis
 
 from controllers.actions import blink, send_update
@@ -111,10 +112,32 @@ async def add_test_task(redis_client: redis.Redis):
     await redis_client.rpush(RedisNames.QUEUE, task.model_dump_json())
 
 
-async def redis_routine(redis_client: redis.Redis) -> set[str]:
-    requisites = {loads(x)['requisite'] for x in await redis_client.smembers(RedisNames.PROD_REPORTS)}
+async def get_all_requisites(redis_client: Redis, set_name: str) -> set[str]:
+    requisites = set()
+    try:
+        members = await redis_client.smembers(set_name)
+
+        for item in members:
+            try:
+                data = loads(item)
+                if 'requisite' in data:
+                    requisites.add(data['requisite'])
+            except JSONDecodeError:
+                continue
+        return requisites
+
+    except Exception as e:
+        logger.exception(f"Failed to get requisites from Redis: {e}")
+        return set()
+
+
+async def redis_routine(redis_client: Redis):
+    requisites = await get_all_requisites(redis_client, RedisNames.PROD_REPORTS)
+    print(f"Found {len(requisites)} requisites in Redis")
     await redis_client.sadd(RedisNames.REQUISITES, *requisites)
-    return requisites
+    print(f"Requisites saved to {RedisNames.REQUISITES}")
+    count = await redis_client.scard(RedisNames.REQUISITES)
+    print(f"Requisites count: {count}")
 
 
 def run_main():
