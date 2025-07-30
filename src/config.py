@@ -13,6 +13,7 @@ from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from bot.helpers import on_shutdown, on_startup
+from internal.schemas import Stage
 
 
 class Settings(BaseSettings):
@@ -33,6 +34,7 @@ class Settings(BaseSettings):
     NGROK_URL: SecretStr
     NGROK_USER: SecretStr
     NGROK_PASSWORD: SecretStr
+    STAGE: Stage
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="allow")
 
