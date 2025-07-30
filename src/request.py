@@ -7,6 +7,7 @@ import random
 import aiohttp
 import redis.asyncio as redis
 
+from controllers.actions import blink, send_update
 from controllers.crypt import Crypt
 from internal.consts import RedisNames
 from internal.schemas import ErrorType, Step, Task
@@ -118,6 +119,8 @@ def run_main():
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
     asyncio.run(add_test_task(redis_client))
+    asyncio.run(send_update('C5', 6000))
+    asyncio.run(blink('red'))
 
 
 if __name__ == "__main__":

@@ -12,9 +12,7 @@ from internal.schemas import CheckType, Step, Task
 from request import send_report
 
 
-async def execute_task(
-    task: Task, redis_client: redis.Redis, mouse: Controller, settings: Settings
-):
+async def execute_task(task: Task, redis_client: redis.Redis, mouse: Controller, settings: Settings):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     nickname = "dnk-jarod" if "dev-" in task.callback_url else task.requisite
@@ -46,10 +44,7 @@ async def execute_task(
             "Task failed. Insufficient funds.",
             task=task,
             image=funds_image_path,
-            chats=(
-                settings.TG_REPORTS_CHAT,
-                settings.TG_BOT_ADMIN_ID
-            ),
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         return
     transfer_button = await Actions.find_square_color(color=Colors.GREEN, sqare_size=5)
@@ -63,10 +58,7 @@ async def execute_task(
             "Task failed. Can't find transfer button.",
             task=task,
             image=screenshot,
-            chats=(
-                settings.TG_REPORTS_CHAT,
-                settings.TG_BOT_ADMIN_ID
-            ),
+            chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
         # if is_already_restarted:
@@ -171,26 +163,6 @@ async def execute_task(
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         logging.info(f"Task {task.order_id} failed.")
-        # if attempts < settings.MAX_ATTEMPTS:
-        #     await execute_task(task=task, redis_client=redis_client, mouse=mouse, attempts=attempts, settings=settings)
-        # else:
-        #     image_path = await Actions.take_screenshot(task=task)
-        #     await send_telegram_report(
-        #         f"Task {task.order_id} failed after {attempts} attempts, check the app.",
-        #         task=task,
-        #         image_path=image_path,
-        #     )
-        #     logging.info(f"Task {task.order_id} failed after {attempts} attempts.")
-        #     await send_report(
-        #         task=task,
-        #         redis_client=redis_client,
-        #         problem=f"Transfer to {task.requisite} with amount {task.amount} failed. Please check the app.",
-        #         settings=settings,
-        #     )
-        # logging.info("Restoring task to the main queue.")
-        # await restore_tasks(task, redis_client)
-        # logging.info(f"Performing restarting emulator after failed task.")
-        # await Actions.reopen_pokerok(mouse)
 
 
 async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):

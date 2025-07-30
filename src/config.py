@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     TG_BOT_TOKEN: SecretStr
     TG_BOT_ADMIN_ID: int
     TG_REPORTS_CHAT: int
+    NGROK_URL: SecretStr
+    NGROK_USER: SecretStr
+    NGROK_PASSWORD: SecretStr
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="allow")
 

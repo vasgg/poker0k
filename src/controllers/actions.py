@@ -4,9 +4,11 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from aiohttp import BasicAuth, ClientSession, ClientTimeout
 from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
 
+from config import settings
 from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
 from internal.schemas import CheckType, Task
 
@@ -187,3 +189,31 @@ async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
     await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 20)
     await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 5)
+
+
+async def send_update(cell: str, value: int):
+    auth = BasicAuth(
+        settings.NGROK_USER.get_secret_value(),
+        settings.NGROK_PASSWORD.get_secret_value(),
+    )
+    url = f"{settings.NGROK_URL.get_secret_value()}/gsheet/update/{cell}/{value}"
+
+    try:
+        async with ClientSession(timeout=ClientTimeout(total=5)) as session:
+            await session.post(url, auth=auth)
+    except Exception:
+        pass
+
+
+async def blink(color: str):
+    auth = BasicAuth(
+        settings.NGROK_USER.get_secret_value(),
+        settings.NGROK_PASSWORD.get_secret_value(),
+    )
+    url = f'{settings.NGROK_URL.get_secret_value()}/blink/{color}'
+
+    try:
+        async with ClientSession(timeout=ClientTimeout(total=3)) as session:
+            await session.get(url, auth=auth)
+    except Exception as e:
+        pass
