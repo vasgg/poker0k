@@ -112,7 +112,7 @@ async def add_test_task(redis_client: redis.Redis):
 
 
 async def redis_routine(redis_client: redis.Redis) -> set[str]:
-    requisites = {loads(x)['requisite'] for x in redis_client.smembers(RedisNames.PROD_REPORTS)}
+    requisites = {loads(x)['requisite'] for x in await redis_client.smembers(RedisNames.PROD_REPORTS)}
     await redis_client.sadd(RedisNames.REQUISITES, *requisites)
     return requisites
 
