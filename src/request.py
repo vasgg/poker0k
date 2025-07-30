@@ -1,7 +1,7 @@
 import asyncio
 from datetime import UTC, datetime
 from http import HTTPStatus
-from json import JSONDecodeError, loads
+from json import loads
 import logging
 import random
 
@@ -9,7 +9,7 @@ import aiohttp
 from redis.asyncio import Redis
 import redis.asyncio as redis
 
-from controllers.actions import blink, send_update
+from controllers.actions import blink
 from controllers.crypt import Crypt
 from internal.consts import RedisNames
 from internal.schemas import ErrorType, Step, Task
@@ -25,9 +25,9 @@ async def send_report(
     retries: int = 3,
     delay: int = 3,
 ) -> None:
-    set_name = "prod_reports"
+    set_name = RedisNames.PROD_REPORTS
     if "dev-" in task.callback_url:
-        set_name = "dev_reports"
+        set_name = RedisNames.DEV_REPORTS
     task.status = task.status if not problem else 0
     task.message = "" if not problem else problem
     async with aiohttp.ClientSession() as session:
@@ -100,7 +100,7 @@ async def send_error_report(task: Task, error_type: ErrorType, settings, retries
     logger.exception(f"Failed to send error report after {retries} attempts, task id: {task.order_id} failed.")
 
 
-async def add_test_task(redis_client: redis.Redis):
+async def add_test_task(redis_client: Redis):
     task = Task(
         order_id=1000000 + random.randint(0, 999999),
         user_id=13,
@@ -112,51 +112,22 @@ async def add_test_task(redis_client: redis.Redis):
     await redis_client.rpush(RedisNames.QUEUE, task.model_dump_json())
 
 
-async def get_all_requisites(redis_client: Redis, set_name: str) -> set[str]:
+async def extract_requisites(redis_client: Redis):
+    items = await redis_client.lrange(RedisNames.PROD_REPORTS, 0, -1)
     requisites = set()
-    try:
-        key_type = await redis_client.type(set_name)
-        if key_type != "set":
-            logger.error(f"Key {set_name} is of type {key_type}, expected 'set'")
-            return requisites
+    for item in items:
+        try:
+            data = loads(item)
+            if 'requisite' in data:
+                requisites.add(data['requisite'])
+        except:
+            continue
 
-        members = await redis_client.smembers(set_name)
-
-        for item in members:
-            try:
-                data = loads(item)
-                if 'requisite' in data:
-                    requisites.add(data['requisite'])
-            except JSONDecodeError:
-                logger.warning(f"Invalid JSON in Redis set: {item}")
-                continue
-        return requisites
-
-    except Exception as e:
-        logger.exception(f"Failed to get requisites from Redis: {e}")
-        return set()
-
-
-async def redis_routine(redis_client: Redis):
-    try:
-        requisites = await get_all_requisites(redis_client, RedisNames.PROD_REPORTS)
-        logger.info(f"Found {len(requisites)} requisites in Redis")
-
-        if not requisites:
-            logger.info("No requisites found to save")
-        req_type = await redis_client.type(RedisNames.REQUISITES)
-        if req_type != "set":
-            await redis_client.delete(RedisNames.REQUISITES)
-
+    if requisites:
         await redis_client.sadd(RedisNames.REQUISITES, *requisites)
-        logger.info(f"Requisites saved to {RedisNames.REQUISITES}")
-
-        count = await redis_client.scard(RedisNames.REQUISITES)
-        logger.info(f"Requisites count: {count}")
-
-    except Exception as e:
-        logger.exception(f"Error in redis_routine: {e}")
-        raise
+        logging.info(f"Successfully extracted {len(requisites)} requisites")
+    else:
+        logging.info("No requisites found")
 
 
 def run_main():
@@ -169,7 +140,7 @@ def run_main():
     )
     # asyncio.run(add_test_task(redis_client))
     asyncio.run(blink('red'))
-    asyncio.run(redis_routine(redis_client))
+    asyncio.run(extract_requisites(redis_client))
 
 
 if __name__ == "__main__":
