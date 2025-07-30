@@ -115,6 +115,11 @@ async def add_test_task(redis_client: redis.Redis):
 async def get_all_requisites(redis_client: Redis, set_name: str) -> set[str]:
     requisites = set()
     try:
+        key_type = await redis_client.type(set_name)
+        if key_type != "set":
+            logger.error(f"Key {set_name} is of type {key_type}, expected 'set'")
+            return requisites
+
         members = await redis_client.smembers(set_name)
 
         for item in members:
@@ -123,6 +128,7 @@ async def get_all_requisites(redis_client: Redis, set_name: str) -> set[str]:
                 if 'requisite' in data:
                     requisites.add(data['requisite'])
             except JSONDecodeError:
+                logger.warning(f"Invalid JSON in Redis set: {item}")
                 continue
         return requisites
 
@@ -132,12 +138,25 @@ async def get_all_requisites(redis_client: Redis, set_name: str) -> set[str]:
 
 
 async def redis_routine(redis_client: Redis):
-    requisites = await get_all_requisites(redis_client, RedisNames.PROD_REPORTS)
-    print(f"Found {len(requisites)} requisites in Redis")
-    await redis_client.sadd(RedisNames.REQUISITES, *requisites)
-    print(f"Requisites saved to {RedisNames.REQUISITES}")
-    count = await redis_client.scard(RedisNames.REQUISITES)
-    print(f"Requisites count: {count}")
+    try:
+        requisites = await get_all_requisites(redis_client, RedisNames.PROD_REPORTS)
+        logger.info(f"Found {len(requisites)} requisites in Redis")
+
+        if not requisites:
+            logger.info("No requisites found to save")
+        req_type = await redis_client.type(RedisNames.REQUISITES)
+        if req_type != "set":
+            await redis_client.delete(RedisNames.REQUISITES)
+
+        await redis_client.sadd(RedisNames.REQUISITES, *requisites)
+        logger.info(f"Requisites saved to {RedisNames.REQUISITES}")
+
+        count = await redis_client.scard(RedisNames.REQUISITES)
+        logger.info(f"Requisites count: {count}")
+
+    except Exception as e:
+        logger.exception(f"Error in redis_routine: {e}")
+        raise
 
 
 def run_main():
