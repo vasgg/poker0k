@@ -1,6 +1,7 @@
 import asyncio
 from datetime import UTC, datetime
 from http import HTTPStatus
+from json import loads
 import logging
 import random
 
@@ -110,6 +111,12 @@ async def add_test_task(redis_client: redis.Redis):
     await redis_client.rpush(RedisNames.QUEUE, task.model_dump_json())
 
 
+async def redis_routine(redis_client: redis.Redis) -> set[str]:
+    requisites = {loads(x)['requisite'] for x in redis_client.smembers(RedisNames.PROD_REPORTS)}
+    await redis_client.sadd(RedisNames.REQUISITES, *requisites)
+    return requisites
+
+
 def run_main():
     from config import settings
 
@@ -118,9 +125,9 @@ def run_main():
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
-    asyncio.run(add_test_task(redis_client))
-    asyncio.run(send_update('C5', 6000))
+    # asyncio.run(add_test_task(redis_client))
     asyncio.run(blink('red'))
+    asyncio.run(redis_routine(redis_client))
 
 
 if __name__ == "__main__":
