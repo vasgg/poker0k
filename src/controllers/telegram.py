@@ -4,7 +4,6 @@ from pathlib import Path
 import aiofiles
 from aiohttp import FormData, ClientSession
 
-from controllers.actions import Actions
 from internal.consts import WorkspaceCoords
 from internal.schemas import Task
 
@@ -56,6 +55,8 @@ async def send_telegram_report(
 
 
 async def get_balance_pic():
+    from controllers.actions import Actions
+
     picture = await Actions.take_screenshot_of_region(
         WorkspaceCoords.BALANCE_WINDOW_TOP_LEFT, WorkspaceCoords.BALANCE_WINDOW_BOTTOM_RIGHT
     )
@@ -66,6 +67,8 @@ async def get_balance_pic():
 
 
 async def get_test_pic():
+    from controllers.actions import Actions
+
     picture = await Actions.take_screenshot_of_region(
         WorkspaceCoords.WORKSPACE_TOP_LEFT, WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
     )
