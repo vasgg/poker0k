@@ -49,6 +49,7 @@ class Colors:
     GREEN = 1, 153, 52
     DARK_GRAY = 33, 33, 33
     VIOLET = 142, 142, 215
+    RED = 182, 53, 53
 
 
 class RedisNames:

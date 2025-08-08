@@ -1,6 +1,8 @@
 import asyncio
 import logging
 from datetime import timedelta, datetime, timezone
+
+from aiohttp import ClientSession, ClientTimeout, TCPConnector
 from pynput.mouse import Controller
 from redis import asyncio as redis
 
@@ -34,23 +36,29 @@ async def main():
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
 
+    http = ClientSession(
+        timeout=ClientTimeout(total=5),
+        connector=TCPConnector(limit=50),
+    )
+
     mouse = Controller()
     stop_event = asyncio.Event()
 
     polling_task = asyncio.create_task(dispatcher.start_polling(bot, skip_updates=True))
-    worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event))
+    worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event, http=http))
 
     logging.info("Worker and polling tasks started.")
 
-    done, pending = await asyncio.wait([polling_task, worker_task], return_when=asyncio.FIRST_COMPLETED)
+    try:
+        done, pending = await asyncio.wait([polling_task, worker_task], return_when=asyncio.FIRST_COMPLETED)
+        logging.info("One of the process stopped, initiating shutdown...")
+        stop_event.set()
+        for task in pending:
+            task.cancel()
+        await asyncio.gather(*pending, return_exceptions=True)
+    finally:
+        await http.close()
 
-    logging.info("One of the process stopped, initiating shutdown...")
-    stop_event.set()
-
-    for task in pending:
-        task.cancel()
-
-    await asyncio.gather(*pending, return_exceptions=True)
     logging.info("App shutdown completed gracefully.")
 
 

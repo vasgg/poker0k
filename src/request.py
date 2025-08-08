@@ -9,7 +9,6 @@ import aiohttp
 from redis.asyncio import Redis
 import redis.asyncio as redis
 
-from controllers.actions import blink
 from controllers.crypt import Crypt
 from internal.consts import RedisNames
 from internal.schemas import ErrorType, Step, Task
@@ -102,7 +101,7 @@ async def send_error_report(task: Task, error_type: ErrorType, settings, retries
 
 async def add_test_task(redis_client: Redis):
     task = Task(
-        order_id=1000000 + random.randint(0, 999999),
+        order_id=7000000 + random.randint(0, 999999),
         user_id=13,
         requisite="dnk-jarod",
         amount=1.11,
@@ -118,8 +117,8 @@ async def extract_requisites(redis_client: Redis):
     for item in items:
         try:
             data = loads(item)
-            if 'requisite' in data:
-                requisites.add(data['requisite'])
+            if "requisite" in data:
+                requisites.add(data["requisite"])
         except:
             continue
 
@@ -139,7 +138,6 @@ def run_main():
         password=settings.REDIS_PASSWORD.get_secret_value(),
     )
     asyncio.run(add_test_task(redis_client))
-    asyncio.run(blink('green'))
 
 
 if __name__ == "__main__":

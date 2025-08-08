@@ -1,5 +1,7 @@
 import asyncio
 import logging
+
+from aiohttp import ClientSession
 from pyautogui import press
 from pynput.mouse import Controller
 from redis import asyncio as redis
@@ -12,7 +14,9 @@ from internal.schemas import CheckType, Stage, Step, Task
 from request import send_report
 
 
-async def execute_task(task: Task, redis_client: redis.Redis, mouse: Controller, settings: Settings):
+async def execute_task(
+    task: Task, redis_client: redis.Redis, mouse: Controller, settings: Settings, http: ClientSession
+):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     nickname = "dnk-jarod" if "dev-" in task.callback_url else task.requisite
@@ -60,7 +64,7 @@ async def execute_task(task: Task, redis_client: redis.Redis, mouse: Controller,
             image=screenshot,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
-        await blink('yellow')
+
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
         # if is_already_restarted:
         #     logging.info(f"Task {task.order_id} skipped — already restarted...")
@@ -83,7 +87,7 @@ async def execute_task(task: Task, redis_client: redis.Redis, mouse: Controller,
             image=name_image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
-        await blink('red')
+        await blink("red", http=http, settings=settings)
         return
 
     transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN, confirm_button=True)
@@ -152,6 +156,7 @@ async def execute_task(task: Task, redis_client: redis.Redis, mouse: Controller,
             chats=(settings.TG_REPORTS_CHAT,),
             disable_notification=True,
         )
+        await blink("yellow", http=http, settings=settings)
     else:
         # task.step = Step.FAILED
         # await redis_client.lpush("FER_reports", task.model_dump_json())
@@ -164,14 +169,14 @@ async def execute_task(task: Task, redis_client: redis.Redis, mouse: Controller,
             image=image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
+        await blink("red", http=http, settings=settings)
         logging.info(f"Task {task.order_id} failed.")
 
 
-async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
+async def worker_loop(redis_client, mouse, settings, stop_event, *, http: ClientSession):
     from worker import check_time
 
     await asyncio.sleep(4)
-
     try:
         while not stop_event.is_set():
             await check_time(mouse)
@@ -184,21 +189,26 @@ async def worker_loop(redis_client, mouse, settings, stop_event: asyncio.Event):
                 logging.info("Worker loop cancelled during Redis waiting.")
                 break
 
-            if task_data:
-                _, task_data = task_data
-                task = Task.model_validate_json(task_data.decode("utf-8"))
-                set_name = RedisNames.DEV_SET if "dev-" in task.callback_url else RedisNames.PROD_SET
-                is_in_completed = await redis_client.sismember(set_name, str(task.order_id))
-                is_existing_user = await redis_client.sismember(RedisNames.REQUISITES, str(task.requisite))
-                if not is_existing_user and settings.STAGE == Stage.PROD:
-                    await redis_client.sadd(RedisNames.REQUISITES, str(task.requisite))
-                    set_length = await redis_client.scard(RedisNames.REQUISITES)
-                    await blink('blue')
-                    await send_update('C5', set_length)
-                if not is_in_completed and task.status not in [1, 2]:
-                    await execute_task(task, redis_client, mouse, settings)
-                else:
-                    logging.info(f"Task {task.order_id} skipped — already processed...")
+            if not task_data:
+                continue
+
+            _, task_data = task_data
+            task = Task.model_validate_json(task_data.decode("utf-8"))
+
+            set_name = RedisNames.DEV_SET if "dev-" in task.callback_url else RedisNames.PROD_SET
+            is_in_completed = await redis_client.sismember(set_name, str(task.order_id))
+            is_existing_user = await redis_client.sismember(RedisNames.REQUISITES, str(task.requisite))
+
+            if not is_existing_user and settings.STAGE == Stage.PROD:
+                await redis_client.sadd(RedisNames.REQUISITES, str(task.requisite))
+                set_length = await redis_client.scard(RedisNames.REQUISITES)
+                await blink("blue", http=http, settings=settings)
+                await send_update("C5", set_length, http=http, settings=settings)
+
+            if not is_in_completed and task.status not in [1, 2]:
+                await execute_task(task, redis_client, mouse, settings)
+            else:
+                logging.info(f"Task {task.order_id} skipped — already processed...")
     except asyncio.CancelledError:
         logging.info("Worker loop cancelled explicitly.")
     finally:

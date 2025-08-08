@@ -183,37 +183,38 @@ async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON)
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
     await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 25)
-    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON)
-    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 20)
+    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 5)
+    login_button = await Actions.find_square_color(color=Colors.RED, sqare_size=5)
+    if login_button:
+        await Actions.click_on_finded(mouse, login_button, "CONFIRM LOGIN BUTTON", delay_after=20)
+
     await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 20)
     await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
     await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 20)
     await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 5)
 
 
-async def send_update(cell: str, value: int):
+async def send_update(cell: str, value: int, *, http: ClientSession, settings):
     auth = BasicAuth(
         settings.NGROK_USER.get_secret_value(),
         settings.NGROK_PASSWORD.get_secret_value(),
     )
     url = f"{settings.NGROK_URL.get_secret_value()}/gsheet/update/{cell}/{value}"
-
     try:
-        async with ClientSession(timeout=ClientTimeout(total=5)) as session:
-            await session.post(url, auth=auth)
+        async with http.post(url, auth=auth) as resp:
+            await resp.read()
     except Exception:
         pass
 
 
-async def blink(color: str):
+async def blink(color: str, *, http: ClientSession, settings):
     auth = BasicAuth(
         settings.NGROK_USER.get_secret_value(),
         settings.NGROK_PASSWORD.get_secret_value(),
     )
-    url = f'{settings.NGROK_URL.get_secret_value()}/blink/{color}'
-
+    url = f"{settings.NGROK_URL.get_secret_value()}/blink/{color}"
     try:
-        async with ClientSession(timeout=ClientTimeout(total=3)) as session:
-            await session.get(url, auth=auth)
-    except Exception as e:
+        async with http.get(url, auth=auth) as resp:
+            await resp.read()
+    except Exception:
         pass
