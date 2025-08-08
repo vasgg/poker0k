@@ -206,7 +206,7 @@ async def worker_loop(redis_client, mouse, settings, stop_event, *, http: Client
                 await send_update("C5", set_length, http=http, settings=settings)
 
             if not is_in_completed and task.status not in [1, 2]:
-                await execute_task(task, redis_client, mouse, settings)
+                await execute_task(task, redis_client, mouse, settings, http=http)
             else:
                 logging.info(f"Task {task.order_id} skipped — already processed...")
     except asyncio.CancelledError:
