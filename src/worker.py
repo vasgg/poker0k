@@ -6,16 +6,17 @@ from aiohttp import ClientSession, ClientTimeout, TCPConnector
 from pynput.mouse import Controller
 from redis import asyncio as redis
 
+from config import Settings
 from controllers.actions import Actions
 from controllers.executor import worker_loop
 
 last_restart_time: datetime | None = None
 
 
-async def check_time(mouse: Controller):
+async def check_time(mouse: Controller, settings: Settings):
     global last_restart_time
     current_time = datetime.now(timezone(timedelta(hours=3)))
-    if (current_time - last_restart_time) >= timedelta(minutes=35):
+    if (current_time - last_restart_time) >= timedelta(minutes=settings.RESET_AFTER_MINS):
         logging.info("Performing scheduled restart app.")
         await Actions.reopen_pokerok_client(mouse)
         last_restart_time = current_time

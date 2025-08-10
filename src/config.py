@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     NGROK_URL: SecretStr
     NGROK_USER: SecretStr
     NGROK_PASSWORD: SecretStr
+    RESET_AFTER_MINS: int
     STAGE: Stage
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="allow")

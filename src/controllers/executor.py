@@ -179,7 +179,7 @@ async def worker_loop(redis_client, mouse, settings, stop_event, *, http: Client
     await asyncio.sleep(4)
     try:
         while not stop_event.is_set():
-            await check_time(mouse)
+            await check_time(mouse, settings)
 
             try:
                 task_data = await asyncio.wait_for(redis_client.brpop(RedisNames.QUEUE), timeout=1)
