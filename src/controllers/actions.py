@@ -177,7 +177,7 @@ async def start_app_flow(mouse: Controller):
             WorkspaceCoords.WORKSPACE_TOP_LEFT,
             WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT,
         ),
-        sqare_size=5
+        sqare_size=5,
     )
     if login_button:
         await Actions.click_on_finded(mouse, login_button, "CONFIRM LOGIN BUTTON", delay_after=20)
@@ -190,7 +190,7 @@ async def start_app_flow(mouse: Controller):
             WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
             WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
         ),
-        sqare_size=5
+        sqare_size=5,
     )
     if banner:
         await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)

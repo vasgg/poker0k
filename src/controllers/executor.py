@@ -30,7 +30,7 @@ async def execute_task(
             WorkspaceCoords.CASHIER_BOTTOM_TOP_LEFT,
             WorkspaceCoords.CASHIER_BOTTOM_TOP_RIGHT,
         ),
-        sqare_size=20
+        sqare_size=20,
     )
     if check_cashier_bottom_section:
         cashier = await Actions.take_screenshot(task=task)
@@ -64,7 +64,7 @@ async def execute_task(
             WorkspaceCoords.WORKSPACE_TOP_LEFT,
             WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT,
         ),
-        sqare_size=5
+        sqare_size=5,
     )
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON", delay_after=5)
@@ -145,7 +145,7 @@ async def execute_task(
         coordinates=(
             WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT,
             WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT,
-        )
+        ),
     )
     if transfer_confirm_section:
         await Actions.click_on_finded(mouse, transfer_confirm_section, "TRANSFER SUCCESSFUL BUTTON")
