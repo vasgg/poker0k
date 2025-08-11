@@ -9,7 +9,7 @@ from redis import asyncio as redis
 from config import Settings
 from controllers.actions import Actions, blink, send_update
 from controllers.telegram import get_balance_pic, send_telegram_report
-from internal.consts import Colors, Coords, RedisNames
+from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
 from internal.schemas import CheckType, Stage, Step, Task
 from request import send_report
 
@@ -24,7 +24,14 @@ async def execute_task(
     await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION)
     await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION, 3)
     press("pgup")
-    check_cashier_bottom_section = await Actions.find_square_color(color=Colors.DARK_GRAY, sqare_size=20)
+    check_cashier_bottom_section = await Actions.find_square_color(
+        color=Colors.DARK_GRAY,
+        coordinates=(
+            WorkspaceCoords.CASHIER_BOTTOM_TOP_LEFT,
+            WorkspaceCoords.CASHIER_BOTTOM_TOP_RIGHT,
+        ),
+        sqare_size=20
+    )
     if check_cashier_bottom_section:
         cashier = await Actions.take_screenshot(task=task)
         await send_telegram_report(
@@ -51,8 +58,14 @@ async def execute_task(
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
         )
         return
-    transfer_button = await Actions.find_square_color(color=Colors.GREEN, sqare_size=5)
-
+    transfer_button = await Actions.find_square_color(
+        color=Colors.GREEN,
+        coordinates=(
+            WorkspaceCoords.WORKSPACE_TOP_LEFT,
+            WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT,
+        ),
+        sqare_size=5
+    )
     if transfer_button:
         await Actions.click_on_finded(mouse, transfer_button, "TRANSFER BUTTON", delay_after=5)
     else:
@@ -90,7 +103,13 @@ async def execute_task(
         await blink("red", http=http, settings=settings)
         return
 
-    transfer_confirm_button = await Actions.find_square_color(color=Colors.GREEN, confirm_button=True)
+    transfer_confirm_button = await Actions.find_square_color(
+        color=Colors.GREEN,
+        coordinates=(
+            WorkspaceCoords.CONFIRM_BUTTON_TOP_LEFT,
+            WorkspaceCoords.CONFIRM_BUTTON_BOTTOM_RIGHT,
+        ),
+    )
     if transfer_confirm_button:
         await Actions.click_on_finded(mouse, transfer_confirm_button, "TRANSFER CONFIRM BUTTON")
     else:
@@ -121,7 +140,13 @@ async def execute_task(
         #     image_path=button_image_path,
         # )
         # return
-    transfer_confirm_section = await Actions.find_square_color(color=Colors.FINAL_GREEN)
+    transfer_confirm_section = await Actions.find_square_color(
+        color=Colors.FINAL_GREEN,
+        coordinates=(
+            WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT,
+            WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT,
+        )
+    )
     if transfer_confirm_section:
         await Actions.click_on_finded(mouse, transfer_confirm_section, "TRANSFER SUCCESSFUL BUTTON")
         await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 3)

@@ -104,24 +104,11 @@ class Actions:
     @staticmethod
     async def find_square_color(
         color: tuple[int, int, int],
+        coordinates: tuple[tuple[int, int], tuple[int, int]],
         tolerance_percent: int = 20,
         sqare_size: int = 11,
-        confirm_button: bool = False,
     ):
-        if color == Colors.FINAL_GREEN:
-            top_left = WorkspaceCoords.TRANSFER_CONFIRM_TOP_LEFT
-            bottom_right = WorkspaceCoords.TRANSFER_CONFIRM_BOTTOM_RIGHT
-        elif color == Colors.DARK_GRAY:
-            top_left = WorkspaceCoords.CASHIER_BOTTOM_TOP_LEFT
-            bottom_right = WorkspaceCoords.CASHIER_BOTTOM_TOP_RIGHT
-        else:
-            if confirm_button:
-                top_left = WorkspaceCoords.CONFIRM_BUTTON_TOP_LEFT
-                bottom_right = WorkspaceCoords.CONFIRM_BUTTON_BOTTOM_RIGHT
-            else:
-                top_left = WorkspaceCoords.WORKSPACE_TOP_LEFT
-                bottom_right = WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT
-
+        top_left, bottom_right = coordinates
         image = await Actions.take_screenshot_of_region(top_left, bottom_right)
         width, height = image.size
         pixels = image.load()
@@ -184,12 +171,29 @@ async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
     await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 25)
     await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 5)
-    login_button = await Actions.find_square_color(color=Colors.RED, sqare_size=5)
+    login_button = await Actions.find_square_color(
+        color=Colors.RED,
+        coordinates=(
+            WorkspaceCoords.WORKSPACE_TOP_LEFT,
+            WorkspaceCoords.WORKSPACE_BOTTOM_RIGHT,
+        ),
+        sqare_size=5
+    )
     if login_button:
         await Actions.click_on_finded(mouse, login_button, "CONFIRM LOGIN BUTTON", delay_after=20)
 
     await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 20)
-    await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
+    # await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
+    banner = await Actions.find_square_color(
+        color=Colors.RUST,
+        coordinates=(
+            WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
+            WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
+        ),
+        sqare_size=5
+    )
+    if banner:
+        await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
     await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
     await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 20)
     await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 5)
