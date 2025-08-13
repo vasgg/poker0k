@@ -47,6 +47,9 @@ class WorkspaceCoords:
     CASHIER_BOTTOM_TOP_LEFT = 850, 910
     CASHIER_BOTTOM_TOP_RIGHT = 1530, 960
 
+    CONFIRM_LOGIN_BUTTON_TOP_LEFT = 1040, 585
+    CONFIRM_LOGIN_BUTTON_TOP_TOP_RIGHT = 1350, 625
+
 
 class Colors:
     FINAL_GREEN = 0, 153, 51
@@ -55,6 +58,7 @@ class Colors:
     VIOLET = 142, 142, 215
     RED = 182, 53, 53
     RUST = 89, 0, 0
+    WHITE = 255, 255, 254
 
 
 class RedisNames:
