@@ -4,11 +4,10 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from aiohttp import BasicAuth, ClientSession, ClientTimeout
+from aiohttp import BasicAuth, ClientSession
 from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
 
-from config import settings
 from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
 from internal.schemas import CheckType, Task
 
@@ -170,7 +169,7 @@ async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON)
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
     await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 25)
-    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 5)
+    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 10)
     login_button = await Actions.find_square_color(
         color=Colors.WHITE,
         coordinates=(
@@ -181,6 +180,8 @@ async def start_app_flow(mouse: Controller):
     )
     if login_button:
         await Actions.click_on_finded(mouse, login_button, "CONFIRM LOGIN BUTTON", delay_after=20)
+    else:
+        await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 20)
 
     await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON, 20)
     # await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
