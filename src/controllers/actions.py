@@ -162,7 +162,7 @@ class Actions:
 
     @staticmethod
     async def reopen_pokerok_client(mouse: Controller):
-        await Actions.click_on_const(mouse, Coords.CLOSE_APP_BUTTON, 3)
+        await Actions.click_on_const(mouse, Coords.CLOSE_APP_BUTTON, 10)
         await start_app_flow(mouse)
 
 

@@ -149,7 +149,7 @@ async def execute_task(
     )
     if transfer_confirm_section:
         await Actions.click_on_finded(mouse, transfer_confirm_section, "TRANSFER SUCCESSFUL BUTTON")
-        await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 3)
+        # await Actions.click_on_const(mouse, Coords.NICKNAME_BUTTON, 3)
 
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm section.")
