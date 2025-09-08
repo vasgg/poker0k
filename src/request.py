@@ -103,7 +103,7 @@ async def add_test_task(redis_client: Redis):
     task = Task(
         order_id=7000000 + random.randint(0, 999999),
         user_id=13,
-        requisite="dnk-jarod",
+        requisite="SimpleEx1",
         amount=1.11,
         status=0,
         callback_url="https://dev-xyz.simpleex.store/api/v2/fer/callback",

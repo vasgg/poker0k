@@ -19,7 +19,7 @@ async def execute_task(
 ):
     await asyncio.sleep(3)
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
-    nickname = "dnk-jarod" if "dev-" in task.callback_url else task.requisite
+    nickname = "SimpleEx1" if "dev-" in task.callback_url else task.requisite
     amount = "1.11" if "dev-" in task.callback_url else str(task.amount)
     await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION)
     await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION, 3)
