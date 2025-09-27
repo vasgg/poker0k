@@ -5,6 +5,7 @@ from datetime import timedelta, datetime, timezone
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
 from pynput.mouse import Controller
 from redis import asyncio as redis
+import pyautogui
 
 from config import Settings
 from controllers.actions import Actions
@@ -30,6 +31,8 @@ async def main():
     last_restart_time = datetime.now(timezone(timedelta(hours=3)))
     setup_worker("pokerok_worker")
     bot, dispatcher = setup_bot()
+    pyautogui.FAILSAFE = False
+
 
     redis_client = redis.Redis(
         host=settings.REDIS_HOST,
