@@ -166,6 +166,10 @@ async def execute_task(
     set_name_completed = "dev_completed_tasks" if "dev-" in task.callback_url else "prod_completed_tasks"
 
     if task.status == 1:
+        from worker import update_last_restart_time
+        
+        update_last_restart_time()
+        logging.info("Last restart time updated after successful task completion.")
         task.step = Step.PROCESSED
 
         await redis_client.lpush("FER_reports", task.model_dump_json())

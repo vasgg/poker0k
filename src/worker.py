@@ -22,6 +22,11 @@ async def check_time(mouse: Controller, settings: Settings):
         await Actions.reopen_pokerok_client(mouse)
         last_restart_time = current_time
         logging.info("App started.")
+        
+
+def update_last_restart_time():
+    global last_restart_time
+    last_restart_time = datetime.now(timezone(timedelta(hours=3)))
 
 
 async def main():

@@ -59,6 +59,7 @@ class Colors:
     RED = 182, 53, 53
     RUST = 89, 0, 0
     WHITE = 255, 255, 254
+    DEBUG_RUST = 192, 57, 57
 
 
 class RedisNames:
