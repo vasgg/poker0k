@@ -235,7 +235,18 @@ async def worker_loop(redis_client, mouse, settings, stop_event, *, http: Client
                 await send_update("C5", set_length, http=http, settings=settings)
 
             if not is_in_completed and task.status not in [1, 2]:
-                await execute_task(task, redis_client, mouse, settings, http=http)
+                try:
+                    await execute_task(task, redis_client, mouse, settings, http=http)
+                except Exception as exc:
+                    logging.exception("Unhandled exception while executing task %s: %s", task.order_id, exc)
+                    try:
+                        await send_telegram_report(
+                            f"Task crashed with unexpected error: {exc}",
+                            chats=(settings.TG_BOT_ADMIN_ID,),
+                            task=task,
+                        )
+                    except Exception:
+                        logging.exception("Failed to notify about crash for task %s", task.order_id)
             else:
                 logging.info(f"Task {task.order_id} skipped — already processed...")
     except asyncio.CancelledError:
