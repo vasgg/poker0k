@@ -1,10 +1,11 @@
 import asyncio
 import logging
+import socket
 from io import BytesIO
 from pathlib import Path
 
 import aiofiles
-from aiohttp import ClientError, ClientSession, ClientTimeout, FormData
+from aiohttp import ClientError, ClientSession, ClientTimeout, FormData, TCPConnector
 
 from internal.consts import WorkspaceCoords
 from internal.schemas import Task
@@ -48,7 +49,14 @@ async def send_telegram_report(
 
     timeout = timeout or _DEFAULT_TIMEOUT
 
-    async with ClientSession(timeout=timeout) as session:
+    connector = TCPConnector(
+        family=socket.AF_INET,
+        ttl_dns_cache=300,
+        limit=20,
+        enable_cleanup_closed=True,
+    )
+
+    async with ClientSession(timeout=timeout, connector=connector, trust_env=True) as session:
         for chat_id in chats:
             for attempt in range(1, retries + 1):
                 try:

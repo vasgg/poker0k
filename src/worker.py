@@ -6,6 +6,7 @@ from aiohttp import ClientSession, ClientTimeout, TCPConnector
 from pynput.mouse import Controller
 from redis import asyncio as redis
 import pyautogui
+import socket
 
 from config import Settings
 from controllers.actions import Actions
@@ -47,7 +48,8 @@ async def main():
 
     http = ClientSession(
         timeout=ClientTimeout(total=5),
-        connector=TCPConnector(limit=50),
+        connector=TCPConnector(limit=50, family=socket.AF_INET, enable_cleanup_closed=True),
+        trust_env=True,
     )
 
     mouse = Controller()
