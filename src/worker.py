@@ -53,20 +53,48 @@ async def main():
     mouse = Controller()
     stop_event = asyncio.Event()
 
-    polling_task = asyncio.create_task(dispatcher.start_polling(bot, skip_updates=True))
-    worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event, http=http))
+    polling_task = asyncio.create_task(
+        dispatcher.start_polling(bot, skip_updates=True), name="telegram-polling"
+    )
+    worker_task = asyncio.create_task(
+        worker_loop(redis_client, mouse, settings, stop_event, http=http), name="worker-loop"
+    )
+    tasks = [polling_task, worker_task]
 
     logging.info("Worker and polling tasks started.")
 
     try:
-        done, pending = await asyncio.wait([polling_task, worker_task], return_when=asyncio.FIRST_COMPLETED)
+        done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+        for finished in done:
+            if finished.cancelled():
+                continue
+            exc = finished.exception()
+            if exc:
+                logging.error("Task %s finished with error", finished.get_name(), exc_info=exc)
         logging.info("One of the process stopped, initiating shutdown...")
         stop_event.set()
+        try:
+            await dispatcher.stop_polling()
+        except Exception:
+            logging.warning("Failed to stop polling gracefully", exc_info=True)
         for task in pending:
             task.cancel()
         await asyncio.gather(*pending, return_exceptions=True)
+    except asyncio.CancelledError:
+        logging.info("Shutdown signal received, stopping worker...")
+        stop_event.set()
+        try:
+            await dispatcher.stop_polling()
+        except Exception:
+            logging.warning("Failed to stop polling gracefully during shutdown", exc_info=True)
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        raise
     finally:
         await http.close()
+        await redis_client.aclose()
+        await bot.session.close()
 
     logging.info("App shutdown completed gracefully.")
 
