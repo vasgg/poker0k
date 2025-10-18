@@ -1,4 +1,5 @@
 from datetime import datetime
+import socket
 import logging.config
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
@@ -8,7 +9,9 @@ from bot.handlers import router as main_router
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
+from aiohttp import TCPConnector
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -59,9 +62,11 @@ def setup_worker(app_name: str):
 
 
 def setup_bot():
+    session = AiohttpSession(connector=TCPConnector(family=socket.AF_INET))
     bot = Bot(
         token=settings.TG_BOT_TOKEN.get_secret_value(),
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+        session=session,
     )
     dispatcher = Dispatcher(settings=settings)
     dispatcher.startup.register(on_startup)
