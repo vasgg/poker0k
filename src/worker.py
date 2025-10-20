@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta, datetime, timezone
 
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
+import socket
 from pynput.mouse import Controller
 from redis import asyncio as redis
 import pyautogui
@@ -47,7 +48,7 @@ async def main():
             ) as redis_client,
             ClientSession(
                 timeout=ClientTimeout(total=5),
-                connector=TCPConnector(limit=50),
+                connector=TCPConnector(limit=50, family=socket.AF_INET),
             ) as http,
         ):
             mouse = Controller()

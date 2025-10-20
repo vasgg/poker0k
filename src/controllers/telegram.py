@@ -4,7 +4,8 @@ from io import BytesIO
 from pathlib import Path
 
 import aiofiles
-from aiohttp import ClientError, ClientSession, ClientTimeout, FormData
+from aiohttp import ClientError, ClientSession, ClientTimeout, FormData, TCPConnector
+import socket
 
 from internal.consts import WorkspaceCoords
 from internal.schemas import Task
@@ -27,7 +28,7 @@ async def send_telegram_report(
     timeout = ClientTimeout(total=10)
     owns_session = session is None
     if owns_session:
-        session = ClientSession(timeout=timeout)
+        session = ClientSession(timeout=timeout, connector=TCPConnector(family=socket.AF_INET))
 
     try:
         for chat_id in chats:
