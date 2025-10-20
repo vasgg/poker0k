@@ -66,23 +66,29 @@ async def init_db():
 
 
 async def main():
-    redis_client = redis.Redis(
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        password=settings.REDIS_PASSWORD.get_secret_value(),
-    )
     logging_config = get_logging_config("reporter")
     logging.config.dictConfig(logging_config)
     logging.info("Reporter started.")
-    while True:
-        async with AsyncSessionLocal() as db_session:
-            async with db_session.begin():
-                # noinspection PyTypeChecker
-                record_data = await redis_client.brpop("FER_reports", timeout=5)
-                if record_data:
-                    _, record_data = record_data
-                    record = Task.model_validate_json(record_data.decode("utf-8"))
-                    await push_record(record, db_session)
+    try:
+        async with redis.Redis(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            password=settings.REDIS_PASSWORD.get_secret_value(),
+        ) as redis_client:
+            while True:
+                async with AsyncSessionLocal() as db_session:
+                    async with db_session.begin():
+                        # noinspection PyTypeChecker
+                        record_data = await redis_client.brpop("FER_reports", timeout=5)
+                        if record_data:
+                            _, record_data = record_data
+                            record = Task.model_validate_json(record_data.decode("utf-8"))
+                            await push_record(record, db_session)
+    except asyncio.CancelledError:
+        logging.info("Reporter shutdown requested.")
+        raise
+    finally:
+        await engine.dispose()
 
 
 def run_main():

@@ -39,6 +39,7 @@ async def execute_task(
             task=task,
             image=cashier,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            session=http,
         )
         return
     # await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 3)
@@ -56,6 +57,7 @@ async def execute_task(
             task=task,
             image=funds_image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            session=http,
         )
         return
     transfer_button = await Actions.find_square_color(
@@ -76,6 +78,7 @@ async def execute_task(
             task=task,
             image=screenshot,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            session=http,
         )
 
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
@@ -99,6 +102,7 @@ async def execute_task(
             task=task,
             image=name_image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            session=http,
         )
         await blink("red", http=http, settings=settings)
         return
@@ -120,6 +124,7 @@ async def execute_task(
             task=task,
             image=screenshot,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            session=http,
         )
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
         # if is_already_restarted:
@@ -159,6 +164,7 @@ async def execute_task(
             task=task,
             image=confirm_section_image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            session=http,
         )
 
     task.status = 1 if transfer_confirm_section is not None else 0
@@ -167,7 +173,7 @@ async def execute_task(
 
     if task.status == 1:
         # from worker import update_last_restart_time
-        
+
         # update_last_restart_time()
         logging.info("Last restart time updated after successful task completion.")
         task.step = Step.PROCESSED
@@ -184,6 +190,7 @@ async def execute_task(
             image=balance_pic,
             chats=(settings.TG_REPORTS_CHAT,),
             disable_notification=True,
+            session=http,
         )
         await blink("yellow", http=http, settings=settings)
     else:
@@ -197,6 +204,7 @@ async def execute_task(
             task=task,
             image=image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+            session=http,
         )
         await blink("red", http=http, settings=settings)
         logging.info(f"Task {task.order_id} failed.")

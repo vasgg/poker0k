@@ -22,7 +22,7 @@ async def check_time(mouse: Controller, settings: Settings):
         await Actions.reopen_pokerok_client(mouse)
         last_restart_time = current_time
         logging.info("App started.")
-        
+
 
 def update_last_restart_time():
     global last_restart_time
@@ -38,35 +38,37 @@ async def main():
     bot, dispatcher = setup_bot()
     pyautogui.FAILSAFE = False
 
-
-    redis_client = redis.Redis(
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        password=settings.REDIS_PASSWORD.get_secret_value(),
-    )
-
-    http = ClientSession(
-        timeout=ClientTimeout(total=5),
-        connector=TCPConnector(limit=50),
-    )
-
-    mouse = Controller()
-    stop_event = asyncio.Event()
-
-    polling_task = asyncio.create_task(dispatcher.start_polling(bot, skip_updates=True))
-    worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event, http=http))
-
-    logging.info("Worker and polling tasks started.")
-
     try:
-        done, pending = await asyncio.wait([polling_task, worker_task], return_when=asyncio.FIRST_COMPLETED)
-        logging.info("One of the process stopped, initiating shutdown...")
-        stop_event.set()
-        for task in pending:
-            task.cancel()
-        await asyncio.gather(*pending, return_exceptions=True)
+        async with (
+            redis.Redis(
+                host=settings.REDIS_HOST,
+                port=settings.REDIS_PORT,
+                password=settings.REDIS_PASSWORD.get_secret_value(),
+            ) as redis_client,
+            ClientSession(
+                timeout=ClientTimeout(total=5),
+                connector=TCPConnector(limit=50),
+            ) as http,
+        ):
+            mouse = Controller()
+            stop_event = asyncio.Event()
+
+            polling_task = asyncio.create_task(dispatcher.start_polling(bot, skip_updates=True))
+            worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event, http=http))
+            tasks = [polling_task, worker_task]
+
+            logging.info("Worker and polling tasks started.")
+
+            try:
+                await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+                logging.info("One of the process stopped, initiating shutdown...")
+            finally:
+                stop_event.set()
+                for task in tasks:
+                    task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
     finally:
-        await http.close()
+        await bot.session.close()
 
     logging.info("App shutdown completed gracefully.")
 

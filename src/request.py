@@ -132,12 +132,15 @@ async def extract_requisites(redis_client: Redis):
 def run_main():
     from config import settings
 
-    redis_client = redis.Redis(
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        password=settings.REDIS_PASSWORD.get_secret_value(),
-    )
-    asyncio.run(add_test_task(redis_client))
+    async def _run():
+        async with redis.Redis(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            password=settings.REDIS_PASSWORD.get_secret_value(),
+        ) as redis_client:
+            await add_test_task(redis_client)
+
+    asyncio.run(_run())
 
 
 if __name__ == "__main__":
