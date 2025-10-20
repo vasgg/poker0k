@@ -11,6 +11,14 @@ from internal.consts import WorkspaceCoords
 from internal.schemas import Task
 
 
+class TelegramDeliveryError(RuntimeError):
+    def __init__(self, chat_id: int, original_exc: BaseException, task: Task | None = None):
+        super().__init__(f"Failed to deliver telegram report to chat {chat_id}")
+        self.chat_id = chat_id
+        self.original_exc = original_exc
+        self.task = task
+
+
 async def send_telegram_report(
     message: str,
     chats: tuple,
@@ -73,6 +81,7 @@ async def send_telegram_report(
                         )
             except (ClientError, asyncio.TimeoutError) as exc:
                 logging.exception("Failed to send telegram report to chat %s: %s", chat_id, exc)
+                raise TelegramDeliveryError(chat_id=chat_id, original_exc=exc, task=task) from exc
     finally:
         if owns_session:
             await session.close()

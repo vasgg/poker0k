@@ -8,7 +8,11 @@ from redis import asyncio as redis
 
 from config import Settings
 from controllers.actions import Actions, blink, send_update
-from controllers.telegram import get_balance_pic, send_telegram_report
+from controllers.telegram import (
+    TelegramDeliveryError,
+    get_balance_pic,
+    send_telegram_report,
+)
 from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
 from internal.schemas import CheckType, Stage, Step, Task
 from request import send_report
@@ -243,7 +247,24 @@ async def worker_loop(redis_client, mouse, settings, stop_event, *, http: Client
                 await send_update("C5", set_length, http=http, settings=settings)
 
             if not is_in_completed and task.status not in [1, 2]:
-                await execute_task(task, redis_client, mouse, settings, http=http)
+                try:
+                    await execute_task(task, redis_client, mouse, settings, http=http)
+                except TelegramDeliveryError as exc:
+                    logging.critical(
+                        "Telegram delivery failed for chat %s, shutting down worker.", exc.chat_id
+                    )
+                    stop_event.set()
+                    if exc.task is not None:
+                        try:
+                            await send_report(
+                                task=exc.task,
+                                redis_client=redis_client,
+                                settings=settings,
+                                problem="Telegram reporting unavailable",
+                            )
+                        except Exception:
+                            logging.exception("Failed to send outage report via callback.")
+                    raise
             else:
                 logging.info(f"Task {task.order_id} skipped — already processed...")
     except asyncio.CancelledError:
