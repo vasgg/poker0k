@@ -25,7 +25,7 @@ async def execute_task(
     logging.info(f"Executing task id {task.order_id} for {task.requisite} with amount {task.amount}")
     nickname = "SimpleEx1" if "dev-" in task.callback_url else task.requisite
     amount = "1.11" if "dev-" in task.callback_url else str(task.amount)
-    await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION)
+    # await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION)
     await Actions.click_on_const(mouse, Coords.CASHIER_FOCUS_SECTION, 3)
     press("pgup")
     check_cashier_bottom_section = await Actions.find_square_color(
