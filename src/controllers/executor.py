@@ -179,7 +179,7 @@ async def execute_task(
         # from worker import update_last_restart_time
 
         # update_last_restart_time()
-        logging.info("Last restart time updated after successful task completion.")
+        # logging.info("Last restart time updated after successful task completion.")
         task.step = Step.PROCESSED
 
         await redis_client.lpush("FER_reports", task.model_dump_json())
