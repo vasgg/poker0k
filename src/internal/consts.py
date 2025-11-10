@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Coords(Enum):
-    LOGIN_BUTTON = 1700, 540
+    LOGIN_BUTTON = 1725, 540
     CONFIRM_LOGIN_BUTTON = 1320, 660
     CLOSE_BANNER_BUTTON = 1373, 345
     CLOSE_BANNER_BUTTON_2 = 1751, 255
