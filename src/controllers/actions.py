@@ -169,7 +169,7 @@ async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON)
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
     await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 35)
-    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 25)
+    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 35)
     login_button = await Actions.find_square_color(
         color=Colors.WHITE,
         coordinates=(
