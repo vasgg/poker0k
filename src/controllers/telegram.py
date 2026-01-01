@@ -25,6 +25,9 @@ async def send_telegram_report(
     task: Task | None = None,
     image: Path | BytesIO | bytes | None = None,
     disable_notification: bool = False,
+    retries: int = 3,
+    retry_delay: float = 2.0,
+    raise_on_fail: bool = True,
     *,
     session: ClientSession | None = None,
 ) -> None:
@@ -38,15 +41,11 @@ async def send_telegram_report(
     if owns_session:
         session = ClientSession(timeout=timeout, connector=TCPConnector(family=socket.AF_INET))
 
+    retries = max(1, retries)
     try:
         for chat_id in chats:
             if image is not None:
                 url = f"https://api.telegram.org/bot{token}/sendPhoto"
-                data = FormData()
-                data.add_field("chat_id", str(chat_id))
-                data.add_field("caption", text)
-                data.add_field("disable_notification", str(disable_notification).lower())
-
                 if isinstance(image, Path):
                     async with aiofiles.open(image, "rb") as f:
                         img_bytes = await f.read()
@@ -59,29 +58,56 @@ async def send_telegram_report(
                     filename = "screenshot.png"
                 else:
                     raise ValueError("Unsupported image type")
-
-                data.add_field("photo", img_bytes, filename=filename, content_type="image/png")
             else:
                 url = f"https://api.telegram.org/bot{token}/sendMessage"
-                data = {
-                    "chat_id": str(chat_id),
-                    "text": text,
-                    "disable_notification": str(disable_notification).lower(),
-                }
 
-            try:
-                async with session.post(url, data=data, ssl=False, timeout=timeout) as resp:
-                    body = await resp.text()
-                    if resp.status >= 400:
+            for attempt in range(1, retries + 1):
+                try:
+                    if image is not None:
+                        data = FormData()
+                        data.add_field("chat_id", str(chat_id))
+                        data.add_field("caption", text)
+                        data.add_field("disable_notification", str(disable_notification).lower())
+                        data.add_field("photo", img_bytes, filename=filename, content_type="image/png")
+                    else:
+                        data = {
+                            "chat_id": str(chat_id),
+                            "text": text,
+                            "disable_notification": str(disable_notification).lower(),
+                        }
+                    async with session.post(url, data=data, ssl=False, timeout=timeout) as resp:
+                        body = await resp.text()
+                        if resp.status >= 400:
+                            logging.error(
+                                "Telegram API responded with status %s for chat %s: %s",
+                                resp.status,
+                                chat_id,
+                                body,
+                            )
+                    break
+                except (ClientError, asyncio.TimeoutError) as exc:
+                    if attempt >= retries:
                         logging.error(
-                            "Telegram API responded with status %s for chat %s: %s",
-                            resp.status,
+                            "Failed to send telegram report to chat %s after %s attempts: %s",
                             chat_id,
-                            body,
+                            retries,
+                            exc,
                         )
-            except (ClientError, asyncio.TimeoutError) as exc:
-                logging.exception("Failed to send telegram report to chat %s: %s", chat_id, exc)
-                raise TelegramDeliveryError(chat_id=chat_id, original_exc=exc, task=task) from exc
+                        if raise_on_fail:
+                            raise TelegramDeliveryError(
+                                chat_id=chat_id,
+                                original_exc=exc,
+                                task=task,
+                            ) from exc
+                        break
+                    logging.warning(
+                        "Failed to send telegram report to chat %s (attempt %s/%s): %s",
+                        chat_id,
+                        attempt,
+                        retries,
+                        exc,
+                    )
+                    await asyncio.sleep(retry_delay)
     finally:
         if owns_session:
             await session.close()

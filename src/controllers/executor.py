@@ -254,6 +254,14 @@ async def worker_loop(redis_client, mouse, settings, stop_event, *, http: Client
                         "Telegram delivery failed for chat %s, shutting down worker.", exc.chat_id
                     )
                     stop_event.set()
+                    await send_telegram_report(
+                        "Telegram connection error. Worker stopped.",
+                        chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+                        task=exc.task,
+                        session=http,
+                        retries=1,
+                        raise_on_fail=False,
+                    )
                     if exc.task is not None:
                         try:
                             await send_report(

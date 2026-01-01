@@ -16,6 +16,12 @@ from internal.schemas import ErrorType, Step, Task
 logger = logging.getLogger(__name__)
 
 
+def _trim_text(text: str | None, limit: int = 200) -> str:
+    if not text:
+        return ""
+    return text if len(text) <= limit else f"{text[:limit]}..."
+
+
 async def send_report(
     task: Task,
     redis_client: redis.Redis,
@@ -44,9 +50,8 @@ async def send_report(
         }
         headers = {"x-simpleex-sign": cryptor.encrypt(data_json)}
         text_ok = f"Report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}"
-        text_not_ok = (
-            f"Report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:"
-        )
+        last_status = None
+        last_error = None
         for attempt in range(retries):
             try:
                 async with session.post(task.callback_url, data=data, headers=headers) as response:
@@ -58,14 +63,28 @@ async def send_report(
                     else:
                         task.step = Step.REPORT_FAILED
                         await redis_client.lpush(set_name, task.model_dump_json())
-                        error_text = await response.text()
-                        logger.info(f"{text_not_ok} {response.status}. {error_text}")
+                        last_status = response.status
+                        last_error = await response.text()
             except Exception as e:
-                logger.exception(f"Attempt {attempt + 1} failed with error: {e}")
+                last_error = f"{type(e).__name__}: {e}"
 
             if attempt < retries - 1:
                 await asyncio.sleep(delay)
-    logger.exception(f"Failed to send report after {retries} attempts, task id: {task.order_id} failed with error")
+    if last_status is not None:
+        logger.warning(
+            "Report failed after %s attempts: task_id=%s status=%s error=%s",
+            retries,
+            task.order_id,
+            last_status,
+            _trim_text(last_error),
+        )
+    else:
+        logger.warning(
+            "Report failed after %s attempts: task_id=%s error=%s",
+            retries,
+            task.order_id,
+            _trim_text(last_error),
+        )
 
 
 async def send_error_report(task: Task, error_type: ErrorType, settings, retries: int = 3, delay: int = 3) -> None:
@@ -81,7 +100,8 @@ async def send_error_report(task: Task, error_type: ErrorType, settings, retries
         }
         headers = {"x-simpleex-sign": cryptor.encrypt(data_json)}
         text_ok = f"Error report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}"
-        text_not_ok = f"Error report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status} with response:"
+        last_status = None
+        last_error = None
         for attempt in range(retries):
             try:
                 async with session.post(task.callback_url, data=data, headers=headers) as response:
@@ -89,14 +109,28 @@ async def send_error_report(task: Task, error_type: ErrorType, settings, retries
                         logger.info(text_ok)
                         return
                     else:
-                        error_text = await response.text()
-                        logger.info(f"{text_not_ok} {response.status}. {error_text}")
+                        last_status = response.status
+                        last_error = await response.text()
             except Exception as e:
-                logger.exception(f"Attempt {attempt + 1} failed with error: {e}")
+                last_error = f"{type(e).__name__}: {e}"
 
             if attempt < retries - 1:
                 await asyncio.sleep(delay)
-    logger.exception(f"Failed to send error report after {retries} attempts, task id: {task.order_id} failed.")
+    if last_status is not None:
+        logger.warning(
+            "Error report failed after %s attempts: task_id=%s status=%s error=%s",
+            retries,
+            task.order_id,
+            last_status,
+            _trim_text(last_error),
+        )
+    else:
+        logger.warning(
+            "Error report failed after %s attempts: task_id=%s error=%s",
+            retries,
+            task.order_id,
+            _trim_text(last_error),
+        )
 
 
 async def add_test_task(redis_client: Redis):
