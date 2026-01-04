@@ -28,7 +28,7 @@ async def send_report(
     settings,
     problem: str | None = None,
     retries: int = 3,
-    delay: int = 3,
+    retry_delays: tuple[float, ...] = (2.0, 5.0, 10.0),
 ) -> None:
     set_name = RedisNames.PROD_REPORTS
     if "dev-" in task.callback_url:
@@ -69,6 +69,7 @@ async def send_report(
                 last_error = f"{type(e).__name__}: {e}"
 
             if attempt < retries - 1:
+                delay = retry_delays[min(attempt, len(retry_delays) - 1)]
                 await asyncio.sleep(delay)
     if last_status is not None:
         logger.warning(
@@ -87,7 +88,13 @@ async def send_report(
         )
 
 
-async def send_error_report(task: Task, error_type: ErrorType, settings, retries: int = 3, delay: int = 3) -> None:
+async def send_error_report(
+    task: Task,
+    error_type: ErrorType,
+    settings,
+    retries: int = 3,
+    retry_delays: tuple[float, ...] = (2.0, 5.0, 10.0),
+) -> None:
     now = datetime.now(UTC)
     async with aiohttp.ClientSession() as session:
         cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
@@ -115,6 +122,7 @@ async def send_error_report(task: Task, error_type: ErrorType, settings, retries
                 last_error = f"{type(e).__name__}: {e}"
 
             if attempt < retries - 1:
+                delay = retry_delays[min(attempt, len(retry_delays) - 1)]
                 await asyncio.sleep(delay)
     if last_status is not None:
         logger.warning(

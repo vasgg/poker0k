@@ -11,6 +11,7 @@ import pyautogui
 from config import Settings
 from controllers.actions import Actions
 from controllers.executor import worker_loop
+from runtime import set_shutdown_event
 
 last_restart_time: datetime | None = None
 
@@ -53,6 +54,7 @@ async def main():
         ):
             mouse = Controller()
             stop_event = asyncio.Event()
+            set_shutdown_event(stop_event)
 
             polling_task = asyncio.create_task(dispatcher.start_polling(bot, skip_updates=True))
             worker_task = asyncio.create_task(worker_loop(redis_client, mouse, settings, stop_event, http=http))

@@ -26,7 +26,7 @@ async def send_telegram_report(
     image: Path | BytesIO | bytes | None = None,
     disable_notification: bool = False,
     retries: int = 3,
-    retry_delay: float = 2.0,
+    retry_delays: tuple[float, ...] = (2.0, 5.0, 10.0),
     raise_on_fail: bool = True,
     *,
     session: ClientSession | None = None,
@@ -88,9 +88,10 @@ async def send_telegram_report(
                 except (ClientError, asyncio.TimeoutError) as exc:
                     if attempt >= retries:
                         logging.error(
-                            "Failed to send telegram report to chat %s after %s attempts: %s",
+                            "Failed to send telegram report to chat %s after %s attempts: %s: %s",
                             chat_id,
                             retries,
+                            type(exc).__name__,
                             exc,
                         )
                         if raise_on_fail:
@@ -101,13 +102,16 @@ async def send_telegram_report(
                             ) from exc
                         break
                     logging.warning(
-                        "Failed to send telegram report to chat %s (attempt %s/%s): %s",
+                        "Failed to send telegram report to chat %s (attempt %s/%s): %s: %s",
                         chat_id,
                         attempt,
                         retries,
+                        type(exc).__name__,
                         exc,
                     )
-                    await asyncio.sleep(retry_delay)
+                    delay_idx = max(0, attempt - 1)
+                    delay = retry_delays[min(delay_idx, len(retry_delays) - 1)]
+                    await asyncio.sleep(delay)
     finally:
         if owns_session:
             await session.close()
