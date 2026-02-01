@@ -168,18 +168,22 @@ class Actions:
 async def start_app_flow(mouse: Controller):
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON)
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
-    await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 35)
-    await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 35)
-    login_button = await Actions.find_square_color(
-        color=Colors.WHITE,
-        coordinates=(
-            WorkspaceCoords.CONFIRM_LOGIN_BUTTON_TOP_LEFT,
-            WorkspaceCoords.CONFIRM_LOGIN_BUTTON_TOP_TOP_RIGHT,
-        ),
-        sqare_size=2,
-    )
-    if login_button:
-        await Actions.click_on_finded(mouse, login_button, "CONFIRM LOGIN BUTTON", delay_after=20)
+    # await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 35)
+    # await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 35)
+    # login_button = await Actions.find_square_color(
+    #     color=Colors.WHITE,
+    #     coordinates=(
+    #         WorkspaceCoords.CONFIRM_LOGIN_BUTTON_TOP_LEFT,
+    #         WorkspaceCoords.CONFIRM_LOGIN_BUTTON_TOP_TOP_RIGHT,
+    #     ),
+    #     sqare_size=2,
+    # )
+    # if login_button:
+    #     await Actions.click_on_finded(mouse, login_button, "CONFIRM LOGIN BUTTON", delay_after=20)
+    #
+    #
+
+
     # else:
     #     await Actions.click_on_const(mouse, Coords.CONFIRM_LOGIN_BUTTON, 20)
     # login_button = await Actions.find_square_color(
