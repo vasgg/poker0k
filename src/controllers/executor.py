@@ -250,12 +250,18 @@ async def worker_loop(redis_client, mouse, settings, stop_event, *, http: Client
                 try:
                     await execute_task(task, redis_client, mouse, settings, http=http)
                 except TelegramDeliveryError as exc:
+                    cause = f"{type(exc.original_exc).__name__}: {exc.original_exc}"
+                    if len(cause) > 500:
+                        cause = f"{cause[:500]}..."
                     logging.critical(
-                        "Telegram delivery failed for chat %s, shutting down worker.", exc.chat_id
+                        "Telegram reporting failed for chat %s, shutting down worker. Cause: %s",
+                        exc.chat_id,
+                        cause,
+                        exc_info=True,
                     )
                     stop_event.set()
                     await send_telegram_report(
-                        "Telegram connection error. Worker stopped.",
+                        f"Telegram reporting error. Worker stopped. Cause: {cause[:200]}",
                         chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
                         task=exc.task,
                         session=http,
@@ -264,11 +270,14 @@ async def worker_loop(redis_client, mouse, settings, stop_event, *, http: Client
                     )
                     if exc.task is not None:
                         try:
+                            problem = f"Telegram reporting unavailable: {cause}"
+                            if len(problem) > 200:
+                                problem = f"{problem[:197]}..."
                             await send_report(
                                 task=exc.task,
                                 redis_client=redis_client,
                                 settings=settings,
-                                problem="Telegram reporting unavailable",
+                                problem=problem,
                             )
                         except Exception:
                             logging.exception("Failed to send outage report via callback.")

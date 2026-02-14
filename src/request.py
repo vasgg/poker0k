@@ -30,62 +30,67 @@ async def send_report(
     retries: int = 3,
     retry_delays: tuple[float, ...] = (2.0, 5.0, 10.0),
 ) -> None:
-    set_name = RedisNames.PROD_REPORTS
-    if "dev-" in task.callback_url:
-        set_name = RedisNames.DEV_REPORTS
-    task.status = task.status if not problem else 0
-    task.message = "" if not problem else problem
-    async with aiohttp.ClientSession() as session:
-        cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
-        data_json = task.model_dump_json()
-        data = {
-            "order_id": task.order_id,
-            "user_id": task.user_id,
-            "requisite": task.requisite,
-            "amount": task.amount,
-            "status": task.status,
-            "message": task.message,
-            "callback_url": task.callback_url,
-            "step": task.step,
-        }
-        headers = {"x-simpleex-sign": cryptor.encrypt(data_json)}
-        text_ok = f"Report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}"
-        last_status = None
-        last_error = None
-        for attempt in range(retries):
-            try:
-                async with session.post(task.callback_url, data=data, headers=headers) as response:
-                    if response.status == HTTPStatus.OK:
-                        task.step = Step.REPORTED
-                        await redis_client.lpush(set_name, task.model_dump_json())
-                        logger.info(text_ok)
-                        return
-                    else:
-                        task.step = Step.REPORT_FAILED
-                        await redis_client.lpush(set_name, task.model_dump_json())
-                        last_status = response.status
-                        last_error = await response.text()
-            except Exception as e:
-                last_error = f"{type(e).__name__}: {e}"
+    try:
+        set_name = RedisNames.PROD_REPORTS
+        if "dev-" in task.callback_url:
+            set_name = RedisNames.DEV_REPORTS
+        task.status = task.status if not problem else 0
+        task.message = "" if not problem else problem
+        async with aiohttp.ClientSession() as session:
+            cryptor = Crypt(settings.key_encrypt, settings.key_decrypt)
+            data_json = task.model_dump_json()
+            data = {
+                "order_id": task.order_id,
+                "user_id": task.user_id,
+                "requisite": task.requisite,
+                "amount": task.amount,
+                "status": task.status,
+                "message": task.message,
+                "callback_url": task.callback_url,
+                "step": task.step,
+            }
+            headers = {"x-simpleex-sign": cryptor.encrypt(data_json)}
+            text_ok = f"Report sent: {task.order_id}|{task.user_id}|{task.requisite}|${task.amount}|{task.status}"
+            last_status = None
+            last_error = None
+            for attempt in range(retries):
+                try:
+                    async with session.post(task.callback_url, data=data, headers=headers) as response:
+                        if response.status == HTTPStatus.OK:
+                            task.step = Step.REPORTED
+                            await redis_client.lpush(set_name, task.model_dump_json())
+                            logger.info(text_ok)
+                            return
+                        else:
+                            task.step = Step.REPORT_FAILED
+                            await redis_client.lpush(set_name, task.model_dump_json())
+                            last_status = response.status
+                            last_error = await response.text()
+                except Exception as e:
+                    last_error = f"{type(e).__name__}: {e}"
 
-            if attempt < retries - 1:
-                delay = retry_delays[min(attempt, len(retry_delays) - 1)]
-                await asyncio.sleep(delay)
-    if last_status is not None:
-        logger.warning(
-            "Report failed after %s attempts: task_id=%s status=%s error=%s",
-            retries,
-            task.order_id,
-            last_status,
-            _trim_text(last_error),
-        )
-    else:
-        logger.warning(
-            "Report failed after %s attempts: task_id=%s error=%s",
-            retries,
-            task.order_id,
-            _trim_text(last_error),
-        )
+                if attempt < retries - 1:
+                    delay = retry_delays[min(attempt, len(retry_delays) - 1)]
+                    await asyncio.sleep(delay)
+        if last_status is not None:
+            logger.warning(
+                "Report failed after %s attempts: task_id=%s status=%s error=%s",
+                retries,
+                task.order_id,
+                last_status,
+                _trim_text(last_error),
+            )
+        else:
+            logger.warning(
+                "Report failed after %s attempts: task_id=%s error=%s",
+                retries,
+                task.order_id,
+                _trim_text(last_error),
+            )
+    except asyncio.CancelledError:
+        raise
+    except Exception:
+        logger.exception("Unexpected error in send_report: task_id=%s", task.order_id)
 
 
 async def send_error_report(

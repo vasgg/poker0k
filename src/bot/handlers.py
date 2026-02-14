@@ -43,4 +43,8 @@ async def balance(message: Message):
             break
 
     logger.error("Failed to send /balance photo after 3 attempts: %s", last_exc)
-    request_shutdown("Telegram connection error while sending /balance photo")
+    if last_exc is None:
+        reason = "Failed to send /balance photo: no exception details"
+    else:
+        reason = f"Failed to send /balance photo: {type(last_exc).__name__}: {last_exc}"
+    request_shutdown(reason)
