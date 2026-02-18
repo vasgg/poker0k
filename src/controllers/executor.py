@@ -38,12 +38,17 @@ async def execute_task(
     )
     if check_cashier_bottom_section:
         cashier = await Actions.take_screenshot(task=task)
+        task.status = 0
+        task.step = Step.PROCESSED
+        await send_report(task=task, redis_client=redis_client, settings=settings)
         await send_telegram_report(
             "Task failed. Problem with cashier detected.",
             task=task,
             image=cashier,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
             session=http,
+            retries=1,
+            raise_on_fail=False,
         )
         return
     # await Actions.click_on_const(mouse, Coords.TRANSFER_SECTION, 3)
@@ -56,12 +61,17 @@ async def execute_task(
         logging.info(f"Task {task.order_id} failed. Insufficient funds.")
         # await send_error_report(task, ErrorType.INSUFFICIENT_FUNDS, settings)
         funds_image_path = await Actions.take_screenshot(task=task)
+        task.status = 0
+        task.step = Step.PROCESSED
+        await send_report(task=task, redis_client=redis_client, settings=settings)
         await send_telegram_report(
             "Task failed. Insufficient funds.",
             task=task,
             image=funds_image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
             session=http,
+            retries=1,
+            raise_on_fail=False,
         )
         return
     transfer_button = await Actions.find_square_color(
@@ -77,12 +87,17 @@ async def execute_task(
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer button.")
         screenshot = await Actions.take_screenshot(task=task)
+        task.status = 0
+        task.step = Step.PROCESSED
+        await send_report(task=task, redis_client=redis_client, settings=settings)
         await send_telegram_report(
             "Task failed. Can't find transfer button.",
             task=task,
             image=screenshot,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
             session=http,
+            retries=1,
+            raise_on_fail=False,
         )
 
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
@@ -101,12 +116,17 @@ async def execute_task(
         logging.info(f"Task {task.order_id} failed. Incorrect name.")
         # await send_error_report(task, ErrorType.INCORRECT_NAME, settings)
         name_image_path = await Actions.take_screenshot(task=task)
+        task.status = 0
+        task.step = Step.PROCESSED
+        await send_report(task=task, redis_client=redis_client, settings=settings)
         await send_telegram_report(
             "Task failed. Incorrect name.",
             task=task,
             image=name_image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
             session=http,
+            retries=1,
+            raise_on_fail=False,
         )
         await blink("red", http=http, settings=settings)
         return
@@ -123,12 +143,17 @@ async def execute_task(
     else:
         logging.info(f"Task {task.order_id} failed. Can't find transfer confirm button.")
         screenshot = await Actions.take_screenshot(task=task)
+        task.status = 0
+        task.step = Step.PROCESSED
+        await send_report(task=task, redis_client=redis_client, settings=settings)
         await send_telegram_report(
             "Task failed. Can't find transfer confirm button.",
             task=task,
             image=screenshot,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
             session=http,
+            retries=1,
+            raise_on_fail=False,
         )
         # is_already_restarted = await redis_client.sismember(RedisNames.RESTARTED_TASKS, str(task.order_id))
         # if is_already_restarted:
@@ -169,6 +194,8 @@ async def execute_task(
             image=confirm_section_image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
             session=http,
+            retries=1,
+            raise_on_fail=False,
         )
 
     task.status = 1 if transfer_confirm_section is not None else 0
@@ -195,6 +222,8 @@ async def execute_task(
             chats=(settings.TG_REPORTS_CHAT,),
             disable_notification=True,
             session=http,
+            retries=1,
+            raise_on_fail=False,
         )
         await blink("yellow", http=http, settings=settings)
     else:
@@ -203,12 +232,17 @@ async def execute_task(
         # attempts += 1
         # await Actions.take_screenshot(task=task, debug=True)
         image_path = await Actions.take_screenshot(task=task)
+        task.status = 0
+        task.step = Step.PROCESSED
+        await send_report(task=task, redis_client=redis_client, settings=settings)
         await send_telegram_report(
             "Task failed.",
             task=task,
             image=image_path,
             chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
             session=http,
+            retries=1,
+            raise_on_fail=False,
         )
         await blink("red", http=http, settings=settings)
         logging.info(f"Task {task.order_id} failed.")
@@ -253,35 +287,21 @@ async def worker_loop(redis_client, mouse, settings, stop_event, *, http: Client
                     cause = f"{type(exc.original_exc).__name__}: {exc.original_exc}"
                     if len(cause) > 500:
                         cause = f"{cause[:500]}..."
-                    logging.critical(
-                        "Telegram reporting failed for chat %s, shutting down worker. Cause: %s",
+                    logging.error(
+                        "Telegram reporting failed for chat %s, continuing worker. Cause: %s",
                         exc.chat_id,
                         cause,
                         exc_info=True,
                     )
-                    stop_event.set()
                     await send_telegram_report(
-                        f"Telegram reporting error. Worker stopped. Cause: {cause[:200]}",
-                        chats=(settings.TG_REPORTS_CHAT, settings.TG_BOT_ADMIN_ID),
+                        f"Telegram reporting error. Worker continues. Cause: {cause[:200]}",
+                        chats=(settings.TG_BOT_ADMIN_ID,),
                         task=exc.task,
                         session=http,
                         retries=1,
                         raise_on_fail=False,
                     )
-                    if exc.task is not None:
-                        try:
-                            problem = f"Telegram reporting unavailable: {cause}"
-                            if len(problem) > 200:
-                                problem = f"{problem[:197]}..."
-                            await send_report(
-                                task=exc.task,
-                                redis_client=redis_client,
-                                settings=settings,
-                                problem=problem,
-                            )
-                        except Exception:
-                            logging.exception("Failed to send outage report via callback.")
-                    raise
+                    continue
             else:
                 logging.info(f"Task {task.order_id} skipped — already processed...")
     except asyncio.CancelledError:
