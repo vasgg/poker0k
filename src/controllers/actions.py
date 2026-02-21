@@ -204,16 +204,16 @@ async def start_app_flow(mouse: Controller):
 
 
 
-    # banner = await Actions.find_square_color(
-    #     color=Colors.RUST,
-    #     coordinates=(
-    #         WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
-    #         WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
-    #     ),
-    #     sqare_size=5,
-    # )
-    # if banner:
-    #     await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
+    banner = await Actions.find_square_color(
+        color=Colors.RUST,
+        coordinates=(
+            WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
+            WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
+        ),
+        sqare_size=5,
+    )
+    if banner:
+        await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
 
 
 
