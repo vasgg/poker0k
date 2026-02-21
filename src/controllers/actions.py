@@ -102,11 +102,17 @@ class Actions:
 
     @staticmethod
     async def find_square_color(
-        color: tuple[int, int, int],
+        color: tuple[int, int, int] | tuple[tuple[int, int, int], ...],
         coordinates: tuple[tuple[int, int], tuple[int, int]],
         tolerance_percent: int = 20,
         sqare_size: int = 11,
     ):
+        colors: tuple[tuple[int, int, int], ...]
+        if color and isinstance(color[0], int):
+            colors = (color,)  # Backward compatibility: single color tuple.
+        else:
+            colors = color
+
         top_left, bottom_right = coordinates
         image = await Actions.take_screenshot_of_region(top_left, bottom_right)
         width, height = image.size
@@ -118,7 +124,14 @@ class Actions:
                 matched = True
                 for dx in range(-half_square, half_square + 1):
                     for dy in range(-half_square, half_square + 1):
-                        if not Actions.is_color_match(pixels[x + dx, y + dy][:3], color, tolerance_percent):
+                        if not any(
+                            Actions.is_color_match(
+                                pixels[x + dx, y + dy][:3],
+                                one_color,
+                                tolerance_percent,
+                            )
+                            for one_color in colors
+                        ):
                             matched = False
                             break
                     if not matched:
@@ -214,6 +227,14 @@ async def start_app_flow(mouse: Controller):
     )
     if banner:
         await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
+
+    browser = await Actions.find_square_color(
+      color=(Colors.BROWSER_LIGHT, Colors.BROWSER_DARK),
+      coordinates=(WorkspaceCoords.BANNER_CHECK_TOP_LEFT, WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT),
+      sqare_size=5,
+    )
+    if browser:
+        await Actions.click_on_const(mouse, Coords.CLOSE_BROWSER, 20)
 
 
 

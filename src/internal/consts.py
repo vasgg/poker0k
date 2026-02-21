@@ -6,6 +6,7 @@ class Coords(Enum):
     CONFIRM_LOGIN_BUTTON = 1320, 660
     CLOSE_BANNER_BUTTON = 1373, 345
     CLOSE_BANNER_BUTTON_2 = 1751, 255
+    CLOSE_BROWSER = 1767, 266
 
     CASHIER_BUTTON = 1755, 555
 
@@ -60,6 +61,8 @@ class Colors:
     RUST = 89, 0, 0
     WHITE = 255, 255, 254
     DEBUG_RUST = 192, 57, 57
+    BROWSER_LIGHT = 231, 231, 231
+    BROWSER_DARK = 206, 206, 206
 
 
 class RedisNames:
