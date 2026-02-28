@@ -179,6 +179,23 @@ class Actions:
 
 
 async def start_app_flow(mouse: Controller):
+    async def close_overlay_with_retries(
+        color: tuple[int, int, int] | tuple[tuple[int, int, int], ...],
+        coordinates: tuple[tuple[int, int], tuple[int, int]],
+        close_button: Coords,
+        retries: int = 5,
+        window_size: int = 5,
+    ):
+        for i in range(retries):
+            overlay = await Actions.find_square_color(
+                color=color,
+                coordinates=coordinates,
+                sqare_size=window_size,
+            )
+            if not overlay:
+                break
+            await Actions.click_on_const(mouse, close_button, i + 1)
+
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON)
     await Actions.click_on_const(mouse, Coords.OPEN_APP_BUTTON, 35)
     # await Actions.click_on_const(mouse, Coords.LOGIN_BUTTON, 35)
@@ -217,44 +234,23 @@ async def start_app_flow(mouse: Controller):
 
 
 
-    banner = await Actions.find_square_color(
+    await close_overlay_with_retries(
         color=Colors.RUST,
         coordinates=(
             WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
             WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
         ),
-        sqare_size=5,
+        close_button=Coords.CLOSE_BANNER_BUTTON_2,
     )
-    if banner:
-        await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
 
-    banner = await Actions.find_square_color(
-        color=Colors.RUST,
-        coordinates=(
-            WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
-            WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
-        ),
-        sqare_size=5,
-    )
-    if banner:
-        await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
-
-    browser = await Actions.find_square_color(
-      color=(Colors.BROWSER_LIGHT, Colors.BROWSER_DARK),
-      coordinates=(WorkspaceCoords.BANNER_CHECK_TOP_LEFT, WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT),
-      sqare_size=5,
-    )
-    if browser:
-        await Actions.click_on_const(mouse, Coords.CLOSE_BROWSER, 20)
-
-    browser = await Actions.find_square_color(
+    await close_overlay_with_retries(
         color=(Colors.BROWSER_LIGHT, Colors.BROWSER_DARK),
-        coordinates=(WorkspaceCoords.BANNER_CHECK_TOP_LEFT, WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT),
-        sqare_size=5,
+        coordinates=(
+            WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
+            WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
+        ),
+        close_button=Coords.CLOSE_BROWSER,
     )
-    if browser:
-        await Actions.click_on_const(mouse, Coords.CLOSE_BROWSER, 20)
-
 
 
     await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
