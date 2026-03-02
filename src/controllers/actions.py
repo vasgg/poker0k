@@ -233,24 +233,24 @@ async def start_app_flow(mouse: Controller):
     # await Actions.click_on_const(mouse, Coords.CLOSE_BANNER_BUTTON_2, 20)
 
 
-
-    await close_overlay_with_retries(
-        color=Colors.RUST,
-        coordinates=(
-            WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
-            WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
-        ),
-        close_button=Coords.CLOSE_BANNER_BUTTON_2,
-    )
-
-    await close_overlay_with_retries(
-        color=(Colors.BROWSER_LIGHT, Colors.BROWSER_DARK),
-        coordinates=(
-            WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
-            WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
-        ),
-        close_button=Coords.CLOSE_BROWSER,
-    )
+    #
+    # await close_overlay_with_retries(
+    #     color=Colors.RUST,
+    #     coordinates=(
+    #         WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
+    #         WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
+    #     ),
+    #     close_button=Coords.CLOSE_BANNER_BUTTON_2,
+    # )
+    #
+    # await close_overlay_with_retries(
+    #     color=(Colors.BROWSER_LIGHT, Colors.BROWSER_DARK),
+    #     coordinates=(
+    #         WorkspaceCoords.BANNER_CHECK_TOP_LEFT,
+    #         WorkspaceCoords.BANNER_CHECK_BOTTOM_RIGHT,
+    #     ),
+    #     close_button=Coords.CLOSE_BROWSER,
+    # )
 
 
     await Actions.click_on_const(mouse, Coords.CASHIER_BUTTON, 20)
