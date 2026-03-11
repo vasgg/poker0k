@@ -51,6 +51,21 @@ def _extract_description(body: str) -> str | None:
     return None
 
 
+def _build_restart_eta_suffix(reset_after_mins: int) -> str | None:
+    try:
+        from runtime import get_minutes_until_next_restart
+
+        minutes = get_minutes_until_next_restart(reset_after_mins)
+    except Exception:
+        return None
+
+    if minutes is None:
+        return None
+
+    unit = "minute" if minutes == 1 else "minutes"
+    return f"Next restart pokerok client in: {minutes} {unit}."
+
+
 class TelegramAPIResponseError(RuntimeError):
     def __init__(self, *, method: str, status: int, body: str):
         self.method = method
@@ -73,6 +88,7 @@ async def send_telegram_report(
     chats: tuple,
     task: Task | None = None,
     image: Path | BytesIO | bytes | None = None,
+    include_restart_eta: bool = False,
     disable_notification: bool = False,
     retries: int = 3,
     retry_delays: tuple[float, ...] = (2.0, 5.0, 10.0),
@@ -83,6 +99,10 @@ async def send_telegram_report(
     from config import settings
 
     text = f"{task.order_id}|{task.requisite}|${task.amount}|{message}" if task else message
+    if include_restart_eta:
+        restart_eta = _build_restart_eta_suffix(settings.RESET_AFTER_MINS)
+        if restart_eta:
+            text = f"{text}\n{restart_eta}"
     token = settings.TG_BOT_TOKEN.get_secret_value()
 
     timeout = ClientTimeout(total=10)

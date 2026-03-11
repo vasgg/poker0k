@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from datetime import timedelta, datetime, timezone
 
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
 import socket
@@ -11,31 +10,25 @@ import pyautogui
 from config import Settings
 from controllers.actions import Actions
 from controllers.executor import worker_loop
-from runtime import set_shutdown_event
-
-last_restart_time: datetime | None = None
+from runtime import get_minutes_until_next_restart, get_worker_now, set_last_restart_time, set_shutdown_event
 
 
 async def check_time(mouse: Controller, settings: Settings):
-    global last_restart_time
-    current_time = datetime.now(timezone(timedelta(hours=3)))
-    if (current_time - last_restart_time) >= timedelta(minutes=settings.RESET_AFTER_MINS):
+    if get_minutes_until_next_restart(settings.RESET_AFTER_MINS, now=get_worker_now()) == 0:
         logging.info("Performing scheduled restart app.")
         await Actions.reopen_pokerok_client(mouse)
-        last_restart_time = current_time
+        set_last_restart_time()
         logging.info("App started.")
 
 
 def update_last_restart_time():
-    global last_restart_time
-    last_restart_time = datetime.now(timezone(timedelta(hours=3)))
+    set_last_restart_time()
 
 
 async def main():
     from config import settings, setup_worker, setup_bot
 
-    global last_restart_time
-    last_restart_time = datetime.now(timezone(timedelta(hours=3)))
+    set_last_restart_time()
     setup_worker("pokerok_worker")
     bot, dispatcher = setup_bot()
     pyautogui.FAILSAFE = False

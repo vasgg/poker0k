@@ -8,24 +8,8 @@ from aiohttp import BasicAuth, ClientSession
 from pyautogui import hotkey, screenshot, typewrite
 from pynput.mouse import Button, Controller
 
-from internal.consts import Colors, Coords, RedisNames, WorkspaceCoords
+from internal.consts import Coords, WorkspaceCoords
 from internal.schemas import CheckType, Task
-
-
-async def restore_current_task_to_queue(task: Task, redis_client):
-    serialized_task = task.model_dump_json()
-    await redis_client.rpush(RedisNames.QUEUE, serialized_task)
-    logging.info(f"Task {task.order_id} restored to the main queue.")
-
-
-async def handle_failure_and_restart(task, redis_client, mouse):
-    import worker
-
-    await restore_current_task_to_queue(task, redis_client)
-    await redis_client.sadd(RedisNames.RESTARTED_TASKS, str(task.order_id))
-    logging.info("Performing restart app after failed task.")
-    await Actions.reopen_pokerok_client(mouse)
-    worker.last_restart_time = datetime.now(timezone(timedelta(hours=3)))
 
 
 class Actions:
